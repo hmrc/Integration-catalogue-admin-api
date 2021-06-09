@@ -1,5 +1,5 @@
 
-# Integration-catalogue-admin-api
+# integration-catalogue-admin-api
 
 This is a placeholder README.md for a new repository
 

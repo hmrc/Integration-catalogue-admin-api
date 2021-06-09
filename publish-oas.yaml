@@ -1,0 +1,299 @@
+openapi: 3.0.0
+servers:
+# TODO: Not sure these URL are correct.
+  - description: MDTP - QA
+    url: https://admin.qa.tax.service.gov.uk/integration-catalogue-admin
+  - description: MDTP - Prod
+    url: https://www.example.com/integration-catalogue-admin
+  - description: MDTP - Jenkins CURL Internal URL
+    url: https://integration-catalogue-admin-frontend.protected.mdtp
+info:
+  version: '0.1'
+  title: Integration Catalogue Keeper API
+  description:
+    This API lets you create, update and delete APIs defined in 'get data for your service'.
+paths:
+  /services/apis/publish:
+    put:
+      tags:
+        - Publishing
+      security:
+        - ApiKeyAuth: []
+      description: 
+        Create or updates an API with the passed OAS specification.
+      parameters:
+        - in: header
+          name: x-platform-type
+          description: Must be specified in either this header or the OAS file
+          required: false
+          schema:
+            $ref: "#/components/schemas/PlatformType"
+        - in: header
+          name: x-publisher-reference
+          description: Must be specified in this header or in the OAS file's 'publisher-reference'.
+          required: false
+          schema:
+            type: string
+            example: 1234
+        - in: header
+          name: x-specification-type
+          schema:
+            type: string
+            enum:
+              - OAS_V3
+      requestBody:
+        description: The body of the OAS file
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                selectedFile:
+                  type: string
+                  example: |
+                    openapi: 3.0.0
+                    info:
+                      version: '0.1'
+                      title: My new API
+                      ...
+      responses:
+        '201':
+          description: 
+            Created from the OAS file
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/Api'
+        '200':
+          description: 
+            Updated from the OAS file
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/Api'
+        '400':
+          description:
+            Failed to create or upsert an API
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/Errors'
+  /services/filetransfers/publish:
+    put:
+      tags:
+        - Publishing
+      security:
+        - ApiKeyAuth: []
+      description: 
+        Create or updates a file transfer
+      requestBody:
+        description: The file transfer definition
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/FileTransfer'
+      responses:
+        '201':
+          description: 
+            Created file transfer
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/Api'
+        '200':
+          description: 
+            Updated file transfer
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/Api'
+        '400':
+          description:
+            Failed to create or update file transfer
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/Errors'
+  /services/integrations:
+    get:
+      description: 
+        DRAFT
+      tags:
+        - Publishing
+      parameters:
+        - in: query
+          required: false
+          name: platformFilter
+          schema:
+            $ref: "#/components/schemas/PlatformType"
+        - in: query
+          required: false
+          name: searchTerm
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Yeah"
+          content:
+            application/json:
+              schema: 
+                type: array
+                items: 
+                  type: object
+                  $ref: '#/components/schemas/Api'
+    delete:
+      tags:
+        - Publishing
+      parameters:
+        - in: query
+          required: true
+          name: platformFilter
+          schema:
+            $ref: "#/components/schemas/PlatformType"
+      responses:
+        "200":
+          description: "Yeah"
+          content:
+            application/json:
+              schema: 
+                type: object
+                $ref: '#/components/schemas/Api'
+  /services/integrations/{api-id}:
+    get:
+      description: 
+        DRAFT
+      tags:
+        - Publishing
+      parameters:
+        - in: path
+          required: true
+          name: api-id
+          schema:
+            $ref: '#/components/schemas/ApiId'
+      responses:
+        "200":
+          description: "Yeah"
+          content:
+            application/json:
+              schema: 
+                type: object
+                $ref: '#/components/schemas/Api'
+    delete:
+      description: 
+        DRAFT
+      tags:
+        - Publishing
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          required: true
+          name: api-id
+          schema: 
+            $ref: '#/components/schemas/ApiId'
+      responses:
+        "204": 
+          description: The resource was deleted successfully
+components:
+  # From: https://swagger.io/docs/specification/2-0/authentication/
+  securitySchemes:
+    ApiKeyAuth: # TODO Is this what we want auth to look like?
+      type: apiKey
+      in: header
+      name: X-API-Key # TODO Good header name?
+  schemas:
+    Api:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 2e9772e9-3c6a-4f1b-a9a3-0b205cbca4fb
+        publisherReference :
+          type: string
+          example: "1234"
+        platform:
+          type: string
+          example: IF
+    FileTransfer:
+      type: object
+      properties:
+        fileTransferSpecificationVersion:
+          description: Must be 0.1
+          type: string
+          example: "0.1"
+        publisherReference:
+          type: string
+          example: "1234"
+        title:
+          type: string
+          example: BBSI to DPS file transfer
+        description:
+          type: string
+          example: "A file transfer from Bank and Building Society Interest (BBSI) to Data Provisioning Systems (DPS)"
+        platformType:
+          $ref: '#/components/schemas/PlatformType'
+        lastUpdated:
+          description: This is shows on the details page in the catalogue
+          type: string
+          format: date-time
+          example: "2021-01-01T13:00:00Z" 
+        contact:
+          $ref: '#/components/schemas/ContactInformation'
+        sourceSystem:
+          type: array
+          items:
+            type: string
+            example: "BBSI"
+        targetSystem:
+          type: array
+          items:
+            type: string
+            example: "MDTP"
+        fileTransferPattern:
+          type: string
+          example: Corporate to corporate
+    PlatformType:
+      type: string
+      enum:
+        - CORE_IF
+        - API_PLATFORM
+        - DES
+        - CMA
+      example: DES
+    ContactInformation:
+      type: object
+      properties:
+         name: 
+            type: string
+            example: Elliot Glenn
+         emailAddress: 
+            type: string
+            example: elliot.glenn@example.com
+    Errors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Unable to parse OAS line 50"
+    ApiId:
+      type: string
+      format: uuid
+      example: 2e9772e9-3c6a-4f1b-a9a3-0b205cbca4fb
