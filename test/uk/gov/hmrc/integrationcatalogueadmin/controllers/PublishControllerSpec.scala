@@ -90,7 +90,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
       tempFile.deleteOnExit()
 
       val data = new MultipartFormData[TemporaryFile](Map(), List(FilePart(filePartKey, fileName, Some("text/plain"), tempFile)), List())
-      val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-frontend/publish/api")
+      val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
         .withHeaders(headers: _*)
         .withBody(data)
 
@@ -104,7 +104,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
       tempFile.deleteOnExit()
 
       val data = new MultipartFormData[TemporaryFile](Map(), List(FilePart(filePartKey, fileName, Some("text/plain"), tempFile)), List())
-      val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-frontend/publish/api")
+      val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
         .withHeaders(headers: _*)
         .withBody(data)
 

@@ -21,5 +21,9 @@ node_modules/
 npm-debug.log
 yarn-debug.log
 yarn-error.log
-
-    
+project/.bloop/*
+.metals/*
+.vscode/*
+.bloop/*
+project/metals.sbt
+project/.bloop/integration-catalogue-admin-api-build.json

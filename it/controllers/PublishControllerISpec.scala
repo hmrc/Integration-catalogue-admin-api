@@ -54,7 +54,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         "microservice.services.integration-catalogue.port" -> wireMockPort
       )
 
-  val url = s"http://localhost:$port/integration-catalogue-admin-frontend"
+  val url = s"http://localhost:$port/integration-catalogue-admin-api"
 
   private val encodedMasterAuthKey = "dGVzdC1hdXRoLWtleQ=="
   private val encodedCoreIfAuthKey = "c29tZUtleTM="
@@ -110,17 +110,17 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
     val multipartBody: MultipartFormData[TemporaryFile] = MultipartFormData[TemporaryFile](dataParts = Map.empty, files = Seq(filePart), badParts = Nil)
 
     val validApiPublishRequest: FakeRequest[MultipartFormData[TemporaryFile]] =
-      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-frontend/services/apis/publish", Headers(basePublishHeaders: _*), multipartBody)
+      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-api/services/apis/publish", Headers(basePublishHeaders: _*), multipartBody)
     
     val validFileTransferPublishRequest: FakeRequest[JsValue] =
       FakeRequest(Helpers.PUT,
-        "/integration-catalogue-admin-frontend/services/filetransfers/publish",
+        "/integration-catalogue-admin-api/services/filetransfers/publish",
         Headers(basePublishHeaders: _*),
         Json.toJson(fileTransferPublishRequestObj))
 
      
     val invalidFileTransferPublishRequest: FakeRequest[JsValue] =
-      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-frontend/services/filetransfers/publish", headersWithMasterAuthKey, Json.toJson("{}"))
+      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-api/services/filetransfers/publish", headersWithMasterAuthKey, Json.toJson("{}"))
 
 
     val invalidFilePart =
@@ -134,7 +134,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       MultipartFormData[TemporaryFile](dataParts = Map.empty, files = Seq(invalidFilePart), badParts = Nil)
 
     val invalidPublishRequest: FakeRequest[MultipartFormData[TemporaryFile]] =
-      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-frontend/services/apis/publish", headersWithMasterAuthKey, invalidMultipartBody)
+      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-api/services/apis/publish", headersWithMasterAuthKey, invalidMultipartBody)
 
 
     def createBackendPublishResponse(isSuccess: Boolean, isUpdate: Boolean): PublishResult = {

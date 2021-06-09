@@ -47,7 +47,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         "microservice.services.integration-catalogue.port" -> wireMockPort
       )
 
-  val url = s"http://localhost:$port/integration-catalogue-admin-frontend"
+  val url = s"http://localhost:$port/integration-catalogue-admin-api"
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
 
@@ -65,31 +65,31 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
     val exampleIntegrationId = "2840ce2d-03fa-46bb-84d9-0299402b7b32"
     val validGetApisRequest: FakeRequest[AnyContentAsEmpty.type] =
-      FakeRequest(Helpers.GET, "/integration-catalogue-admin-frontend/services/integrations")
+      FakeRequest(Helpers.GET, "/integration-catalogue-admin-api/services/integrations")
 
     def validFindByIntegrationIdRequest(id: String): FakeRequest[AnyContentAsEmpty.type] =
-      FakeRequest(Helpers.GET, s"/integration-catalogue-admin-frontend/services/integrations/$id")
+      FakeRequest(Helpers.GET, s"/integration-catalogue-admin-api/services/integrations/$id")
 
     def validFindwithFilterRequest(searchTerm: String): FakeRequest[AnyContentAsEmpty.type] =
-      FakeRequest(Helpers.GET, s"/integration-catalogue-admin-frontend/services/integrations$searchTerm")
+      FakeRequest(Helpers.GET, s"/integration-catalogue-admin-api/services/integrations$searchTerm")
 
     
     def validDeleteIntegrationRequest(integrationId: String): FakeRequest[AnyContentAsEmpty.type] = {
-      FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-frontend/services/integrations/$integrationId")
+      FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$integrationId")
         .withHeaders(masterKeyHeader : _*)
     }
 
     def validDeleteIntegrationRequestWithNoHeaders(integrationId: String): FakeRequest[AnyContentAsEmpty.type] = {
-      FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-frontend/services/integrations/$integrationId")
+      FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$integrationId")
     }
 
     def validDeleteByPlatformRequest(queryParam: String): FakeRequest[AnyContentAsEmpty.type] = {
-      FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-frontend/services/integrations/$queryParam")
+      FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$queryParam")
         .withHeaders(masterKeyHeader : _*)
     }
 
     def invalidPathRequest(): FakeRequest[AnyContentAsEmpty.type] = {
-      FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-frontend/services/iamanunknownpath")
+      FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/iamanunknownpath")
     }
   }
 
@@ -235,7 +235,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
      "respond with 400 when non uuid id provided" in new Setup {
 
-        val request = FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-frontend/services/integrations/invalidId")
+        val request = FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/invalidId")
 
         val response: Future[Result] = route(app, request).get
         status(response) mustBe BAD_REQUEST
@@ -257,7 +257,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeIntegrationCatalogueServiceDelete(exampleIntegrationId, NOT_FOUND)
 
         val requestWithNoAuthHeader =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-frontend/services/integrations/$exampleIntegrationId")
+          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfPlatformTypeHeader : _*)).get
         status(response) mustBe UNAUTHORIZED
@@ -269,7 +269,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeIntegrationCatalogueServiceDelete(exampleIntegrationId, NOT_FOUND)
 
         val requestWithNoAuthHeader =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-frontend/services/integrations/$exampleIntegrationId")
+          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader : _*)).get
         status(response) mustBe BAD_REQUEST
@@ -281,7 +281,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeIntegrationCatalogueServiceDelete(exampleIntegrationId, NOT_FOUND)
 
         val requestWithNoAuthHeader =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-frontend/services/integrations/$exampleIntegrationId")
+          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "INVALID_PLATFORM"): _*)).get
         status(response) mustBe BAD_REQUEST
@@ -293,7 +293,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeIntegrationCatalogueServiceGetByIdWithoutResponseBody(NOT_FOUND, exampleIntegrationId)
 
         val requestWithNoAuthHeader =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-frontend/services/integrations/$exampleIntegrationId")
+          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
         status(response) mustBe NOT_FOUND
@@ -307,7 +307,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeIntegrationCatalogueServiceGetByIdWithBody(OK, Json.toJson(integrationWithApiPlatform.asInstanceOf[IntegrationDetail]).toString, integrationWithApiPlatform.id)
 
         val requestWithNoAuthHeader =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-frontend/services/integrations/${integrationWithApiPlatform.id.value.toString}")
+          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/${integrationWithApiPlatform.id.value.toString}")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
         status(response) mustBe UNAUTHORIZED

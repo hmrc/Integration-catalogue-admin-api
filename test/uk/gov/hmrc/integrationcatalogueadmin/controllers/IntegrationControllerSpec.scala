@@ -81,7 +81,7 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
       when(mockAppConfig.authPlatformMap).thenReturn(Map.empty)
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
-        FakeRequest.apply("DELETE", s"integration-catalogue-admin-frontend/services/integrations/${exampleApiDetail.id.value.toString}")
+        FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations/${exampleApiDetail.id.value.toString}")
         .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
 
       val result: Future[Result] = controller.deleteByIntegrationId(exampleApiDetail.id)(deleteRequest)
@@ -99,7 +99,7 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
       when(mockIntegrationService.deleteByPlatform(*)(*)).thenReturn(Future.successful(DeleteIntegrationsSuccess(DeleteIntegrationsResponse(1))))
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
-        FakeRequest.apply("DELETE", s"integration-catalogue-admin-frontend/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
+        FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
         .withHeaders(masterKeyHeader : _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
@@ -115,7 +115,7 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
       when(mockIntegrationService.deleteByPlatform(*)(*)).thenReturn(Future.successful(DeleteIntegrationsSuccess(DeleteIntegrationsResponse(1))))
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
-        FakeRequest.apply("DELETE", s"integration-catalogue-admin-frontend/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
+        FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
         .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
@@ -131,7 +131,7 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
       when(mockIntegrationService.deleteByPlatform(*)(*)).thenReturn(Future.successful(DeleteIntegrationsFailure("Internal Server Error")))
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
-        FakeRequest.apply("DELETE", s"integration-catalogue-admin-frontend/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
+        FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
         .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
@@ -145,7 +145,7 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
       when(mockAppConfig.authPlatformMap).thenReturn(Map(PlatformType.CORE_IF -> "someKey3"))
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
-        FakeRequest.apply("DELETE", s"integration-catalogue-admin-frontend/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}")
+        FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}")
         .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.API_PLATFORM))(deleteRequest)
@@ -159,7 +159,7 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
       when(mockAppConfig.authPlatformMap).thenReturn(Map(PlatformType.CORE_IF -> "someKey3"))
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
-        FakeRequest.apply("DELETE", s"integration-catalogue-admin-frontend/services/integrations")
+        FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations")
         .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List.empty)(deleteRequest)
@@ -174,7 +174,7 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest
-          .apply("DELETE", s"integration-catalogue-admin-frontend/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}&platforms=${PlatformType.CORE_IF.toString}")
+          .apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}&platforms=${PlatformType.CORE_IF.toString}")
         .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.API_PLATFORM, PlatformType.CORE_IF))(deleteRequest)
