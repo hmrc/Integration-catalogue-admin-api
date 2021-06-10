@@ -4,4 +4,4 @@
 ->         /                          health.Routes
 
 GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics
-GET        /integration-catalogue-admin/hello                   uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.hello
+GET        /integration-catalogue-admin-api/hello                   uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.hello
