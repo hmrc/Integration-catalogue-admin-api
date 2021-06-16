@@ -1,12 +1,11 @@
 openapi: 3.0.0
 servers:
-# TODO: Not sure these URL are correct.
+  - description: MDTP - Production
+    url: https://admin.tax.service.gov.uk/integration-catalogue-admin-api
   - description: MDTP - QA
-    url: https://admin.qa.tax.service.gov.uk/integration-catalogue-admin
-  - description: MDTP - Prod
-    url: https://www.example.com/integration-catalogue-admin
+    url: https://admin.qa.tax.service.gov.uk/integration-catalogue-admin-api
   - description: MDTP - Jenkins CURL Internal URL
-    url: https://integration-catalogue-admin-frontend.protected.mdtp
+    url: https://integration-catalogue-admin-frontend.protected.mdtp/integration-catalogue-admin-api
 info:
   version: '0.1'
   title: Integration Catalogue Keeper API
