@@ -54,7 +54,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
 
   private val headerValidator = app.injector.instanceOf[ValidateApiPublishRequestAction]
   private val authAction = app.injector.instanceOf[ValidateAuthorizationHeaderAction]
-  private val encodedAuthHeader = "dGVzdC1hdXRoLWtleQ=="
+  private val encodedAuthHeader = "dGVzdC1hdXRoLWtleQ==" // authorizationKey = test-auth-key
 
   private val publisherReference = "123456"
 
