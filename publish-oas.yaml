@@ -4,13 +4,28 @@ servers:
     url: https://admin.tax.service.gov.uk/integration-catalogue-admin-api
   - description: MDTP - QA
     url: https://admin.qa.tax.service.gov.uk/integration-catalogue-admin-api
-  - description: MDTP - Jenkins CURL Internal URL
-    url: https://integration-catalogue-admin-frontend.protected.mdtp/integration-catalogue-admin-api
+  - description: Localhost
+    url: http://localhost:11114/integration-catalogue-admin-api
 info:
-  version: '0.1'
-  title: Integration Catalogue Keeper API
-  description:
-    This API lets you create, update and delete APIs defined in 'get data for your service'.
+  version: "0.2"
+  title: Publish API
+  description: |
+    The publish API for the API catalogue. This lets you create, update and delete content in the API catalogue.
+    This is intended to be used by Platform teams to publish APIs and file transfers into the API catalogue.
+    To use this API you will need to know: 
+      - Which platform your API or file transfer belongs to
+      - The API key for that platform
+    # PublisherReference & Platform
+    Each entry in the catalogue has a publisherReference and a platform ID. We use these when content is pushed (PUT) into the API to 
+    decide which content to update, or if a new record is to be created.
+  contact:
+    name: API catalogue
+    email: who@example.com
+  x-integration-catalogue:
+    platform: API_PLATFORM
+    publisher-reference: publish-api
+    short-description: | 
+      The publish API for the API catalogue. This lets you create, update and delete content in the API catalogue.
 paths:
   /services/apis/publish:
     put:
@@ -19,29 +34,34 @@ paths:
       security:
         - ApiKeyAuth: []
       description: 
-        Create or updates an API with the passed OAS specification.
+        Create or update an API with the uploaded OpenAPI Specification.
       parameters:
         - in: header
           name: x-platform-type
-          description: Must be specified in either this header or the OAS file
-          required: false
+          description: The platform
+          required: true
           schema:
             $ref: "#/components/schemas/PlatformType"
         - in: header
           name: x-publisher-reference
-          description: Must be specified in this header or in the OAS file's 'publisher-reference'.
+          description: | 
+             Must be specified in either this header or the OpenAPI Specification file.
+             
+             It is **recommended** that it is included in the OpenAPI Specification files as an extension field, and that this header is not used.
           required: false
           schema:
             type: string
             example: 1234
         - in: header
           name: x-specification-type
-          schema:
+          description: Set to `OAS_V3` to represent an OpenAPI Specification version 3 file.
+          required: true
+          schema: 
             type: string
             enum:
               - OAS_V3
       requestBody:
-        description: The body of the OAS file
+        description: The content of the OpenAPI Specification file is posted as multi-part form data.
         required: true
         content:
           multipart/form-data:
@@ -50,6 +70,7 @@ paths:
               properties:
                 selectedFile:
                   type: string
+                  format: binary
                   example: |
                     openapi: 3.0.0
                     info:
@@ -59,7 +80,7 @@ paths:
       responses:
         '201':
           description: 
-            Created from the OAS file
+            Created a new API catalogue entry
           content:
             application/json:
               schema:
@@ -67,7 +88,7 @@ paths:
                 $ref: '#/components/schemas/Api'
         '200':
           description: 
-            Updated from the OAS file
+            Updated an existing API catalogue entry
           content:
             application/json:
               schema:
@@ -75,7 +96,7 @@ paths:
                 $ref: '#/components/schemas/Api'
         '400':
           description:
-            Failed to create or upsert an API
+            Failed to create or update an API
           content:
             application/json:
               schema:
@@ -125,7 +146,7 @@ paths:
   /services/integrations:
     get:
       description: 
-        DRAFT
+        This gets all the integrations in the API catalogue
       tags:
         - Publishing
       parameters:
@@ -141,17 +162,20 @@ paths:
             type: string
       responses:
         "200":
-          description: "Yeah"
+          description: |
+            The matching APIs or file transfer resources
           content:
             application/json:
               schema: 
                 type: array
                 items: 
                   type: object
-                  $ref: '#/components/schemas/Api'
+                  $ref: '#/components/schemas/ApiResults'
     delete:
       tags:
         - Publishing
+      description: |
+        Delete all content in the catalogue for a platform. This cannot be undone.
       parameters:
         - in: query
           required: true
@@ -160,16 +184,16 @@ paths:
             $ref: "#/components/schemas/PlatformType"
       responses:
         "200":
-          description: "Yeah"
+          description: All content for the platform was deleted
           content:
             application/json:
               schema: 
                 type: object
-                $ref: '#/components/schemas/Api'
+                $ref: '#/components/schemas/DeletePlatformResponse'
   /services/integrations/{api-id}:
     get:
       description: 
-        DRAFT
+        Returns information about an integration (OpenAPI Specification or file transfer) in the catalogue.
       tags:
         - Publishing
       parameters:
@@ -180,15 +204,15 @@ paths:
             $ref: '#/components/schemas/ApiId'
       responses:
         "200":
-          description: "Yeah"
+          description: The details about the API or file transfer
           content:
             application/json:
               schema: 
                 type: object
-                $ref: '#/components/schemas/Api'
+                $ref: '#/components/schemas/ApiFull'
     delete:
       description: 
-        DRAFT
+        Lets you delete content from the API catalogue. This cannot be undone.
       tags:
         - Publishing
       security:
@@ -203,26 +227,48 @@ paths:
         "204": 
           description: The resource was deleted successfully
 components:
-  # From: https://swagger.io/docs/specification/2-0/authentication/
   securitySchemes:
-    ApiKeyAuth: # TODO Is this what we want auth to look like?
+    ApiKeyAuth:
       type: apiKey
       in: header
-      name: X-API-Key # TODO Good header name?
+      name: Authorization
   schemas:
     Api:
       type: object
       properties:
         id:
-          type: string
-          format: uuid
-          example: 2e9772e9-3c6a-4f1b-a9a3-0b205cbca4fb
+          $ref: '#/components/schemas/ApiId'
         publisherReference :
+          $ref: '#/components/schemas/PublisherReference'
+        platformType:
           type: string
-          example: "1234"
+          example: IF
+    ApiResults:
+      type: object
+      properties:
+        count:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiFull'
+    ApiFull:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ApiId'
+        publisherReference :
+          $ref: '#/components/schemas/PublisherReference'
         platform:
           type: string
           example: IF
+        specificationType:
+          type: string
+          enum:
+            - OAS_V3
+        title:
+          type: string
+          example: My API title
     FileTransfer:
       type: object
       properties:
@@ -231,53 +277,53 @@ components:
           type: string
           example: "0.1"
         publisherReference:
-          type: string
-          example: "1234"
+          $ref: '#/components/schemas/PublisherReference'
+        platformType:
+          $ref: '#/components/schemas/PlatformType'
         title:
           type: string
           example: BBSI to DPS file transfer
         description:
           type: string
-          example: "A file transfer from Bank and Building Society Interest (BBSI) to Data Provisioning Systems (DPS)"
-        platformType:
-          $ref: '#/components/schemas/PlatformType'
+          example: A file transfer from Bank and Building Society Interest (BBSI) to Data Provisioning Systems (DPS)
         lastUpdated:
           description: This is shows on the details page in the catalogue
           type: string
           format: date-time
-          example: "2021-01-01T13:00:00Z" 
+          example: "2021-01-01T13:00:00Z"
         contact:
           $ref: '#/components/schemas/ContactInformation'
         sourceSystem:
           type: array
           items:
             type: string
-            example: "BBSI"
+            example: BBSI
         targetSystem:
           type: array
           items:
             type: string
-            example: "MDTP"
+            example: MDTP
         fileTransferPattern:
           type: string
           example: Corporate to corporate
     PlatformType:
       type: string
       enum:
-        - CORE_IF
         - API_PLATFORM
         - DES
+        - CDS_CLASSIC
         - CMA
+        - CORE_IF
       example: DES
     ContactInformation:
       type: object
       properties:
          name: 
             type: string
-            example: Elliot Glenn
+            example: Forename Surname
          emailAddress: 
             type: string
-            example: elliot.glenn@example.com
+            example: forename.surname@example.com
     Errors:
       type: object
       properties:
@@ -291,8 +337,18 @@ components:
       properties:
         message:
           type: string
-          example: "Unable to parse OAS line 50"
+          example: Unable to parse file line 50
     ApiId:
       type: string
       format: uuid
       example: 2e9772e9-3c6a-4f1b-a9a3-0b205cbca4fb
+    PublisherReference:
+      type: string
+      example: my-ref-1234
+    DeletePlatformResponse:
+        type: object
+        properties:
+          numberOfIntegrationsDeleted:
+            type: integer
+            example: 10
+        
