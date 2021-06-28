@@ -8,24 +8,30 @@ servers:
     url: http://localhost:11114/integration-catalogue-admin-api
 info:
   version: "0.2"
-  title: Publish API
+  title: Publish API for the API catalogue
   description: |
-    The publish API for the API catalogue. This lets you create, update and delete content in the API catalogue.
-    This is intended to be used by Platform teams to publish APIs and file transfers into the API catalogue.
+    This lets you create, update and delete content in the API catalogue.
+    This is intended to be used by platform teams to publish APIs and file
+    transfers into the API catalogue.
     To use this API you will need to know: 
       - Which platform your API or file transfer belongs to
       - The API key for that platform
+    
     # PublisherReference & Platform
-    Each entry in the catalogue has a publisherReference and a platform ID. We use these when content is pushed (PUT) into the API to 
-    decide which content to update, or if a new record is to be created.
-  contact:
-    name: API catalogue
-    email: who@example.com
+    Each integration (API or file transfer) in the catalogue has a 
+    publisherReference and a platform code. We use these when content is pushed
+    (PUT) into the API to decide which integration to update, or if a integration 
+    is to be created.
+  #TODO
+  # contact:
+  #   name: API catalogue
+  #   email: who@example.com
   x-integration-catalogue:
     platform: API_PLATFORM
     publisher-reference: publish-api
-    short-description: | 
-      The publish API for the API catalogue. This lets you create, update and delete content in the API catalogue.
+    short-description: |
+      The publish API for the API catalogue. This lets you create, update and
+      delete content in the API catalogue.
 paths:
   /services/apis/publish:
     put:
@@ -33,35 +39,42 @@ paths:
         - Publishing
       security:
         - ApiKeyAuth: []
-      description: 
+      description: |
         Create or update an API with the uploaded OpenAPI Specification.
       parameters:
         - in: header
           name: x-platform-type
-          description: The platform
+          description: |
+            The platform
           required: true
           schema:
             $ref: "#/components/schemas/PlatformType"
         - in: header
           name: x-publisher-reference
-          description: | 
-             Must be specified in either this header or the OpenAPI Specification file.
+          description: |
+             Must be specified in either this header or the OpenAPI Specification
+             file as an `x-integration-catalogue` OpenAPI specification extension.
              
-             It is **recommended** that it is included in the OpenAPI Specification files as an extension field, and that this header is not used.
+             It is **recommended** that it is included in the OpenAPI Specification
+             files as an extension, and that this header is not used.
           required: false
           schema:
             type: string
-            example: 1234
+            example: API-1234
         - in: header
           name: x-specification-type
-          description: Set to `OAS_V3` to represent an OpenAPI Specification version 3 file.
+          description: |
+            Set to `OAS_V3` to represent an OpenAPI Specification
+            version 3 file.
           required: true
           schema: 
             type: string
             enum:
               - OAS_V3
       requestBody:
-        description: The content of the OpenAPI Specification file is posted as multi-part form data.
+        description: |
+          The content of the OpenAPI Specification file is posted as
+          multi-part form data.
         required: true
         content:
           multipart/form-data:
@@ -79,16 +92,16 @@ paths:
                       ...
       responses:
         '201':
-          description: 
-            Created a new API catalogue entry
+          description: |
+            Created a new API
           content:
             application/json:
               schema:
                 type: object
                 $ref: '#/components/schemas/Api'
         '200':
-          description: 
-            Updated an existing API catalogue entry
+          description: |
+            Updated an existing API
           content:
             application/json:
               schema:
@@ -108,10 +121,11 @@ paths:
         - Publishing
       security:
         - ApiKeyAuth: []
-      description: 
+      description: |
         Create or updates a file transfer
       requestBody:
-        description: The file transfer definition
+        description: |
+          The file transfer definition
         required: true
         content:
           application/json:
@@ -120,16 +134,16 @@ paths:
               $ref: '#/components/schemas/FileTransfer'
       responses:
         '201':
-          description: 
-            Created file transfer
+          description: |
+            Created a file transfer
           content:
             application/json:
               schema:
                 type: object
                 $ref: '#/components/schemas/Api'
         '200':
-          description: 
-            Updated file transfer
+          description: |
+            Updated a file transfer
           content:
             application/json:
               schema:
@@ -137,7 +151,7 @@ paths:
                 $ref: '#/components/schemas/Api'
         '400':
           description:
-            Failed to create or update file transfer
+            Failed to create or update a file transfer
           content:
             application/json:
               schema:
@@ -145,10 +159,11 @@ paths:
                 $ref: '#/components/schemas/Errors'
   /services/integrations:
     get:
-      description: 
-        This gets all the integrations in the API catalogue
+      description:
+        This gets all the integrations (APIs or file transfers) in the API 
+        catalogue
       tags:
-        - Publishing
+        - Managing
       parameters:
         - in: query
           required: false
@@ -162,22 +177,22 @@ paths:
             type: string
       responses:
         "200":
-          description: |
-            The matching APIs or file transfer resources
+          description:
+            An array of APIs or file transfer resources
           content:
             application/json:
               schema: 
                 type: array
                 items: 
                   type: object
-                  $ref: '#/components/schemas/ApiResults'
+                  $ref: '#/components/schemas/ApiArrayResult'
     delete:
       tags:
-        - Publishing
+        - Managing
       security:
         - ApiKeyAuth: []
-      description: |
-        Delete all content in the catalogue for a platform. This cannot be undone.
+      description:
+        Deletes all content in the catalogue for a platform. This cannot be undone.
       parameters:
         - in: query
           required: true
@@ -186,7 +201,8 @@ paths:
             $ref: "#/components/schemas/PlatformType"
       responses:
         "200":
-          description: All content for the platform was deleted
+          description: |
+            All content for the platform was deleted successfully
           content:
             application/json:
               schema: 
@@ -195,45 +211,53 @@ paths:
   /services/integrations/{api-id}:
     get:
       description: 
-        Returns information about an integration (OpenAPI Specification or file transfer) in the catalogue.
+        Returns a single integration (API or file transfer)
       tags:
-        - Publishing
+        - Managing
       parameters:
         - in: path
           required: true
           name: api-id
+          description: |
+            The id of the integration (API or file transfer)
           schema:
             $ref: '#/components/schemas/ApiId'
       responses:
         "200":
-          description: The details about the API or file transfer
+          description: |
+            The resource for the integration (API or file transfer)
           content:
             application/json:
               schema: 
                 type: object
                 $ref: '#/components/schemas/ApiFull'
     delete:
-      description: 
-        Lets you delete content from the API catalogue. This cannot be undone.
+      description: |
+        Deletes content from the API catalogue. This cannot be undone.
       tags:
-        - Publishing
+        - Managing
       security:
         - ApiKeyAuth: []
       parameters:
         - in: path
           required: true
           name: api-id
+          description: |
+            The id of the integration (API or file transfer)
           schema: 
             $ref: '#/components/schemas/ApiId'
       responses:
         "204": 
-          description: The resource was deleted successfully
+          description: |
+            The resource was deleted successfully
 components:
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
       in: header
       name: Authorization
+      description: |
+        This can be obtained from the API catalogue team
   schemas:
     Api:
       type: object
@@ -245,7 +269,7 @@ components:
         platformType:
           type: string
           example: IF
-    ApiResults:
+    ApiArrayResult:
       type: object
       properties:
         count:
@@ -275,7 +299,8 @@ components:
       type: object
       properties:
         fileTransferSpecificationVersion:
-          description: Must be 0.1
+          description: |
+            Must be 0.1
           type: string
           example: "0.1"
         publisherReference:
@@ -287,9 +312,12 @@ components:
           example: BBSI to DPS file transfer
         description:
           type: string
-          example: A file transfer from Bank and Building Society Interest (BBSI) to Data Provisioning Systems (DPS)
+          example: 
+            A file transfer from Bank and Building Society Interest (BBSI) to
+            Data Provisioning Systems (DPS)
         lastUpdated:
-          description: This is shows on the details page in the catalogue
+          description: |
+            This is shows on the details page in the catalogue
           type: string
           format: date-time
           example: "2021-01-01T13:00:00Z"
