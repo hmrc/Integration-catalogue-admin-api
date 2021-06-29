@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import play.api.{Logger, Logging}
 import play.api.http.HeaderNames
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, Request, Result}
@@ -37,7 +38,7 @@ import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
 
 @Singleton
 class ValidateAuthorizationHeaderAction @Inject()
-(appConfig: AppConfig)(implicit ec: ExecutionContext) extends ActionFilter[Request] with HttpErrorFunctions with ValidateParameters {
+(appConfig: AppConfig)(implicit ec: ExecutionContext) extends ActionFilter[Request] with HttpErrorFunctions with ValidateParameters with Logging{
 
   override def executionContext: ExecutionContext = ec
 
@@ -55,12 +56,21 @@ class ValidateAuthorizationHeaderAction @Inject()
 
   }
 
-  private def validatePlatformAuthHeader(platformType: PlatformType, authHeader: String) = {
+  private def validatePlatformAuthHeader(platformType: PlatformType, authHeader: String)  = {
+    appConfig.authPlatformMap.foreach(k => {
+     val encodedString =  Try(new String(Base64.getEncoder.encode(k._2.getBytes), StandardCharsets.UTF_8))
+      logger.info(s"${k._1}  ${encodedString.getOrElse("ERROR-ENCODING")}")
+    })
     appConfig.authPlatformMap.get(platformType) match {
       case Some(authKey) => if (base64Decode(authHeader).map(_ == authKey).getOrElse(false)) Future.successful(None)
-        else
+      else {
+         logger.info("Unauthorised -  key didn't match value in config")
           Future.successful(Some(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Authorisation failed")))))))
-      case None          => Future.successful(Some(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Authorisation failed")))))))
+      }
+
+      case None          => { logger.info("Unauthorised - no config for platform type found")
+        Future.successful(Some(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Authorisation failed")))))))
+      }
     }
   }
 
