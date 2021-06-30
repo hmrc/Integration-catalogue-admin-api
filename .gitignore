@@ -27,3 +27,4 @@ project/.bloop/*
 .bloop/*
 project/metals.sbt
 project/.bloop/integration-catalogue-admin-api-build.json
+project/.bloop/bloop.settings.json
