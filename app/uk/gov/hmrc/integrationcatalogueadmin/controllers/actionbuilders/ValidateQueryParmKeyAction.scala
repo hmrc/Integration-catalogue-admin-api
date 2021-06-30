@@ -31,7 +31,7 @@ class ValidateQueryParamKeyAction @Inject()()(implicit ec: ExecutionContext)
   override def executionContext: ExecutionContext = ec
 
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = {
-    val validKeys = List("platformFilter", "searchTerm", "platform")
+    val validKeys = List("platformFilter", "searchTerm", "platform", "backendsFilter")
     val queryParamKeys = request.queryString.keys
 
     Future.successful(validateQueryParamKey(validKeys, queryParamKeys))
