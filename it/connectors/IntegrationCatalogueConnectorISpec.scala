@@ -31,6 +31,7 @@ import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConn
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 
 class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailTestData with BeforeAndAfterEach with IntegrationCatalogueConnectorStub {
@@ -113,8 +114,8 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
 
     "findWithFilter" should {
       "return Right with IntegrationResponse " in new Setup {
-        primeIntegrationCatalogueServiceFindWithFilterWithBody(OK, Json.toJson(integrationResponse).toString(), "?searchTerm=API-1001")
-        val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(IntegrationFilter(searchText = List("API-1001"), platforms = List.empty)))
+        primeIntegrationCatalogueServiceFindWithFilterWithBody(OK, Json.toJson(integrationResponse).toString(), "?searchTerm=API-1001&platformFilter=CORE_IF&backendsFilter=HODS")
+        val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(IntegrationFilter(searchText = List("API-1001"), platforms = List(CORE_IF), backends = List("HODS"))))
             result match {
               case Right(_) => succeed
               case _ => fail
