@@ -66,10 +66,10 @@ class IntegrationServiceSpec extends WordSpec
   "findWithFilter" should {
     "return a Right when successful" in new SetUp {
       val expectedResult = List(exampleApiDetail, exampleApiDetail2, exampleFileTransfer)
-      when(mockIntegrationCatalogueConnector.findWithFilters(*, *)(*))
+      when(mockIntegrationCatalogueConnector.findWithFilters(*)(*))
         .thenReturn(Future.successful(Right(IntegrationResponse(expectedResult.size, expectedResult))))
 
-      val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(List("search"), List.empty))
+      val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(IntegrationFilter(searchText = List("search"), platforms = List.empty)))
 
       result match {
         case Left(_) => fail()
@@ -78,17 +78,18 @@ class IntegrationServiceSpec extends WordSpec
     }
 
     "return Left when error from connector" in new SetUp {
-      when(mockIntegrationCatalogueConnector.findWithFilters(*,*)(*)).thenReturn(Future.successful(Left(new RuntimeException("some error"))))
+      when(mockIntegrationCatalogueConnector.findWithFilters(*)(*)).thenReturn(Future.successful(Left(new RuntimeException("some error"))))
 
+      val integrationFilter = IntegrationFilter(searchText = List("search"), platforms = List.empty)
       val result: Either[Throwable, IntegrationResponse] =
-        await(objInTest.findWithFilters(List("search"), List.empty))
+        await(objInTest.findWithFilters(integrationFilter))
 
       result match {
         case Left(_) => succeed
         case Right(_) => fail()
       }
 
-      verify(mockIntegrationCatalogueConnector).findWithFilters(eqTo(List("search")), eqTo(List.empty))(eqTo(hc))
+      verify(mockIntegrationCatalogueConnector).findWithFilters(eqTo(integrationFilter))(eqTo(hc))
     }
   }
 

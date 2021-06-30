@@ -159,6 +159,16 @@ class IntegrationControllerISpec extends ServerBaseISpec
           contentAsString(response) mustBe """{"count":0,"results":[]}"""
         }
 
+        "return 200 and integration response from backend when using backendsFilter" in new Setup {
+        val backendsFilter = "?backendsFilter=ETMP"
+        primeIntegrationCatalogueServiceFindWithFilterWithBody(OK, Json.toJson(IntegrationResponse(0, List.empty)).toString, backendsFilter)
+
+          val response: Future[Result] = route(app, validFindwithFilterRequest(backendsFilter)).get
+          status(response) mustBe OK
+          contentAsString(response) mustBe """{"count":0,"results":[]}"""
+        }
+
+
         "return 400 when using invalid filter key" in new Setup {
           val invalidFilterKey = "?invalidFilterKey=UNKNOWN"
 

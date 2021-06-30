@@ -114,7 +114,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
     "findWithFilter" should {
       "return Right with IntegrationResponse " in new Setup {
         primeIntegrationCatalogueServiceFindWithFilterWithBody(OK, Json.toJson(integrationResponse).toString(), "?searchTerm=API-1001")
-        val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(List("API-1001"), List.empty))
+        val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(IntegrationFilter(searchText = List("API-1001"), platforms = List.empty)))
             result match {
               case Right(_) => succeed
               case _ => fail
@@ -124,7 +124,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
       
       "return Left with Bad Request " in new Setup {
         primeIntegrationCatalogueServiceFindWithFilterWithBadRequest("?searchTerm=API-1001")
-        val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(List("API-1001"), List.empty))
+        val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(IntegrationFilter(searchText = List("API-1001"), platforms = List.empty)))
             result match {
               case Left(_) => succeed
               case _ => fail

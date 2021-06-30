@@ -142,7 +142,7 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
       val expectedResult = List(exampleApiDetail, exampleApiDetail2)
       httpCallToFindWithFilterWillSucceedWithResponse(IntegrationResponse(2, expectedResult))
 
-      val result: Either[Throwable, IntegrationResponse] = await(connector.findWithFilters(List(searchTerm), List.empty))
+      val result: Either[Throwable, IntegrationResponse] = await(connector.findWithFilters(IntegrationFilter(searchText = List(searchTerm), platforms = List.empty)))
 
       result match {
         case Right(integrationResponse: IntegrationResponse) => integrationResponse.results shouldBe expectedResult
@@ -154,7 +154,7 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
     "handle exceptions" in new SetUp {
       httpCallToFindWithFilterWillFailWithException(new BadGatewayException("some error"))
 
-      val result: Either[Throwable, IntegrationResponse] = await(connector.findWithFilters(List(searchTerm), List.empty))
+      val result: Either[Throwable, IntegrationResponse] = await(connector.findWithFilters(IntegrationFilter(searchText = List(searchTerm), platforms = List.empty)))
 
       result match {
         case Left(_:BadGatewayException) => succeed

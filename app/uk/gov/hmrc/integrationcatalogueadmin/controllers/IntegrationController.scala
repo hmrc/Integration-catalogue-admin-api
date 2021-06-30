@@ -54,9 +54,9 @@ class IntegrationController @Inject()(appConfig: AppConfig,
     Future.successful(Ok("HELLO!!!"))
   }
 
-  def findWithFilters(searchTerm: List[String], platformFilter: List[PlatformType]) : Action[AnyContent] =
+  def findWithFilters(searchTerm: List[String], platformFilter: List[PlatformType], backendsFilter: List[String]) : Action[AnyContent] =
     (Action andThen validateQueryParamKeyAction).async { implicit request =>
-    integrationService.findWithFilters(searchTerm, platformFilter)
+    integrationService.findWithFilters(IntegrationFilter(searchTerm, platformFilter, backendsFilter))
      .map {
       case Right(response) => Ok(Json.toJson(response))
       case Left(error: Throwable) =>

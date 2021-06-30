@@ -62,3 +62,5 @@ case class ErrorResponseMessage(message: String)
 case class ErrorResponse(errors: List[ErrorResponseMessage])
 
 case class DeleteIntegrationsResponse(numberOfIntegrationsDeleted: Int)
+
+case class IntegrationFilter(searchText: List[String] = List.empty, platforms: List[PlatformType] = List.empty, backends: List[String] = List.empty, itemsPerPage: Option[Int] = None, currentPage: Option[Int] = None)
