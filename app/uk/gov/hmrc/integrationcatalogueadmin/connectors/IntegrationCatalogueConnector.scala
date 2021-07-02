@@ -45,9 +45,9 @@ class IntegrationCatalogueConnector @Inject()(http: HttpClient, appConfig: AppCo
       http.PUT[FileTransferPublishRequest, PublishResult](s"$externalServiceUri/filetransfer/publish", publishRequest))
   }
 
-  def findWithFilters(searchTerm: List[String], platformFilter: List[PlatformType])
+  def findWithFilters(integrationFilter: IntegrationFilter)
                      (implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationResponse]] = {
-   val queryParamsValues = buildQueryParams(searchTerm, platformFilter: List[PlatformType])
+   val queryParamsValues = buildQueryParams(integrationFilter)
 
       http.GET[IntegrationResponse](s"$externalServiceUri/integrations", queryParams = queryParamsValues)
         .map(x=> Right(x))
@@ -86,10 +86,11 @@ class IntegrationCatalogueConnector @Inject()(http: HttpClient, appConfig: AppCo
         }
   }
 
-  private def buildQueryParams(searchTerm: List[String], platformFilter: List[PlatformType]): Seq[(String, String)] = {
-    val searchTerms = searchTerm.map(x => ("searchTerm", x))
-    val platformsFilters = platformFilter.map((x: PlatformType) => ("platformFilter", x.toString))
-    searchTerms ++ platformsFilters
+  private def buildQueryParams(integrationFilter: IntegrationFilter): Seq[(String, String)] = {
+    val searchTerms = integrationFilter.searchText.map(x => ("searchTerm", x))
+    val platformsFilters = integrationFilter.platforms.map((x: PlatformType) => ("platformFilter", x.toString))
+    val backendFilters = integrationFilter.backends.map(x => ("backendsFilter", x.toString))
+    searchTerms ++ platformsFilters ++ backendFilters
 
   }
 

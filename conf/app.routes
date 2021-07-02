@@ -5,7 +5,7 @@ PUT            /apis/publish                                uk.gov.hmrc.integrat
 PUT            /filetransfers/publish                       uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishFileTransfer()
 
 #api
-GET            /integrations                                uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.findWithFilters(searchTerm: List[String], platformFilter: List[uk.gov.hmrc.integrationcatalogue.models.common.PlatformType])
+GET            /integrations                                uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.findWithFilters(searchTerm: List[String], platformFilter: List[uk.gov.hmrc.integrationcatalogue.models.common.PlatformType], backendsFilter: List[String])
 GET            /integrations/:id                            uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.findByIntegrationId(id: uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId)
 DELETE         /integrations/:id                            uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.deleteByIntegrationId(id: uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId)
 

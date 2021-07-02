@@ -26,6 +26,7 @@ import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
 import uk.gov.hmrc.integrationcatalogue.models.IntegrationDetail
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 import uk.gov.hmrc.integrationcatalogue.models.DeleteApiResult
+import uk.gov.hmrc.integrationcatalogue.models.IntegrationFilter
 
 
 @Singleton
@@ -39,9 +40,9 @@ class IntegrationService @Inject()(integrationCatalogueConnector: IntegrationCat
     integrationCatalogueConnector.deleteByPlatform(platform)
   }
 
-  def findWithFilters(searchTerm: List[String], platformFilter: List[PlatformType])
+  def findWithFilters(integrationFilter: IntegrationFilter)
   (implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationResponse]] = {
-        integrationCatalogueConnector.findWithFilters(searchTerm, platformFilter)
+        integrationCatalogueConnector.findWithFilters(integrationFilter)
   }
 
   def findByIntegrationId(integrationId: IntegrationId)
