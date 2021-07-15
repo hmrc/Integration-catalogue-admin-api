@@ -32,26 +32,31 @@ import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
 
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IntegrationControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSuite
-with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeAndAfterEach {
+class IntegrationControllerSpec
+    extends WordSpec
+    with Matchers
+    with GuiceOneAppPerSuite
+    with MockitoSugar
+    with StubBodyParserFactory
+    with ApiDetailTestData
+    with BeforeAndAfterEach {
 
   implicit lazy val mat: Materializer = app.materializer
 
   val mockAppConfig: AppConfig = mock[AppConfig]
   val mockIntegrationService: IntegrationService = mock[IntegrationService]
-  
+
   private val validateQueryParamKeyAction = app.injector.instanceOf[ValidateQueryParamKeyAction]
   private val authAction = new ValidateAuthorizationHeaderAction(mockAppConfig)
   private val validateIntegrationIdAgainstPlatformTypeAction = new ValidateIntegrationIdAgainstParametersAction(mockIntegrationService)
 
-    override def beforeEach(): Unit = {
+  override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockAppConfig)
-    }
+  }
 
   trait Setup {
 
@@ -66,12 +71,13 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
     private val encodedCoreIfAuthKey = "c29tZUtleTM="
     val coreIfAuthHeader = List(HeaderNames.AUTHORIZATION -> encodedCoreIfAuthKey)
-    val coreIfPlatformTypeHeader =  List(HeaderKeys.platformKey -> "CORE_IF")
+    val coreIfPlatformTypeHeader = List(HeaderKeys.platformKey -> "CORE_IF")
 
     private val encodedMasterAuthKey = "dGVzdC1hdXRoLWtleQ=="
     val masterKeyHeader = List(HeaderNames.AUTHORIZATION -> encodedMasterAuthKey)
 
   }
+
 
   "DELETE /services/integrations/{id}" should {
 
@@ -82,14 +88,14 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations/${exampleApiDetail.id.value.toString}")
-        .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
 
       val result: Future[Result] = controller.deleteByIntegrationId(exampleApiDetail.id)(deleteRequest)
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) shouldBe """{"errors":[{"message":"Authorisation failed"}]}"""
-      
+
     }
-}
+  }
 
   "DELETE /services/integrations" should {
     "respond with 200 when using master key" in new Setup {
@@ -100,12 +106,12 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
-        .withHeaders(masterKeyHeader : _*)
+          .withHeaders(masterKeyHeader: _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
       status(result) shouldBe OK
       contentAsString(result) shouldBe """{"numberOfIntegrationsDeleted":1}"""
-      
+
     }
 
     "respond with 200 when using platform header for auth and this matches the platform param" in new Setup {
@@ -116,12 +122,12 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
-        .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
       status(result) shouldBe OK
       contentAsString(result) shouldBe """{"numberOfIntegrationsDeleted":1}"""
-      
+
     }
 
     "respond with 500 when backend returns error" in new Setup {
@@ -132,12 +138,12 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
-        .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
       status(result) shouldBe INTERNAL_SERVER_ERROR
       contentAsString(result) shouldBe """{"errors":[{"message":"Internal Server Error"}]}"""
-      
+
     }
 
     "respond with 401 when platform header for auth does not match the platform param" in new Setup {
@@ -146,12 +152,12 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}")
-        .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.API_PLATFORM))(deleteRequest)
       status(result) shouldBe UNAUTHORIZED
       contentAsString(result) shouldBe """{"errors":[{"message":"You are not authorised to delete integrations on this Platform"}]}"""
-      
+
     }
 
     "respond with 400 when platform param is missing" in new Setup {
@@ -160,12 +166,12 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations")
-        .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List.empty)(deleteRequest)
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) shouldBe """{"errors":[{"message":"platforms query parameter is either invalid, missing or multiple have been provided"}]}"""
-      
+
     }
 
     "respond with 400 when multiple platform params passed in" in new Setup {
@@ -174,15 +180,30 @@ with MockitoSugar with StubBodyParserFactory with ApiDetailTestData with BeforeA
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest
-          .apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}&platforms=${PlatformType.CORE_IF.toString}")
-        .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)
+          .apply(
+            "DELETE",
+            s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}&platforms=${PlatformType.CORE_IF.toString}"
+          )
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.API_PLATFORM, PlatformType.CORE_IF))(deleteRequest)
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) shouldBe """{"errors":[{"message":"platforms query parameter is either invalid, missing or multiple have been provided"}]}"""
-      
+
     }
 
-    
-}
+  }
+
+  "GET findWithFilters" should {
+    "respond with 400 when backendsFilter has no value" in new Setup {
+
+      val getRequest: FakeRequest[AnyContentAsEmpty.type] =
+        FakeRequest.apply("GET", s"integration-catalogue-admin-api/services/integrations/?backendsFilter=")
+
+      val result: Future[Result] = controller.findWithFilters(List.empty, List.empty, List.empty)(getRequest)
+      status(result) shouldBe BAD_REQUEST
+      contentAsString(result) shouldBe """{"errors":[{"message":"backendsFilter cannot be empty"}]}"""
+
+    }
+  }
 }
