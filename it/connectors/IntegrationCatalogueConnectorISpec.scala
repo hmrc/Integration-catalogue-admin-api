@@ -71,7 +71,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
       description = "A file transfer",
       platformType = PlatformType.CORE_IF,
       lastUpdated =  dateValue,
-      contact = ContactInformation("Core IF Team", "example@gmail.com"),
+      contact = ContactInformation(Some("Core IF Team"), Some("example@gmail.com")),
       sourceSystem = List("XXX"),
       targetSystem = List("YYY"),
       fileTransferPattern = "Corporate to corporate"
