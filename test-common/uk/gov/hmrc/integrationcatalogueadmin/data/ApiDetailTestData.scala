@@ -144,7 +144,8 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     components = Components(List(schema1), List(platformTypeHeader), List(reqHeaderParameter)),
-    shortDescription = None
+    shortDescription = None, 
+    apiStatus = ApiStatus.LIVE
   )
 
   val exampleApiDetail2: ApiDetail = ApiDetail(
@@ -160,7 +161,8 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     components = Components(List(schema1), List.empty),
-    shortDescription = None
+    shortDescription = None, 
+    apiStatus = ApiStatus.LIVE
   )
 
   val exampleApiDetail3: ApiDetail = ApiDetail(
@@ -176,7 +178,8 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     components = Components(List(schema1), List.empty),
-    shortDescription = Some("short description")
+    shortDescription = Some("short description"), 
+    apiStatus = ApiStatus.LIVE
   )
 
   val exampleFileTransfer: FileTransferDetail =
