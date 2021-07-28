@@ -29,6 +29,7 @@ trait ApiDetailTestData {
   val fileContents = "{}"
   val uuid: UUID = UUID.fromString("28c0bd67-4176-42c7-be13-53be98a4db58")
   val dateValue: DateTime = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+  val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
 
   val apiPlatformMaintainer: Maintainer = Maintainer("API Platform Team", "#team-api-platform-sup")
   val coreIfMaintainer: Maintainer = Maintainer("IF Team", "N/A", List.empty)
@@ -145,7 +146,8 @@ trait ApiDetailTestData {
     endpoints = endpoints,
     components = Components(List(schema1), List(platformTypeHeader), List(reqHeaderParameter)),
     shortDescription = None, 
-    apiStatus = ApiStatus.LIVE
+    apiStatus = ApiStatus.LIVE,
+    reviewedDate = reviewedDate
   )
 
   val exampleApiDetail2: ApiDetail = ApiDetail(
@@ -162,7 +164,8 @@ trait ApiDetailTestData {
     endpoints = endpoints,
     components = Components(List(schema1), List.empty),
     shortDescription = None, 
-    apiStatus = ApiStatus.LIVE
+    apiStatus = ApiStatus.LIVE,
+    reviewedDate = reviewedDate
   )
 
   val exampleApiDetail3: ApiDetail = ApiDetail(
@@ -179,7 +182,8 @@ trait ApiDetailTestData {
     endpoints = endpoints,
     components = Components(List(schema1), List.empty),
     shortDescription = Some("short description"), 
-    apiStatus = ApiStatus.LIVE
+    apiStatus = ApiStatus.LIVE,
+    reviewedDate = reviewedDate
   )
 
   val exampleFileTransfer: FileTransferDetail =
