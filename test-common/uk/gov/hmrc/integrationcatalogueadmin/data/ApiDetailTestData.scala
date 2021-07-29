@@ -194,6 +194,7 @@ trait ApiDetailTestData {
       title = "File transfer title",
       description = "File transfer description",
       lastUpdated = dateValue,
+      reviewedDate = reviewedDate,
       platform = PlatformType.CORE_IF,
       maintainer = coreIfMaintainer,
       sourceSystem = List("source"),

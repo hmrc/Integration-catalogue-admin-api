@@ -27,6 +27,7 @@ sealed trait IntegrationDetail {
     def description: String
     def platform: PlatformType
     def lastUpdated: DateTime
+    def reviewedDate: DateTime
     def maintainer : Maintainer
     def integrationType: IntegrationType
     def score: Option[Double]
@@ -170,6 +171,7 @@ case class ApiDetail(id: IntegrationId,
                       platform: PlatformType,
                       hods: List[String] = List.empty,
                       lastUpdated: DateTime,
+                      reviewedDate: DateTime,
                       maintainer: Maintainer,
                       score: Option[Double] = None,
                       version: String,
@@ -177,8 +179,7 @@ case class ApiDetail(id: IntegrationId,
                       endpoints: List[Endpoint],
                       components: Components,
                       shortDescription: Option[String],
-                      apiStatus: ApiStatus,
-                      reviewedDate: DateTime)
+                      apiStatus: ApiStatus)
   extends IntegrationDetail {
   override val integrationType: IntegrationType = IntegrationType.API
 }
@@ -190,6 +191,7 @@ case class FileTransferDetail(id: IntegrationId, // Ignore
                               description: String,
                               platform: PlatformType, // Split this to Platform and type
                               lastUpdated: DateTime,
+                              reviewedDate: DateTime,
                               maintainer: Maintainer,
                               score: Option[Double] = None,
                               sourceSystem: List[String],
