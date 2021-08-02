@@ -46,6 +46,8 @@ trait SetUp {
       PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(UUID.randomUUID()),  "BVD-DPS-PCPMonthly-pull", PlatformType.CORE_IF)))
     
     val dateValue: DateTime = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+    val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+
 
     val fileTransferPublishRequest: FileTransferPublishRequest = FileTransferPublishRequest(
       fileTransferSpecificationVersion = "1.0",
@@ -54,6 +56,7 @@ trait SetUp {
       description = "A file transfer",
       platformType = PlatformType.CORE_IF,
       lastUpdated =  dateValue,
+      reviewedDate = reviewedDate,
       contact = ContactInformation(Some("Core IF Team"), Some("example@gmail.com")),
       sourceSystem = List("XXX"),
       targetSystem = List("YYY"),
