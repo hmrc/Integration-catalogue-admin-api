@@ -86,6 +86,8 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
     implicit val writer: Writeable[MultipartFormData[TemporaryFile]] = MultipartFormDataWritable.writeable
 
     val dateValue: DateTime = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+    val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+
     val publisherReference =  "XXX-YYY-ZZZMonthly-pull"
 
     val fileTransferPublishRequestObj: FileTransferPublishRequest = FileTransferPublishRequest(
@@ -95,6 +97,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       description = "A file transfer",
       platformType = PlatformType.CORE_IF,
       lastUpdated =  dateValue,
+      reviewedDate = reviewedDate,
       contact = ContactInformation(Some("Core IF Team"), Some("example@gmail.com")),
       sourceSystem = List("XXX"),
       targetSystem = List("YYY"),

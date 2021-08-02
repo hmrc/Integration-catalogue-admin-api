@@ -28,6 +28,7 @@ info:
   #   name: API catalogue
   #   email: who@example.com
   x-integration-catalogue:
+    reviewed-date: 2021-07-28T00:00:00.000Z
     platform: API_PLATFORM
     publisher-reference: publish-api
     short-description: |
