@@ -2,7 +2,8 @@
 # microservice specific routes
 # publish
 PUT            /apis/publish                                uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishApi()
-PUT            /filetransfers/publish                       uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishFileTransfer()
+PUT            /filetransfers/publish/json                  uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishFileTransferJson()
+PUT            /filetransfers/publish/yaml                  uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishFileTransferYaml()
 
 #api
 GET            /integrations                                uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.findWithFilters(searchTerm: List[String], platformFilter: List[uk.gov.hmrc.integrationcatalogue.models.common.PlatformType], backendsFilter: List[String])

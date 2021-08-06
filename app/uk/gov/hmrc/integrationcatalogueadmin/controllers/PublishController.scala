@@ -33,6 +33,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton
 class PublishController @Inject() (
@@ -48,18 +49,27 @@ class PublishController @Inject() (
 
   implicit val config: AppConfig = appConfig
 
-  def publishFileTransfer(): Action[JsValue] =
-    (Action andThen validateAuthorizationHeaderAction).async(playBodyParsers.tolerantJson) { implicit request =>
-      validateAndExtractJsonString[FileTransferPublishRequest](request.body.toString()) match {
-        case Some(validBody) => if(validatePlatformTypesMatch(validBody))publishService.publishFileTransfer(validBody).map(handlePublishResult)
+  def publishFileTransferJson(): Action[JsValue] =
+    (Action andThen validateAuthorizationHeaderAction).async(playBodyParsers.json) { implicit request =>
+          val platformHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
+      handlepublishFileTransferRequest(validateAndExtractJsonString[FileTransferPublishRequest](request.body.toString()), platformHeader)
+    }
+
+      def publishFileTransferYaml(): Action[AnyContent] =
+    (Action andThen validateAuthorizationHeaderAction).async(playBodyParsers.default) { implicit request =>
+          Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("****Invalid request body"))))))
+    }
+
+    private def handlepublishFileTransferRequest(mayBeRequest: Option[FileTransferPublishRequest], platformHeader: String)(implicit hc: HeaderCarrier) ={
+      mayBeRequest match {
+        case Some(validBody) => if(validatePlatformTypesMatch(validBody, platformHeader))publishService.publishFileTransfer(validBody).map(handlePublishResult)
           else Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body - platform type mismatch"))))))
         case None => logger.error("Invalid request body, must be a valid publish request")
           Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body"))))))
       }
     }
 
-  private def validatePlatformTypesMatch(fileTransferRequest: FileTransferPublishRequest)(implicit request: Request[JsValue])={
-    val platformHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
+  private def validatePlatformTypesMatch(fileTransferRequest: FileTransferPublishRequest, platformHeader: String)={
     fileTransferRequest.platformType.entryName.equalsIgnoreCase(platformHeader)
   } 
 
