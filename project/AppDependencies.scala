@@ -18,7 +18,8 @@ object AppDependencies {
     "com.fasterxml.jackson.module"     %% "jackson-module-scala"           % jacksonVersion,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml"    % jacksonVersion,
     "com.typesafe.play"               %% "play-json-joda"             % "2.9.0",
-    "org.typelevel"                   %% "cats-core"                  % "2.4.2"
+    "org.typelevel"                   %% "cats-core"                  % "2.4.2",
+    "io.circe"                        %% "circe-yaml"                 % "0.12.0"
   )
 
   val test = Seq(

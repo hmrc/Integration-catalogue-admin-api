@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
-
-import play.api.libs.json.Json
+import play.api.libs.json.{Json => ScalaJson}
 import play.api.mvc.{ActionRefiner, Request, Result}
 import play.api.mvc.Results.BadRequest
 import uk.gov.hmrc.http.HttpErrorFunctions
@@ -29,35 +28,56 @@ import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.integrationcatalogueadmin.models.FileTransferYamlRequest
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import io.circe.{ParsingFailure, Json => CirceJson}
 import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponseMessage
-
-
+import io.circe.yaml.parser
+import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
 
 @Singleton
-class ValidateFileTransferYamlPublishRequestAction @Inject()(implicit ec: ExecutionContext)
-  extends ActionRefiner[Request, FileTransferYamlRequest] with HttpErrorFunctions {
+class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: ExecutionContext)
+    extends ActionRefiner[Request, FileTransferYamlRequest]
+    with HttpErrorFunctions
+    with JsonUtils {
   actionName =>
-
 
   override def executionContext: ExecutionContext = ec
 
   override def refine[A](request: Request[A]): Future[Either[Result, FileTransferYamlRequest[A]]] = Future.successful {
     request.contentType match {
-      case Some("application/x-yaml") => 
-      println(request.body.toString)
-      Right(FileTransferYamlRequest[A](parseYaml(request.body.toString()), request))
-      case _ => Left(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Some error"))))))
+      case Some("application/x-yaml") =>
+        println(request.body.toString)
+        parseYamlUsingCirce(request.body.toString()) match {
+          case Right(fileTransferPublishRequest) => Right(FileTransferYamlRequest[A](fileTransferPublishRequest, request))
+          case Left(e) => Left(e)
+        }
+      case _                          => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Some error"))))))
 
     }
 
   }
 
-  private def parseYaml(payload: String): FileTransferPublishRequest ={
+  private def parseYamlUsingCirce(payload: String): Either[Result, FileTransferPublishRequest] = {
+
+    val json: Either[ParsingFailure, CirceJson] = parser.parse(payload)
+    json match {
+      case Left(e: ParsingFailure) => {
+        println(s"**** Error parsing yaml to json + ${e.toString}")
+        Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error parsing yaml to json"))))))
+      }
+      case Right(json: CirceJson)  => validateAndExtractJsonString[FileTransferPublishRequest](json.toString()) match {
+          case Some(fileTransferPublishRequest: FileTransferPublishRequest) => Right(fileTransferPublishRequest)
+          case None                                                         => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error validating or parsing json"))))))
+        }
+    }
+
+  }
+
+  private def parseYamlUsingJackson(payload: String): FileTransferPublishRequest = {
     val om = new ObjectMapper(new YAMLFactory());
     om.findAndRegisterModules();
     om.readValue(payload, classOf[FileTransferPublishRequest])
-     
+
   }
 
 }
