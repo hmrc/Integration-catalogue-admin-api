@@ -42,6 +42,7 @@ class PublishController @Inject() (
     publishService: PublishService,
     validateApiPublishRequest: ValidateApiPublishRequestAction,
     validateAuthorizationHeaderAction: ValidateAuthorizationHeaderAction,
+    validateFileTransferYamlPublishRequestAction: ValidateFileTransferYamlPublishRequestAction,
     playBodyParsers: PlayBodyParsers
   )(implicit ec: ExecutionContext)
     extends BackendController(cc)
@@ -55,9 +56,11 @@ class PublishController @Inject() (
       handlepublishFileTransferRequest(validateAndExtractJsonString[FileTransferPublishRequest](request.body.toString()), platformHeader)
     }
 
-      def publishFileTransferYaml(): Action[AnyContent] =
-    (Action andThen validateAuthorizationHeaderAction).async(playBodyParsers.default) { implicit request =>
-          Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("****Invalid request body"))))))
+      def publishFileTransferYaml(): Action[String] =
+    (Action andThen validateAuthorizationHeaderAction 
+    andThen validateFileTransferYamlPublishRequestAction).async(playBodyParsers.tolerantText) { implicit request =>
+        val platformHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
+        handlepublishFileTransferRequest(Some(request.fileTransferRequest), platformHeader)
     }
 
     private def handlepublishFileTransferRequest(mayBeRequest: Option[FileTransferPublishRequest], platformHeader: String)(implicit hc: HeaderCarrier) ={

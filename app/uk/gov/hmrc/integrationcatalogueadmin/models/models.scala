@@ -19,6 +19,7 @@ package uk.gov.hmrc.integrationcatalogueadmin.models
 import play.api.mvc.{Request, WrappedRequest}
 import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
 import uk.gov.hmrc.integrationcatalogue.models.IntegrationDetail
+import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
 
 case class ExtractedHeaders(publisherReference: Option[String], platformType: PlatformType, specificationType: SpecificationType)
 
@@ -26,3 +27,5 @@ case class ValidatedApiPublishRequest[A](publisherReference: Option[String], pla
     extends WrappedRequest[A](request)
 
 case class IntegrationDetailRequest[A](integrationDetail: IntegrationDetail, request: Request[A]) extends WrappedRequest[A](request)
+
+case class FileTransferYamlRequest[A](fileTransferRequest: FileTransferPublishRequest, request: Request[A]) extends WrappedRequest[A](request)
