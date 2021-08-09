@@ -26,8 +26,6 @@ import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.integrationcatalogueadmin.models.FileTransferYamlRequest
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.circe.{ParsingFailure, Json => CirceJson}
 import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponseMessage
@@ -48,36 +46,17 @@ class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: Execu
       case Some("application/x-yaml") =>
         println(request.body.toString)
         parseYamlUsingCirce(request.body.toString()) match {
-          case Right(fileTransferPublishRequest) => Right(FileTransferYamlRequest[A](fileTransferPublishRequest, request))
-          case Left(e) => Left(e)
+          case Some(fileTransferPublishRequest) => Right(FileTransferYamlRequest[A](fileTransferPublishRequest, request))
+          case None => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error parsing yaml"))))))
         }
-      case _                          => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Some error"))))))
-
+      case _                          => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid Content-Type. Is must be application/x-yaml"))))))
     }
-
   }
 
-  private def parseYamlUsingCirce(payload: String): Either[Result, FileTransferPublishRequest] = {
-
-    val json: Either[ParsingFailure, CirceJson] = parser.parse(payload)
-    json match {
-      case Left(e: ParsingFailure) => {
-        println(s"**** Error parsing yaml to json + ${e.toString}")
-        Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error parsing yaml to json"))))))
-      }
-      case Right(json: CirceJson)  => validateAndExtractJsonString[FileTransferPublishRequest](json.toString()) match {
-          case Some(fileTransferPublishRequest: FileTransferPublishRequest) => Right(fileTransferPublishRequest)
-          case None                                                         => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error validating or parsing json"))))))
-        }
+  private def parseYamlUsingCirce(payload: String): Option[FileTransferPublishRequest] = parser.parse(payload) match {
+      case Left(e: ParsingFailure) => None
+      case Right(json: CirceJson)  => validateAndExtractJsonString[FileTransferPublishRequest](json.toString())
     }
-
-  }
-
-  private def parseYamlUsingJackson(payload: String): FileTransferPublishRequest = {
-    val om = new ObjectMapper(new YAMLFactory());
-    om.findAndRegisterModules();
-    om.readValue(payload, classOf[FileTransferPublishRequest])
-
-  }
+  
 
 }
