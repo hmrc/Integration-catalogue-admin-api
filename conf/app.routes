@@ -2,7 +2,7 @@
 # microservice specific routes
 # publish
 PUT            /apis/publish                                uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishApi()
-PUT            /filetransfers/publish/json                  uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishFileTransferJson()
+PUT            /filetransfers/publish                       uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishFileTransferJson()
 PUT            /filetransfers/publish/yaml                  uk.gov.hmrc.integrationcatalogueadmin.controllers.PublishController.publishFileTransferYaml()
 
 #api
