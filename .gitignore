@@ -26,6 +26,7 @@ project/.bloop/*
 .vscode/*
 .bloop/*
 .bsp/*
+.bsp/sbt.json
 project/metals.sbt
 project/.bloop/integration-catalogue-admin-api-build.json
 project/.bloop/bloop.settings.json
