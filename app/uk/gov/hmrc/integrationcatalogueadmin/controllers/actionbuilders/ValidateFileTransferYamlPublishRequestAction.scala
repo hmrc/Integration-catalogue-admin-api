@@ -55,7 +55,7 @@ class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: Execu
 
   private def parseYamlUsingCirce(payload: String): Option[FileTransferPublishRequest] =
     parser.parse(payload) match {
-      case Left(e: ParsingFailure) => None
+      case Left(_) => None
       case Right(json: CirceJson)  => validateAndExtractJsonString[FileTransferPublishRequest](json.toString())
     }
   
