@@ -44,7 +44,6 @@ class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: Execu
   override def refine[A](request: Request[A]): Future[Either[Result, FileTransferYamlRequest[A]]] = Future.successful {
     request.contentType match {
       case Some("application/x-yaml") =>
-        println(request.body.toString)
         parseYamlUsingCirce(request.body.toString()) match {
           case Some(fileTransferPublishRequest) => Right(FileTransferYamlRequest[A](fileTransferPublishRequest, request))
           case None => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error parsing yaml"))))))
