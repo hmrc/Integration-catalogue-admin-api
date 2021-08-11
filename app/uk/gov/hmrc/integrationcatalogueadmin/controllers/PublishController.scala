@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
-
 import play.api.Logging
 import play.api.libs.Files
 import play.api.libs.json.{JsValue, Json, Reads}
@@ -33,6 +32,8 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
 
 @Singleton
 class PublishController @Inject() (
@@ -41,27 +42,40 @@ class PublishController @Inject() (
     publishService: PublishService,
     validateApiPublishRequest: ValidateApiPublishRequestAction,
     validateAuthorizationHeaderAction: ValidateAuthorizationHeaderAction,
+    validateFileTransferYamlPublishRequestAction: ValidateFileTransferYamlPublishRequestAction,
     playBodyParsers: PlayBodyParsers
   )(implicit ec: ExecutionContext)
     extends BackendController(cc)
-    with Logging {
+    with Logging
+    with JsonUtils {
 
   implicit val config: AppConfig = appConfig
 
-  def publishFileTransfer(): Action[JsValue] =
-    (Action andThen validateAuthorizationHeaderAction).async(playBodyParsers.tolerantJson) { implicit request =>
-      validateAndExtractJsonString[FileTransferPublishRequest](request.body.toString()) match {
-        case Some(validBody) => if(validatePlatformTypesMatch(validBody))publishService.publishFileTransfer(validBody).map(handlePublishResult)
-          else Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body - platform type mismatch"))))))
-        case None => logger.error("Invalid request body, must be a valid publish request")
-          Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body"))))))
-      }
+  def publishFileTransferJson(): Action[JsValue] =
+    (Action andThen validateAuthorizationHeaderAction).async(playBodyParsers.json) { implicit request =>
+      val platformHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
+      handlepublishFileTransferRequest(validateAndExtractJsonString[FileTransferPublishRequest](request.body.toString()), platformHeader)
     }
 
-  private def validatePlatformTypesMatch(fileTransferRequest: FileTransferPublishRequest)(implicit request: Request[JsValue])={
-    val platformHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
+  def publishFileTransferYaml(): Action[String] =
+    (Action andThen validateAuthorizationHeaderAction
+      andThen validateFileTransferYamlPublishRequestAction).async(playBodyParsers.tolerantText) { implicit request =>
+      val platformHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
+      handlepublishFileTransferRequest(Some(request.fileTransferRequest), platformHeader)
+    }
+
+  private def handlepublishFileTransferRequest(mayBeRequest: Option[FileTransferPublishRequest], platformHeader: String)(implicit hc: HeaderCarrier) = {
+    mayBeRequest match {
+      case Some(validBody) => if (validatePlatformTypesMatch(validBody, platformHeader)) publishService.publishFileTransfer(validBody).map(handlePublishResult)
+        else Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body - platform type mismatch"))))))
+      case None            => logger.error("Invalid request body, must be a valid publish request")
+        Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body"))))))
+    }
+  }
+
+  private def validatePlatformTypesMatch(fileTransferRequest: FileTransferPublishRequest, platformHeader: String) = {
     fileTransferRequest.platformType.entryName.equalsIgnoreCase(platformHeader)
-  } 
+  }
 
   def publishApi(): Action[MultipartFormData[Files.TemporaryFile]] = (Action andThen
     validateAuthorizationHeaderAction andThen
@@ -79,8 +93,7 @@ class PublishController @Inject() (
             .map(handlePublishResult)
       }
 
-    }
-
+  }
 
   private def handlePublishResult(result: Either[Throwable, PublishResult]) = {
     result match {
@@ -89,27 +102,15 @@ class PublishController @Inject() (
           case Some(details) =>
             val resultAsJson = Json.toJson(PublishDetails.toPublishResponse(details))
             if (details.isUpdate) Ok(resultAsJson) else Created(resultAsJson)
-          case None => if (publishResult.errors.nonEmpty) {
-            BadRequest(Json.toJson(ErrorResponse(publishResult.errors.map(x => ErrorResponseMessage(x.message)))))
-          } else {
-            BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Unexpected response from /integration-catalogue")))))
-          }
+          case None          => if (publishResult.errors.nonEmpty) {
+              BadRequest(Json.toJson(ErrorResponse(publishResult.errors.map(x => ErrorResponseMessage(x.message)))))
+            } else {
+              BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Unexpected response from /integration-catalogue")))))
+            }
         }
-      case Left(errorResult) =>
+      case Left(errorResult)    =>
         BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage(s"Unexpected response from /integration-catalogue: ${errorResult.getMessage}")))))
     }
   }
 
-  private def validateAndExtractJsonString[T](body: String)(implicit  reads: Reads[T]) = {
-    validateJsonAndExtract[T](body, body => Json.parse(body))
-  }
-
-  private def validateJsonAndExtract[T](body: String, f: String => JsValue)(implicit reads: Reads[T]) = {
-    Try[T] {
-      f(body).as[T]
-    } match {
-      case Success(result) => Some(result)
-      case Failure(_) => None
-    }
-  }
 }
