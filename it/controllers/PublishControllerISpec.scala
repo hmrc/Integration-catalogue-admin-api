@@ -114,6 +114,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       contact = ContactInformation(Some("Core IF Team"), Some("example@gmail.com")),
       sourceSystem = List("XXX"),
       targetSystem = List("YYY"),
+      transports = List("UTM"),
       fileTransferPattern = "Corporate to corporate"
     )
 

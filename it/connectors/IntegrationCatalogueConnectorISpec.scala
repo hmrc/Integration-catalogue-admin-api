@@ -75,6 +75,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
       contact = ContactInformation(Some("Core IF Team"), Some("example@gmail.com")),
       sourceSystem = List("XXX"),
       targetSystem = List("YYY"),
+      transports = List.empty,
       fileTransferPattern = "Corporate to corporate"
     )
 
