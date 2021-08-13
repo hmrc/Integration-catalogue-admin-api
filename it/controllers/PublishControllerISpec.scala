@@ -430,8 +430,8 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 when json content type is sent" in new Setup {
 
         val response: Future[Result] = route(app, invalidContentTypeFileTransferYamlPublishRequest).get
-        status(response) mustBe BAD_REQUEST
-        contentAsString(response) mustBe """{"errors":[{"message":"Invalid Content-Type. Is must be application/x-yaml"}]}"""
+        status(response) mustBe UNSUPPORTED_MEDIA_TYPE
+        contentAsString(response) mustBe """{"errors":[{"message":"Invalid Content-Type. Expecting application/x-yaml"}]}"""
 
       }
 

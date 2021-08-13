@@ -18,7 +18,7 @@ package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
 import play.api.libs.json.{Json => ScalaJson}
 import play.api.mvc.{ActionRefiner, Request, Result}
-import play.api.mvc.Results.BadRequest
+import play.api.mvc.Results.{UnsupportedMediaType, BadRequest}
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponse
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
@@ -31,6 +31,7 @@ import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponseMessage
 import io.circe.yaml.parser
 import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
+import play.api.mvc.Results
 
 @Singleton
 class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: ExecutionContext)
@@ -48,7 +49,7 @@ class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: Execu
           case Some(fileTransferPublishRequest) => Right(FileTransferYamlRequest[A](fileTransferPublishRequest, request))
           case None => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error parsing yaml"))))))
         }
-      case _                          => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid Content-Type. Is must be application/x-yaml"))))))
+      case _                          => Left(UnsupportedMediaType(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid Content-Type. Expecting application/x-yaml"))))))
     }
   }
 
