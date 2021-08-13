@@ -199,6 +199,7 @@ trait ApiDetailTestData {
       maintainer = coreIfMaintainer,
       sourceSystem = List("source"),
       targetSystem = List("target"),
+      transports = List("S3"),
       fileTransferPattern = "pattern1"
     )
 

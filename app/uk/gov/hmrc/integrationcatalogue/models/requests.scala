@@ -38,6 +38,7 @@ case class FileTransferPublishRequest(
                               contact: ContactInformation, // (single name + email)
                               sourceSystem: List[String], // One or many
                               targetSystem: List[String],
+                              transports: List[String],
                               fileTransferPattern: String)
 
 //TODO remove code from PublishError

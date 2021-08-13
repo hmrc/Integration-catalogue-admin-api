@@ -60,6 +60,7 @@ trait SetUp {
       contact = ContactInformation(Some("Core IF Team"), Some("example@gmail.com")),
       sourceSystem = List("XXX"),
       targetSystem = List("YYY"),
+      transports = List.empty,
       fileTransferPattern = "Pattern1"
     )
 }
