@@ -56,7 +56,8 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
     val integrationId: IntegrationId = IntegrationId(UUID.fromString("2840ce2d-03fa-46bb-84d9-0299402b7b32"))
     val searchTerm  = "API-1001"
     val outboundUrl = "/integration-catalogue/apis/publish"
-    val findWithFilterlUrl = s"/integration-catalogue/integrations"
+    val findWithFilterlUrl = "/integration-catalogue/integrations"
+    val reportlUrl = "/integration-catalogue/report"
     def deleteIntegrationsUrl(id: IntegrationId) = s"/integration-catalogue/integrations/${id.value}"
     def deleteIntegrationsByPlatformUrl(platform: String) = s"/integration-catalogue/integrations?platformFilter=$platform"
 
@@ -99,6 +100,12 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
     def httpCallToDeleteByPlatformWillFail(exception: Throwable, platform: String): ScalaOngoingStubbing[Future[DeleteIntegrationsResponse]] =
       when(mockHttpClient.DELETE[DeleteIntegrationsResponse](eqTo(deleteIntegrationsByPlatformUrl(platform)), *)(*, *, *)).thenReturn(Future.failed(exception))
 
+    def httpCallToCatalogueReportWillSucceed(): Unit ={
+      when(mockHttpClient.GET[List[IntegrationPlatformReport]]
+        (eqTo(reportlUrl), eqTo(Seq.empty), eqTo(Seq.empty))
+        (any[HttpReads[List[IntegrationPlatformReport]]], any[HeaderCarrier], any[ExecutionContext]))
+        .thenReturn(Future.successful(List.empty))
+    }
   }
 
   "IntegrationCatalogueConnector send" should {
@@ -199,6 +206,13 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
       await(connector.deleteByPlatform(PlatformType.CORE_IF)) shouldBe DeleteIntegrationsFailure("Internal Server Error")
     }
     
+  }
+
+  "catalogueReport" should {
+    "return platform reports when successful" in new SetUp {
+        httpCallToCatalogueReportWillSucceed()
+      await(connector.catalogueReport()) shouldBe Right(List.empty)
+    }
   }
   
 }
