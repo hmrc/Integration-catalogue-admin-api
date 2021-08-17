@@ -18,22 +18,21 @@ package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
 import play.api.Logging
 import play.api.libs.Files
-import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.{Request => _, _}
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders._
 import uk.gov.hmrc.integrationcatalogueadmin.models.{HeaderKeys, ValidatedApiPublishRequest}
 import uk.gov.hmrc.integrationcatalogueadmin.services.PublishService
+import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
-import scala.util.{Failure, Success, Try}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
 
 @Singleton
 class PublishController @Inject() (

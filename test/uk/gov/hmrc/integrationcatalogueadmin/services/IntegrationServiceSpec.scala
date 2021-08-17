@@ -17,10 +17,12 @@
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
 import org.mockito.scalatest.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
+import org.scalatest.{Assertion, BeforeAndAfterEach, Matchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.integrationcatalogue.models._
+import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationType.{API, FILE_TRANSFER}
+import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.{API_PLATFORM, CORE_IF}
 import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
 import uk.gov.hmrc.integrationcatalogueadmin.AwaitTestSupport
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
@@ -43,6 +45,15 @@ class IntegrationServiceSpec extends WordSpec
     val objInTest = new IntegrationService(mockIntegrationCatalogueConnector)
     val exampleIntegrationId: IntegrationId = IntegrationId(UUID.fromString("2840ce2d-03fa-46bb-84d9-0299402b7b32"))
 
+    def validateFailureCall[A](f: Future[A]): Assertion ={
+      val result: A =
+        await(f)
+
+      result match {
+        case Left(_) => succeed
+        case Right(_) => fail()
+      }
+    }
   }
 
   "deleteByIntegrationId" should {
@@ -69,7 +80,8 @@ class IntegrationServiceSpec extends WordSpec
       when(mockIntegrationCatalogueConnector.findWithFilters(*)(*))
         .thenReturn(Future.successful(Right(IntegrationResponse(expectedResult.size, expectedResult))))
 
-      val result: Either[Throwable, IntegrationResponse] = await(objInTest.findWithFilters(IntegrationFilter(searchText = List("search"), platforms = List.empty)))
+      val result: Either[Throwable, IntegrationResponse] =
+        await(objInTest.findWithFilters(IntegrationFilter(searchText = List("search"), platforms = List.empty)))
 
       result match {
         case Left(_) => fail()
@@ -79,16 +91,9 @@ class IntegrationServiceSpec extends WordSpec
 
     "return Left when error from connector" in new SetUp {
       when(mockIntegrationCatalogueConnector.findWithFilters(*)(*)).thenReturn(Future.successful(Left(new RuntimeException("some error"))))
+      val integrationFilter: IntegrationFilter = IntegrationFilter(searchText = List("search"), platforms = List.empty)
 
-      val integrationFilter = IntegrationFilter(searchText = List("search"), platforms = List.empty)
-      val result: Either[Throwable, IntegrationResponse] =
-        await(objInTest.findWithFilters(integrationFilter))
-
-      result match {
-        case Left(_) => succeed
-        case Right(_) => fail()
-      }
-
+      validateFailureCall(objInTest.findWithFilters(integrationFilter))
       verify(mockIntegrationCatalogueConnector).findWithFilters(eqTo(integrationFilter))(eqTo(hc))
     }
   }
@@ -98,14 +103,7 @@ class IntegrationServiceSpec extends WordSpec
       val id: IntegrationId = IntegrationId(UUID.randomUUID())
       when(mockIntegrationCatalogueConnector.findByIntegrationId(eqTo(id))(*)).thenReturn(Future.successful(Left(new RuntimeException("some error"))))
 
-      val result: Either[Throwable, IntegrationDetail] =
-        await(objInTest.findByIntegrationId(id))
-
-      result match {
-        case Left(_) => succeed
-        case Right(_) => fail()
-      }
-
+      validateFailureCall(objInTest.findByIntegrationId(id))
       verify(mockIntegrationCatalogueConnector).findByIntegrationId(eqTo(id))(eqTo(hc))
     }
 
@@ -123,8 +121,27 @@ class IntegrationServiceSpec extends WordSpec
 
       verify(mockIntegrationCatalogueConnector).findByIntegrationId(eqTo(id))(eqTo(hc))
     }
+  }
 
 
+  "catalogueReport" should {
+    "return error from connector" in new SetUp {
+      when(mockIntegrationCatalogueConnector.catalogueReport()(*)).thenReturn(Future.successful(Left(new RuntimeException("some error"))))
+      validateFailureCall(objInTest.catalogueReport())
+      verify(mockIntegrationCatalogueConnector).catalogueReport()(eqTo(hc))
+    }
+
+    "return results from connector" in new SetUp {
+      val reports = List(IntegrationPlatformReport(API_PLATFORM, API, 2),
+        IntegrationPlatformReport(CORE_IF, API, 5),
+        IntegrationPlatformReport(CORE_IF, FILE_TRANSFER, 2))
+      when(mockIntegrationCatalogueConnector.catalogueReport()(*)).thenReturn(Future.successful(Right(reports)))
+     await(objInTest.catalogueReport()) match{
+       case Right(results) => results shouldBe reports
+       case _ => fail()
+     }
+      verify(mockIntegrationCatalogueConnector).catalogueReport()(eqTo(hc))
+    }
   }
 
 }

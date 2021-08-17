@@ -74,38 +74,43 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
         .thenReturn(Future.failed(exception))
 
     def httpCallToFindWithFilterWillSucceedWithResponse(response: IntegrationResponse): ScalaOngoingStubbing[Future[IntegrationResponse]] =
-      when(mockHttpClient.GET[IntegrationResponse]
-        (eqTo(findWithFilterlUrl), eqTo(Seq(("searchTerm",searchTerm))), eqTo(Seq.empty))
-        (any[HttpReads[IntegrationResponse]], any[HeaderCarrier], any[ExecutionContext]))
-        .thenReturn(Future.successful(response))
+    httpCallToGETEndpointWillSucceed(response, findWithFilterlUrl, Seq(("searchTerm",searchTerm)))
+
 
     def httpCallToFindWithFilterWillFailWithException(exception: Throwable): ScalaOngoingStubbing[Future[IntegrationResponse]] =
-           when(mockHttpClient.GET[IntegrationResponse]
-        (eqTo(findWithFilterlUrl), eqTo(Seq(("searchTerm",searchTerm))), eqTo(Seq.empty))
-        (any[HttpReads[IntegrationResponse]], any[HeaderCarrier], any[ExecutionContext]))
-        .thenReturn(Future.failed(exception))
+    httpCallToGETEndpointWillFail(exception , findWithFilterlUrl,  Seq(("searchTerm",searchTerm)))
 
     def httpCallToDeleteApiWillSucceed(response: HttpResponse, id: IntegrationId): ScalaOngoingStubbing[Future[HttpResponse]] =
       when(mockHttpClient.DELETE[HttpResponse](eqTo(deleteIntegrationsUrl(id)), *)(*, *, *)).thenReturn(Future.successful(response))
 
-
-    def httpCallToDeleteApiWillFailWithNotFound(exception: Throwable, id: IntegrationId): ScalaOngoingStubbing[Future[HttpResponse]] =
-      when(mockHttpClient.DELETE[HttpResponse](eqTo(deleteIntegrationsUrl(id)), *)(*, *, *)).thenReturn(Future.failed(exception))
+    def httpCallToDeleteApiWillFail[A](exception: Throwable, urlParam: A,  urlResolveFunction :A => String):
+    ScalaOngoingStubbing[Future[HttpResponse]] = when(mockHttpClient.DELETE[HttpResponse](eqTo(urlResolveFunction(urlParam)), *)(*, *, *)).thenReturn(Future.failed(exception))
 
     def httpCallToDeleteByPlatformWillSucceed(response: DeleteIntegrationsResponse, platform: String):
     ScalaOngoingStubbing[Future[DeleteIntegrationsResponse]] =
       when(mockHttpClient.DELETE[DeleteIntegrationsResponse](eqTo(deleteIntegrationsByPlatformUrl(platform)), *)(*, *, *))
         .thenReturn(Future.successful(response))
 
-    def httpCallToDeleteByPlatformWillFail(exception: Throwable, platform: String): ScalaOngoingStubbing[Future[DeleteIntegrationsResponse]] =
-      when(mockHttpClient.DELETE[DeleteIntegrationsResponse](eqTo(deleteIntegrationsByPlatformUrl(platform)), *)(*, *, *)).thenReturn(Future.failed(exception))
-
-    def httpCallToCatalogueReportWillSucceed(): Unit ={
-      when(mockHttpClient.GET[List[IntegrationPlatformReport]]
-        (eqTo(reportlUrl), eqTo(Seq.empty), eqTo(Seq.empty))
-        (any[HttpReads[List[IntegrationPlatformReport]]], any[HeaderCarrier], any[ExecutionContext]))
-        .thenReturn(Future.successful(List.empty))
+    def httpCallToCatalogueReportWillSucceed(): ScalaOngoingStubbing[Future[List[IntegrationPlatformReport]]] ={
+      httpCallToGETEndpointWillSucceed(List.empty[IntegrationPlatformReport], reportlUrl, Seq.empty)
     }
+
+    def httpCallToCatalogueReportWillFail(exception: Throwable): ScalaOngoingStubbing[Future[List[IntegrationPlatformReport]]] ={
+      httpCallToGETEndpointWillFail(exception, reportlUrl, Seq.empty)
+    }
+
+     def httpCallToGETEndpointWillSucceed[A](returnValue: A, urlString: String, queryParams: Seq[(String, String)]): ScalaOngoingStubbing[Future[A]] ={
+       when(mockHttpClient.GET[A]
+         (eqTo(urlString), eqTo(queryParams), eqTo(Seq.empty))
+         (any[HttpReads[A]], any[HeaderCarrier], any[ExecutionContext]))
+         .thenReturn(Future.successful(returnValue))
+     }
+
+    def httpCallToGETEndpointWillFail[A](exception: Throwable, url: String, queryParams: Seq[(String, String)]): ScalaOngoingStubbing[Future[A]] =
+      when(mockHttpClient.GET[A]
+        (eqTo(url), eqTo(queryParams), eqTo(Seq.empty))
+        (any[HttpReads[A]], any[HeaderCarrier], any[ExecutionContext]))
+        .thenReturn(Future.failed(exception))
   }
 
   "IntegrationCatalogueConnector send" should {
@@ -131,12 +136,13 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
     }
 
     "handle exceptions" in new SetUp {
-      httpCallToPublishWillFailWithException(new BadGatewayException("some error"))
+      val errorMessage = "some error"
+      httpCallToPublishWillFailWithException(new BadGatewayException(errorMessage))
 
       val result: Either[Throwable, PublishResult] = await(connector.publishApis(request))
 
       result match {
-        case Left(_:BadGatewayException) => succeed
+        case Left(e :BadGatewayException) => e.getMessage shouldBe "some error"
         case _ => fail()
       }
 
@@ -145,26 +151,24 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
   }
 
   "findWithFilter" should {
+
     "return Right when successful" in new SetUp {
       val expectedResult = List(exampleApiDetail, exampleApiDetail2)
       httpCallToFindWithFilterWillSucceedWithResponse(IntegrationResponse(2, expectedResult))
+      val filter: IntegrationFilter =  IntegrationFilter(searchText = List(searchTerm), platforms = List.empty)
 
-      val result: Either[Throwable, IntegrationResponse] = await(connector.findWithFilters(IntegrationFilter(searchText = List(searchTerm), platforms = List.empty)))
-
-      result match {
+      await(connector.findWithFilters(filter)) match {
         case Right(integrationResponse: IntegrationResponse) => integrationResponse.results shouldBe expectedResult
         case _ => fail()
-
       }
     }
 
     "handle exceptions" in new SetUp {
       httpCallToFindWithFilterWillFailWithException(new BadGatewayException("some error"))
+      val filter: IntegrationFilter =  IntegrationFilter(searchText = List(searchTerm), platforms = List.empty)
 
-      val result: Either[Throwable, IntegrationResponse] = await(connector.findWithFilters(IntegrationFilter(searchText = List(searchTerm), platforms = List.empty)))
-
-      result match {
-        case Left(_:BadGatewayException) => succeed
+      await(connector.findWithFilters(filter)) match {
+        case Left(e:BadGatewayException) => e.getMessage shouldBe "some error"
         case _ => fail()
       }
 
@@ -186,7 +190,7 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
     }
 
     "return false when NotFoundException is thrown" in new SetUp {
-      httpCallToDeleteApiWillFailWithNotFound(new NotFoundException(s"api with publisherReference: ${integrationId.value} not found"), integrationId)
+      httpCallToDeleteApiWillFail(new NotFoundException(s"api with publisherReference: ${integrationId.value} not found"), integrationId, deleteIntegrationsUrl)
       await(connector.deleteByIntegrationId(integrationId)) shouldBe false
     }
 
@@ -201,8 +205,7 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
     }
 
     "return DeleteIntegrationsFailure with error message when error is returned from backend" in new SetUp {
-  
-      httpCallToDeleteByPlatformWillFail(new InternalServerException("Internal Server Error"), "CORE_IF")
+      httpCallToDeleteApiWillFail(new InternalServerException("Internal Server Error"), "CORE_IF", deleteIntegrationsByPlatformUrl)
       await(connector.deleteByPlatform(PlatformType.CORE_IF)) shouldBe DeleteIntegrationsFailure("Internal Server Error")
     }
     
@@ -211,7 +214,15 @@ class IntegrationCatalogueConnectorSpec extends WordSpec with Matchers with Opti
   "catalogueReport" should {
     "return platform reports when successful" in new SetUp {
         httpCallToCatalogueReportWillSucceed()
-      await(connector.catalogueReport()) shouldBe Right(List.empty)
+        await(connector.catalogueReport()) shouldBe Right(List.empty)
+    }
+
+    "handle exceptions correctly" in new SetUp {
+      httpCallToCatalogueReportWillFail(new BadGatewayException("some error"))
+      await(connector.catalogueReport()) match {
+        case Left(e: BadGatewayException) => e.getMessage shouldBe "some error"
+        case _ => fail()
+      }
     }
   }
   

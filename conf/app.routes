@@ -11,3 +11,5 @@ GET            /integrations/:id                            uk.gov.hmrc.integrat
 DELETE         /integrations/:id                            uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.deleteByIntegrationId(id: uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId)
 
 DELETE         /integrations                                uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.deleteByPlatform(platformFilter: List[uk.gov.hmrc.integrationcatalogue.models.common.PlatformType])
+
+GET            /report                                      uk.gov.hmrc.integrationcatalogueadmin.controllers.IntegrationController.catalogueReport()

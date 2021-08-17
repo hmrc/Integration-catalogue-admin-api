@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.integrationcatalogue.models
 
-import uk.gov.hmrc.integrationcatalogue.models.common.{ContactInformation, IntegrationId, IntegrationType, PlatformType, SpecificationType}
 import org.joda.time.DateTime
-import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
+import uk.gov.hmrc.integrationcatalogue.models.common._
 
 case class IntegrationResponse(count: Int, results: List[IntegrationDetail])
 

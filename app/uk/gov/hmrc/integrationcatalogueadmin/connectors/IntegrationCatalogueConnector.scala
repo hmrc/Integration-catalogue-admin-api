@@ -80,14 +80,13 @@ class IntegrationCatalogueConnector @Inject()(http: HttpClient, appConfig: AppCo
   def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] = {
     handleResult(
       http.GET[List[IntegrationPlatformReport]](s"$externalServiceUri/report"))
-
   }
 
 
   private def buildQueryParams(integrationFilter: IntegrationFilter): Seq[(String, String)] = {
     val searchTerms = integrationFilter.searchText.map(x => ("searchTerm", x))
     val platformsFilters = integrationFilter.platforms.map((x: PlatformType) => ("platformFilter", x.toString))
-    val backendFilters = integrationFilter.backends.map(x => ("backendsFilter", x.toString))
+    val backendFilters = integrationFilter.backends.map(x => ("backendsFilter", x))
     searchTerms ++ platformsFilters ++ backendFilters
 
   }

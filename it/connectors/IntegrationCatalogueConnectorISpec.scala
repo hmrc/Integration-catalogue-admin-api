@@ -30,7 +30,7 @@ import java.util.UUID
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 
@@ -62,7 +62,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
         val publishErrors = if(isSuccess) List.empty else List(PublishError(10000, "Some Error Message"))
         PublishResult(isSuccess, publishDetails, publishErrors)
     }
-  val dateValue: DateTime = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"));
+  val dateValue: DateTime = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
 
     val fileTransferPublishRequestObj: FileTransferPublishRequest = FileTransferPublishRequest(
       fileTransferSpecificationVersion = "1.0",
@@ -112,6 +112,18 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
       }
 
 
+    }
+
+    "catalogueReport" should {
+      "return Left with error when bad request from backend " in new Setup {
+        primeIntegrationCatalogueServiceCatalogueReportReturnsBadRequest()
+        val result: Either[Throwable, List[IntegrationPlatformReport]] = await(objInTest.catalogueReport())
+        result match {
+          case Left(_) => succeed
+          case _ => fail
+        }
+
+      }
     }
 
     "findWithFilter" should {

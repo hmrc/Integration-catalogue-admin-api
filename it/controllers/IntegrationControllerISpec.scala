@@ -16,6 +16,7 @@
 
 package controllers
 
+import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
@@ -23,14 +24,13 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
-import uk.gov.hmrc.integrationcatalogue.models.{ApiDetail, DeleteIntegrationsResponse, IntegrationDetail, IntegrationResponse}
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
+import uk.gov.hmrc.integrationcatalogue.models.{ApiDetail, DeleteIntegrationsResponse, IntegrationDetail, IntegrationResponse}
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
+import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 
 import scala.concurrent.Future
-import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
-import play.api.http.HeaderNames
-import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 
 class IntegrationControllerISpec extends ServerBaseISpec
   with IntegrationCatalogueConnectorStub with ApiDetailTestData {
@@ -97,7 +97,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
     "DELETE [some unknown path]" should {
       "return blah" in new Setup {
-         val response: Future[Result] = route(app, invalidPathRequest).get
+         val response: Future[Result] = route(app, invalidPathRequest()).get
          status(response) mustBe NOT_FOUND
          contentAsString(response) mustBe """{"errors":[{"message":"Path or Http method may be wrong. "}]}"""
       }
@@ -114,7 +114,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
       }
 
       "return 200 and integration detail from backend" in new Setup {
-        val jsonAsString = Json.toJson(exampleApiDetail.asInstanceOf[IntegrationDetail]).toString
+        val jsonAsString: String = Json.toJson(exampleApiDetail.asInstanceOf[IntegrationDetail]).toString
        primeIntegrationCatalogueServiceGetByIdWithBody(OK, jsonAsString, exampleApiDetail.id)
 
         val response: Future[Result] = route(app, validFindByIntegrationIdRequest(exampleApiDetail.id.value.toString)).get
@@ -239,13 +239,14 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
         primeIntegrationCatalogueServiceDelete(exampleApiDetail.id.value.toString, NO_CONTENT)
 
-        val response: Future[Result] = route(app, validDeleteIntegrationRequest(exampleApiDetail.id.value.toString).withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)).get
+        val response: Future[Result] =
+          route(app, validDeleteIntegrationRequest(exampleApiDetail.id.value.toString).withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)).get
         status(response) mustBe NO_CONTENT
       }
 
      "respond with 400 when non uuid id provided" in new Setup {
 
-        val request = FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/invalidId")
+        val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/invalidId")
 
         val response: Future[Result] = route(app, request).get
         status(response) mustBe BAD_REQUEST
@@ -266,7 +267,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
       "respond with 401 when no auth header but platform type header is present" in new Setup {
         primeIntegrationCatalogueServiceDelete(exampleIntegrationId, NOT_FOUND)
 
-        val requestWithNoAuthHeader =
+        val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfPlatformTypeHeader : _*)).get
@@ -278,7 +279,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
       "respond with 400 when auth header present but platform type header is missing" in new Setup {
         primeIntegrationCatalogueServiceDelete(exampleIntegrationId, NOT_FOUND)
 
-        val requestWithNoAuthHeader =
+        val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader : _*)).get
@@ -290,10 +291,11 @@ class IntegrationControllerISpec extends ServerBaseISpec
       "respond with 400 when auth header present but platform type header is invalid" in new Setup {
         primeIntegrationCatalogueServiceDelete(exampleIntegrationId, NOT_FOUND)
 
-        val requestWithNoAuthHeader =
+        val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
-        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "INVALID_PLATFORM"): _*)).get
+        val response: Future[Result] =
+          route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "INVALID_PLATFORM"): _*)).get
         status(response) mustBe BAD_REQUEST
 
         contentAsString(response) mustBe """{"errors":[{"message":"platform type header is missing or invalid"}]}"""
@@ -302,7 +304,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
       "respond with 404 when auth header and key are CORE_IF and integrationId is not found" in new Setup {
         primeIntegrationCatalogueServiceGetByIdWithoutResponseBody(NOT_FOUND, exampleIntegrationId)
 
-        val requestWithNoAuthHeader =
+        val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
@@ -313,10 +315,10 @@ class IntegrationControllerISpec extends ServerBaseISpec
       }
 
       "respond with 401 when auth header and key are CORE_IF but integrationId on API_PLATFORM" in new Setup {
-        val integrationWithApiPlatform = exampleApiDetail.copy(platform = PlatformType.API_PLATFORM)
+        val integrationWithApiPlatform: ApiDetail = exampleApiDetail.copy(platform = PlatformType.API_PLATFORM)
         primeIntegrationCatalogueServiceGetByIdWithBody(OK, Json.toJson(integrationWithApiPlatform.asInstanceOf[IntegrationDetail]).toString, integrationWithApiPlatform.id)
 
-        val requestWithNoAuthHeader =
+        val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/${integrationWithApiPlatform.id.value.toString}")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get

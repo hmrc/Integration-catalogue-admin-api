@@ -17,16 +17,13 @@
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.integrationcatalogue.models.IntegrationResponse
+import uk.gov.hmrc.integrationcatalogue.models.{DeleteApiResult, IntegrationDetail, IntegrationFilter, IntegrationPlatformReport, IntegrationResponse}
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
-import uk.gov.hmrc.integrationcatalogue.models.IntegrationDetail
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
-import uk.gov.hmrc.integrationcatalogue.models.DeleteApiResult
-import uk.gov.hmrc.integrationcatalogue.models.IntegrationFilter
 
 
 @Singleton
@@ -48,6 +45,10 @@ class IntegrationService @Inject()(integrationCatalogueConnector: IntegrationCat
   def findByIntegrationId(integrationId: IntegrationId)
     (implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationDetail]] = {
          integrationCatalogueConnector.findByIntegrationId(integrationId)
+  }
+
+  def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] ={
+    integrationCatalogueConnector.catalogueReport()
   }
 }
 
