@@ -118,9 +118,9 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       fileTransferPattern = "Corporate to corporate"
     )
 
-    val circeJsonFileTransferPublishRequest = CirceJson.fromString(Json.prettyPrint(Json.toJson(fileTransferPublishRequestObj)))
+    val circeJsonFileTransferPublishRequest: CirceJson = CirceJson.fromString(Json.prettyPrint(Json.toJson(fileTransferPublishRequestObj)))
 
-    val yamlFileTransferPublishRequest = io.circe.yaml.Printer(dropNullKeys = true, mappingStyle = Printer.FlowStyle.Block)
+    val yamlFileTransferPublishRequest: String = io.circe.yaml.Printer(dropNullKeys = true, mappingStyle = Printer.FlowStyle.Block)
       .pretty(circeJsonFileTransferPublishRequest)
 
     val filePart =
@@ -194,7 +194,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 201 when using master auth key and valid request then do a create" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader : _*)).get
         status(response) mustBe CREATED
@@ -204,7 +204,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 201 when using CORE_IF platform auth key and valid request then do a create" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)).get
         status(response) mustBe CREATED
@@ -214,7 +214,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 when platform auth key is provided but platform type header is missing" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader : _*)).get
         status(response) mustBe BAD_REQUEST
@@ -225,7 +225,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 when platform auth key is provided but platform type header is invalid" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] =
           route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "SOMEINVALIDPLATFORM"): _*)).get
@@ -237,7 +237,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 and list of errors when backend returns isSuccess is false" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader : _*)).get
         status(response) mustBe BAD_REQUEST
@@ -248,7 +248,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 200 when valid request and an update" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = true)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader : _*)).get
         status(response) mustBe OK
@@ -258,7 +258,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 from BodyParser when invalid body is sent" in new Setup {
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
 
         val response: Future[Result] = route(app, invalidPublishRequest).get
@@ -307,7 +307,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
 
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, request).get
         status(response) mustBe CREATED
@@ -336,7 +336,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 201 when valid request and a create" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader : _*)).get
         status(response) mustBe CREATED
@@ -346,7 +346,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 and list of errors when backend returns isSuccess is false" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader : _*)).get
         status(response) mustBe BAD_REQUEST
@@ -357,7 +357,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 200 when valid request and an update" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = true)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader : _*)).get
         status(response) mustBe OK
@@ -409,7 +409,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 201 when valid request and a create" in new Setup {
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validFileTransferYamlPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader: _*)).get
         status(response) mustBe CREATED
@@ -419,7 +419,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 and list of errors when backend returns isSuccess is false" in new Setup {
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
-        primeIntegrationCatalogueServicePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader : _*)).get
         status(response) mustBe BAD_REQUEST
