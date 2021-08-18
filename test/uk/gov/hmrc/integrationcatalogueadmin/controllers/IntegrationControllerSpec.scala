@@ -21,16 +21,22 @@ import org.mockito.scalatest.MockitoSugar
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HeaderNames
+import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, StubBodyParserFactory}
-import uk.gov.hmrc.integrationcatalogue.models.{DeleteIntegrationsFailure, DeleteIntegrationsResponse, DeleteIntegrationsSuccess}
+import uk.gov.hmrc.http.NotFoundException
+import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationType.{API, FILE_TRANSFER}
+import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
+import uk.gov.hmrc.integrationcatalogue.models.{DeleteIntegrationsFailure, DeleteIntegrationsResponse, DeleteIntegrationsSuccess, IntegrationPlatformReport}
 import uk.gov.hmrc.integrationcatalogue.models.common._
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders._
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
+
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -204,6 +210,30 @@ class IntegrationControllerSpec
       status(result) shouldBe BAD_REQUEST
       contentAsString(result) shouldBe """{"errors":[{"message":"backendsFilter cannot be empty"}]}"""
 
+    }
+  }
+
+  "GET /report" should {
+    "respond with 500 when error received from service " in new Setup {
+      when(mockIntegrationService.catalogueReport()(*)).thenReturn(Future.successful(Left(new NotFoundException("some error"))))
+
+      val getRequest: FakeRequest[AnyContentAsEmpty.type] =
+        FakeRequest.apply("GET", s"integration-catalogue-admin-api/report")
+
+      val result: Future[Result] = controller.catalogueReport()(getRequest)
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      contentAsString(result) shouldBe """{"errors":[{"message":"catalogueReport: error retrieving the report"}]}"""
+    }
+    "respond with results when received from the service " in new Setup {
+      val results = List(IntegrationPlatformReport(CORE_IF, API, 2), IntegrationPlatformReport(CORE_IF, FILE_TRANSFER, 5))
+      when(mockIntegrationService.catalogueReport()(*)).thenReturn(Future.successful(Right(results)))
+
+      val getRequest: FakeRequest[AnyContentAsEmpty.type] =
+        FakeRequest.apply("GET", s"integration-catalogue-admin-api/report")
+
+      val result: Future[Result] = controller.catalogueReport()(getRequest)
+      status(result) shouldBe OK
+      contentAsString(result) shouldBe Json.toJson(results).toString
     }
   }
 }

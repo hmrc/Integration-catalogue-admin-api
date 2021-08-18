@@ -63,14 +63,15 @@ object JsonFormatters {
 
   implicit val formatPublishResult: Format[PublishResult] = Json.format[PublishResult]
 
-  implicit val publishResponseFormat = Json.format[PublishResponse]
+  implicit val publishResponseFormat: Format[PublishResponse] = Json.format[PublishResponse]
 
-  implicit val errorResponseMessageFormat = Json.format[ErrorResponseMessage]
+  implicit val errorResponseMessageFormat: OFormat[ErrorResponseMessage] = Json.format[ErrorResponseMessage]
 
-  implicit val errorResponseFormat = Json.format[ErrorResponse]
+  implicit val errorResponseFormat: OFormat[ErrorResponse] = Json.format[ErrorResponse]
 
   implicit val formatDeleteIntegrationsResponse : Format[DeleteIntegrationsResponse] = Json.format[DeleteIntegrationsResponse]
 
   implicit val formatIntegrationResponse: Format[IntegrationResponse] = Json.format[IntegrationResponse]
 
+  implicit val formatIntegrationPlatformReport: Format[IntegrationPlatformReport] = Json.format[IntegrationPlatformReport]
 }

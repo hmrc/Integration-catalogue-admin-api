@@ -16,25 +16,24 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
-import play.api.{Logger, Logging}
+import play.api.Logging
 import play.api.http.HeaderNames
+import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, Request, Result}
 import uk.gov.hmrc.http.HttpErrorFunctions
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
+import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
 
+import java.nio.charset.StandardCharsets
+import java.util.Base64
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.libs.json.Json
-
 import scala.util.Try
-import java.util.Base64
-import java.nio.charset.StandardCharsets
-import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
-import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
-import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
 
 @Singleton
 class ValidateAuthorizationHeaderAction @Inject()
@@ -47,12 +46,14 @@ class ValidateAuthorizationHeaderAction @Inject()
     val authHeader = request.headers.get(HeaderNames.AUTHORIZATION).getOrElse("")
     val platformTypeHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
 
-    if (!authHeader.isEmpty && base64Decode(authHeader).map(_ == appConfig.authorizationKey).getOrElse(false)) Future.successful(None)
-    else
+    if (authHeader.nonEmpty && base64Decode(authHeader).map(_ == appConfig.authorizationKey).getOrElse(false)) {
+      Future.successful(None)
+    } else {
       validatePlatformType(platformTypeHeader) match {
         case Some(platformType) => validatePlatformAuthHeader(platformType, authHeader)
-        case None               => Future.successful(Some(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platform type header is missing or invalid")))))))
+        case None => Future.successful(Some(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platform type header is missing or invalid")))))))
       }
+    }
 
   }
 
@@ -67,10 +68,8 @@ class ValidateAuthorizationHeaderAction @Inject()
          logger.info("Unauthorised -  key didn't match value in config")
           Future.successful(Some(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Authorisation failed")))))))
       }
-
-      case None          => { logger.info("Unauthorised - no config for platform type found")
+      case None          => logger.info("Unauthorised - no config for platform type found")
         Future.successful(Some(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Authorisation failed")))))))
-      }
     }
   }
 

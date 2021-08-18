@@ -16,135 +16,104 @@
 
 package support
 
-
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
+
 trait IntegrationCatalogueConnectorStub {
   val publishUrl = "/integration-catalogue/apis/publish"
   val publishFileTransferUrl = "/integration-catalogue/filetransfer/publish"
   val getApisUrl = "/integration-catalogue/integrations"
-  def deleteintegrationByIdUrl(integrationId: String) = s"/integration-catalogue/integrations/$integrationId"
+
+  def deleteIntegrationByIdUrl(integrationId: String) = s"/integration-catalogue/integrations/$integrationId"
+
   def getIntegrationByIdUrl(id: String) = s"/integration-catalogue/integrations/$id"
+
+  val catalogueReportUrl = "/integration-catalogue/report"
+
   def findWithFiltersUrl(searchTerm: String) = s"/integration-catalogue/integrations$searchTerm"
 
-    def primeIntegrationCatalogueServiceFindWithFilterWithBadRequest(searchTerm: String) = {
+  def primeFindWithFilterReturnsBadRequestWithoutBody(searchTerm: String): StubMapping = {
+    primeGETWithoutBody(BAD_REQUEST, findWithFiltersUrl(searchTerm))
+  }
 
-    stubFor(get(urlEqualTo(findWithFiltersUrl(searchTerm)))
+  def primeFindWithFilterWithBody(status: Int, responseBody: String, searchTerm: String): StubMapping = {
+    primeGETWithBody(status, responseBody, findWithFiltersUrl(searchTerm))
+  }
+
+  def primePutReturnsBadRequestWithoutBody(putUrl: String): StubMapping = {
+    primePUTWithoutBody(BAD_REQUEST, putUrl)
+  }
+
+  def primePutWithBody(putUrl: String, status: Int, responseBody: String): StubMapping = {
+    primePUTWithBody(status, responseBody, putUrl)
+  }
+
+  def primeGetByIdWithBody(status: Int, responseBody: String, id: IntegrationId): StubMapping = {
+    primeGETWithBody(status, responseBody, getIntegrationByIdUrl(id.value.toString))
+  }
+
+  def primeGetByIdReturnsBadRequest(id: IntegrationId): StubMapping = {
+    primeGetByIdWithoutResponseBody(BAD_REQUEST, id.value.toString)
+  }
+
+  def primeGetByIdWithoutResponseBody(status: Int, id: String): StubMapping = {
+    primeGETWithoutBody(status, getIntegrationByIdUrl(id))
+  }
+
+  def primeCatalogueReportWithBody(responseBody: String, status: Int): StubMapping = {
+    primeGETWithBody(status, responseBody, catalogueReportUrl)
+  }
+
+  def primeCatalogueReportReturnsBadRequest(): StubMapping = {
+    primeGETWithoutBody(BAD_REQUEST, catalogueReportUrl)
+  }
+
+  def primeDeleteByIdWithoutBody(integrationId: String, status: Int): StubMapping = {
+    primeWithoutBody(delete(urlEqualTo(deleteIntegrationByIdUrl(integrationId))), status)
+  }
+
+  def primeDeleteByPlatformWithBody(platformQueryParm: String, status: Int, responseBody: String): StubMapping = {
+    primeWithBody(delete(urlEqualTo(findWithFiltersUrl(platformQueryParm))), status, responseBody)
+  }
+
+  def primePUTWithoutBody(status: Int, urlResolver: => String): StubMapping = {
+    primeWithoutBody(put(urlEqualTo(urlResolver)), status)
+  }
+
+  def primePUTWithBody(status: Int, responseBody: String, urlResolver: => String): StubMapping = {
+    primeWithBody(put(urlEqualTo(urlResolver)), status, responseBody)
+  }
+
+  def primeGETWithoutBody(status: Int, urlResolver: => String): StubMapping = {
+    primeWithoutBody(get(urlEqualTo(urlResolver)), status)
+  }
+
+  def primeGETWithBody(status: Int, responseBody: String, urlResolver: => String): StubMapping = {
+    primeWithBody(get(urlEqualTo(urlResolver)), status, responseBody)
+  }
+
+  private def primeWithoutBody(x: => MappingBuilder, status: Int) = {
+    stubFor(x
       .willReturn(
         aResponse()
-          .withStatus(BAD_REQUEST)
-          .withHeader("Content-Type","application/json")
+          .withStatus(status)
+          .withHeader("Content-Type", "application/json")
       )
     )
   }
 
-  def primeIntegrationCatalogueServiceFindWithFilterWithBody(status : Int, responseBody : String, searchTerm: String) = {
-
-    stubFor(get(urlEqualTo(findWithFiltersUrl(searchTerm)))
+  private def primeWithBody(x: MappingBuilder, status: Int, responseBody: String) = {
+    stubFor(x
       .willReturn(
         aResponse()
           .withStatus(status)
-          .withHeader("Content-Type","application/json")
+          .withHeader("Content-Type", "application/json")
           .withBody(responseBody)
       )
     )
   }
-
-
-  def primeIntegrationCatalogueServicePutReturnsBadRequest(putUrl: String) = {
-
-      stubFor(put(urlEqualTo(putUrl))
-      .willReturn(
-        aResponse()
-          .withStatus(BAD_REQUEST)
-          .withHeader("Content-Type","application/json")
-
-      )
-    )
-  }
-
-    def primeIntegrationCatalogueServicePutWithBody(putUrl: String, status : Int, responseBody : String) = {
-
-      stubFor(put(urlEqualTo(putUrl))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withHeader("Content-Type","application/json")
-          .withBody(responseBody)
-      )
-    )
-  }
-
-  def primeIntegrationCatalogueServiceGetByIdWithBody(status : Int, responseBody : String, id: IntegrationId) = {
-
-    stubFor(get(urlEqualTo(getIntegrationByIdUrl(id.value.toString)))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withHeader("Content-Type","application/json")
-          .withBody(responseBody)
-      )
-    )
-  }
-
-  def primeIntegrationCatalogueServiceGetByIdWithoutResponseBody(status : Int, id: String) = {
-
-    stubFor(get(urlEqualTo(getIntegrationByIdUrl(id)))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withHeader("Content-Type","application/json")
-      )
-    )
-  }
-
-  def primeIntegrationCatalogueServiceGetByIdReturnsBadRequest( id: IntegrationId) = {
-
-    stubFor(get(urlEqualTo(getIntegrationByIdUrl(id.value.toString)))
-      .willReturn(
-        aResponse()
-          .withStatus(BAD_REQUEST)
-          .withHeader("Content-Type","application/json")
-
-      )
-    )
-  }
-
-  def primeIntegrationCatalogueServiceGetWithBody(status : Int, responseBody : String) = {
-
-    stubFor(get(urlEqualTo(getApisUrl))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withHeader("Content-Type","application/json")
-          .withBody(responseBody)
-      )
-    )
-  }
-
-  def primeIntegrationCatalogueServiceDelete(integrationId: String, status : Int) = {
-
-    stubFor(delete(urlEqualTo(deleteintegrationByIdUrl(integrationId)))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withHeader("Content-Type","application/json")
-      )
-    )
-  }
-
-  def primeIntegrationCatalogueServiceDeleteByPlatform(platformQueryParm: String, status : Int, responseBody: String) = {
-
-    stubFor(delete(urlEqualTo(findWithFiltersUrl(platformQueryParm)))
-      .willReturn(
-        aResponse()
-          .withStatus(status)
-          .withHeader("Content-Type","application/json")
-          .withBody(responseBody)
-      )
-    )
-  }
-
 
 }

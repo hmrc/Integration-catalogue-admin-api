@@ -35,6 +35,7 @@ class IntegrationCatalogueConnector @Inject()(http: HttpClient, appConfig: AppCo
 
   private lazy val externalServiceUri = s"${appConfig.integrationCatalogueUrl}/integration-catalogue"
 
+
   def publishApis(publishRequest: ApiPublishRequest)(implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]] = {
     handleResult(
       http.PUT[ApiPublishRequest, PublishResult](s"$externalServiceUri/apis/publish", publishRequest))
@@ -49,21 +50,11 @@ class IntegrationCatalogueConnector @Inject()(http: HttpClient, appConfig: AppCo
                      (implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationResponse]] = {
    val queryParamsValues = buildQueryParams(integrationFilter)
 
-      http.GET[IntegrationResponse](s"$externalServiceUri/integrations", queryParams = queryParamsValues)
-        .map(x=> Right(x))
-        .recover {
-          case NonFatal(e) => logger.error(e.getMessage)
-            Left(e)
-        }
+      handleResult(http.GET[IntegrationResponse](s"$externalServiceUri/integrations", queryParams = queryParamsValues))
   }
 
   def findByIntegrationId(id: IntegrationId)(implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationDetail]] = {
-    http.GET[IntegrationDetail](s"$externalServiceUri/integrations/${id.value.toString}")
-      .map(x=> Right(x))
-      .recover {
-        case NonFatal(e) => logger.error(e.getMessage)
-          Left(e)
-      }
+    handleResult(http.GET[IntegrationDetail](s"$externalServiceUri/integrations/${id.value.toString}"))
   }
 
   def deleteByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier): Future[Boolean] = {
@@ -86,10 +77,16 @@ class IntegrationCatalogueConnector @Inject()(http: HttpClient, appConfig: AppCo
         }
   }
 
+  def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] = {
+    handleResult(
+      http.GET[List[IntegrationPlatformReport]](s"$externalServiceUri/report"))
+  }
+
+
   private def buildQueryParams(integrationFilter: IntegrationFilter): Seq[(String, String)] = {
     val searchTerms = integrationFilter.searchText.map(x => ("searchTerm", x))
     val platformsFilters = integrationFilter.platforms.map((x: PlatformType) => ("platformFilter", x.toString))
-    val backendFilters = integrationFilter.backends.map(x => ("backendsFilter", x.toString))
+    val backendFilters = integrationFilter.backends.map(x => ("backendsFilter", x))
     searchTerms ++ platformsFilters ++ backendFilters
 
   }

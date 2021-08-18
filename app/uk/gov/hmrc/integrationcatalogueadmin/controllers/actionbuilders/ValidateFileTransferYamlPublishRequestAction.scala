@@ -16,22 +16,19 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import io.circe.yaml.parser
+import io.circe.{Json => CirceJson}
 import play.api.libs.json.{Json => ScalaJson}
+import play.api.mvc.Results.{BadRequest, UnsupportedMediaType}
 import play.api.mvc.{ActionRefiner, Request, Result}
-import play.api.mvc.Results.{UnsupportedMediaType, BadRequest}
 import uk.gov.hmrc.http.HttpErrorFunctions
-import uk.gov.hmrc.integrationcatalogue.models.ErrorResponse
+import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage, FileTransferPublishRequest}
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogueadmin.models.FileTransferYamlRequest
+import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.integrationcatalogueadmin.models.FileTransferYamlRequest
-import io.circe.{ParsingFailure, Json => CirceJson}
-import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
-import uk.gov.hmrc.integrationcatalogue.models.ErrorResponseMessage
-import io.circe.yaml.parser
-import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
-import play.api.mvc.Results
 
 @Singleton
 class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: ExecutionContext)
@@ -45,11 +42,11 @@ class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: Execu
   override def refine[A](request: Request[A]): Future[Either[Result, FileTransferYamlRequest[A]]] = Future.successful {
     request.contentType match {
       case Some("application/x-yaml") =>
-        parseYamlUsingCirce(request.body.toString()) match {
+        parseYamlUsingCirce(request.body.toString) match {
           case Some(fileTransferPublishRequest) => Right(FileTransferYamlRequest[A](fileTransferPublishRequest, request))
           case None => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error parsing yaml"))))))
         }
-      case _                          => Left(UnsupportedMediaType(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid Content-Type. Expecting application/x-yaml"))))))
+      case _  => Left(UnsupportedMediaType(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid Content-Type. Expecting application/x-yaml"))))))
     }
   }
 

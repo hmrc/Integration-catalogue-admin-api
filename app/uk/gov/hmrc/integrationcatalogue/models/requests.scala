@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.integrationcatalogue.models
 
-import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType, SpecificationType}
-import uk.gov.hmrc.integrationcatalogue.models.common.ContactInformation
 import org.joda.time.DateTime
-import com.fasterxml.jackson.module.scala.JsonScalaEnumeration
+import uk.gov.hmrc.integrationcatalogue.models.common._
 
 case class IntegrationResponse(count: Int, results: List[IntegrationDetail])
 
@@ -67,3 +65,5 @@ case class ErrorResponse(errors: List[ErrorResponseMessage])
 case class DeleteIntegrationsResponse(numberOfIntegrationsDeleted: Int)
 
 case class IntegrationFilter(searchText: List[String] = List.empty, platforms: List[PlatformType] = List.empty, backends: List[String] = List.empty, itemsPerPage: Option[Int] = None, currentPage: Option[Int] = None)
+
+case class IntegrationPlatformReport(platformType: PlatformType, integrationType: IntegrationType, count: Int)
