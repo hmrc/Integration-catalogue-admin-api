@@ -82,7 +82,7 @@ class PublishController @Inject() (
     implicit request: ValidatedApiPublishRequest[MultipartFormData[Files.TemporaryFile]] =>
 
 
-    (request.body.file("selectedFile"), request.body.dataParts) match {
+    (request.body.file("selectedFile"), request.body.dataParts.get("selectedFile")) match {
       case (Some(selectedFile), _) => {
           val bufferedSource = Source.fromFile(selectedFile.ref.path.toFile)
           val fileContents = bufferedSource.getLines.mkString("\r\n")
@@ -90,40 +90,20 @@ class PublishController @Inject() (
           publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, fileContents)
             .map(handlePublishResult)
       }
-     case (None, x: Map[String, Seq[String]]) => {
-         x.get("selectedFile") match {
-            case Some(Nil) =>
+     case (None, Some(dataParts: Seq[String])) => {
+         dataParts match {
+            case Nil =>
               logger.info("selectedFile is missing from requestBody")
               Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
-            case Some(oasStringList: Seq[String])  =>
+            case oasStringList: Seq[String]  =>
               publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, oasStringList.head)
                 .map(handlePublishResult)
-
-            case None =>     logger.info("selectedFile is missing from requestBody")
-              Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
           }
      }
      case (_, _) =>  logger.info("selectedFile is missing from requestBody")
               Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
     }
-      //  match {
-      //   case None               =>
-      //     .get("selectedFile") match {
-      //       case Some(Nil) =>
-      //         logger.info("selectedFile is missing from requestBody")
-      //         Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
-      //       case Some(oasStringList: Seq[String])  =>
-      //         publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, oasStringList.head)
-      //           .map(handlePublishResult)
-      //     }
-
-      //   case Some(selectedFile) =>
-      //     val bufferedSource = Source.fromFile(selectedFile.ref.path.toFile)
-      //     val fileContents = bufferedSource.getLines.mkString("\r\n")
-      //     bufferedSource.close()
-      //     publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, fileContents)
-      //       .map(handlePublishResult)
-      // }
+     
 
   }
 

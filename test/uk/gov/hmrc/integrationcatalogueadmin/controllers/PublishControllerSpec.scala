@@ -95,10 +95,12 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
      callPublishCommon(dataWithFile, headers)
     }
 
-     def callPublishWithDataPart(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
-      expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
+     def callPublishWithDataPart(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], dataPart: Seq[String]): Future[Result] = {
+       if(dataPart.nonEmpty) {
+        expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
+       }
      
-       val dataWithDataParts = new MultipartFormData[TemporaryFile](Map("selectedFile" -> Seq("some file data")), List.empty, List())
+       val dataWithDataParts = new MultipartFormData[TemporaryFile](Map("selectedFile" -> dataPart), List.empty, List())
       callPublishCommon(dataWithDataParts, headers)
     }
 
@@ -149,15 +151,14 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
       val result: Future[Result] = callPublishWithDataPart(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = false, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders,
-        "selectedFile",
-        "text.txt"
+        Seq("Data bytes")
       )
 
       result shouldBeResult CREATED
       contentAsString(result) shouldBe raw"""{"id":"$id","publisherReference":"123456","platformType":"CORE_IF"}"""
     }
 
-    "return 200 when valid payload is sent" in new Setup {
+    "return 200 when valid File payload is sent" in new Setup {
 
       val id: UUID = UUID.randomUUID()
       val result: Future[Result] = callPublishWithFile(
@@ -169,6 +170,32 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
 
       result shouldBeResult OK
       contentAsString(result) shouldBe raw"""{"id":"$id","publisherReference":"123456","platformType":"CORE_IF"}"""
+    }
+
+    "return 200 when valid Data part payload is sent" in new Setup {
+
+      val id: UUID = UUID.randomUUID()
+      val result: Future[Result] = callPublishWithDataPart(
+        Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
+        validHeaders,
+        Seq("Data bytes")
+      )
+
+      result shouldBeResult OK
+      contentAsString(result) shouldBe raw"""{"id":"$id","publisherReference":"123456","platformType":"CORE_IF"}"""
+    }
+
+    "return 400 when empty Data part payload is sent" in new Setup {
+
+      val id: UUID = UUID.randomUUID()
+      val result: Future[Result] = callPublishWithDataPart(
+        Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
+        validHeaders,
+        Seq.empty
+      )
+
+      result shouldBeResult BAD_REQUEST
+      contentAsString(result) shouldBe """{"errors":[{"message":"selectedFile is missing from requestBody"}]}"""
     }
 
     "return 400 when connector response has no details or error" in new Setup {
