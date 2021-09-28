@@ -86,20 +86,31 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
       stubPlayBodyParsers(mat)
     )
 
-    def callPublish(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
+    def callPublishWithFile(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
       expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
       val tempFile = SingletonTemporaryFileCreator.create("text", "txt")
       tempFile.deleteOnExit()
 
-      val data = new MultipartFormData[TemporaryFile](Map(), List(FilePart(filePartKey, fileName, Some("text/plain"), tempFile)), List())
-      val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
+      val dataWithFile = new MultipartFormData[TemporaryFile](Map(), List(FilePart(filePartKey, fileName, Some("text/plain"), tempFile)), List())
+     callPublishCommon(dataWithFile, headers)
+    }
+
+     def callPublishWithDataPart(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
+      expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
+     
+       val dataWithDataParts = new MultipartFormData[TemporaryFile](Map("selectedFile" -> Seq("some file data")), List.empty, List())
+      callPublishCommon(dataWithDataParts, headers)
+    }
+
+    private def callPublishCommon(publishBody: MultipartFormData[TemporaryFile], headers: Seq[(String, String)]) ={
+       val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
         .withHeaders(headers: _*)
-        .withBody(data)
+        .withBody(publishBody)
 
       controller.publishApi()(publishRequest)
     }
 
-    def callPublishReturnError(headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
+    def callPublishWithFileReturnError(headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
       when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Left(new RuntimeException("some error"))))
 
       val tempFile = SingletonTemporaryFileCreator.create("text", "txt")
@@ -118,10 +129,24 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
 
   "POST /publish" should {
 
-    "return 201 when valid payload is sent" in new Setup {
+    "return 201 when valid File payload is sent" in new Setup {
 
       val id: UUID = UUID.randomUUID()
-      val result: Future[Result] = callPublish(
+      val result: Future[Result] = callPublishWithFile(
+        Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = false, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
+        validHeaders,
+        "selectedFile",
+        "text.txt"
+      )
+
+      result shouldBeResult CREATED
+      contentAsString(result) shouldBe raw"""{"id":"$id","publisherReference":"123456","platformType":"CORE_IF"}"""
+    }
+
+    "return 201 when valid Data part payload is sent" in new Setup {
+
+      val id: UUID = UUID.randomUUID()
+      val result: Future[Result] = callPublishWithDataPart(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = false, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders,
         "selectedFile",
@@ -135,7 +160,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
     "return 200 when valid payload is sent" in new Setup {
 
       val id: UUID = UUID.randomUUID()
-      val result: Future[Result] = callPublish(
+      val result: Future[Result] = callPublishWithFile(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders,
         "selectedFile",
@@ -148,7 +173,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
 
     "return 400 when connector response has no details or error" in new Setup {
 
-      val result: Future[Result] = callPublish(Some(PublishResult(isSuccess = true, None, List.empty)), validHeaders, "selectedFile", "text.txt")
+      val result: Future[Result] = callPublishWithFile(Some(PublishResult(isSuccess = true, None, List.empty)), validHeaders, "selectedFile", "text.txt")
 
       result shouldBeResult BAD_REQUEST
       contentAsString(result) shouldBe """{"errors":[{"message":"Unexpected response from /integration-catalogue"}]}"""
@@ -156,7 +181,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
 
     "return 400 when connector returns a Left" in new Setup {
 
-      val result: Future[Result] = callPublishReturnError(validHeaders, "selectedFile", "text.txt")
+      val result: Future[Result] = callPublishWithFileReturnError(validHeaders, "selectedFile", "text.txt")
 
       result shouldBeResult BAD_REQUEST
       contentAsString(result) shouldBe """{"errors":[{"message":"Unexpected response from /integration-catalogue: some error"}]}"""
@@ -164,7 +189,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
 
     "return 400 when valid payload is sent but publish fails" in new Setup {
       val result: Future[Result] =
-        callPublish(Some(
+        callPublishWithFile(Some(
           PublishResult(isSuccess = false,
           None,
           List(PublishError(123, "some message")))),
@@ -178,7 +203,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
 
     "return 400 and not call connector when invalid file" in new Setup {
 
-      val result: Future[Result] = callPublish(None, validHeaders, "CANT FIND ME", "text3.txt")
+      val result: Future[Result] = callPublishWithFile(None, validHeaders, "CANT FIND ME", "text3.txt")
 
       contentAsString(result) shouldBe """{"errors":[{"message":"selectedFile is missing from requestBody"}]}"""
       result shouldBeResult BAD_REQUEST
@@ -187,7 +212,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
     }
 
     "return 400 when plaform not set in header" in new Setup {
-      val result: Future[Result] = callPublish(None, validHeaders.filterNot(_._1.equals(HeaderKeys.platformKey)), "selectedFile", "text.txt")
+      val result: Future[Result] = callPublishWithFile(None, validHeaders.filterNot(_._1.equals(HeaderKeys.platformKey)), "selectedFile", "text.txt")
 
       status(result) shouldBe BAD_REQUEST
 
@@ -202,7 +227,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
         HeaderKeys.publisherRefKey -> "123456",
         HeaderNames.AUTHORIZATION -> encodedAuthHeader
       )
-      val result: Future[Result] = callPublish(None, headers, "selectedFile", "text.txt")
+      val result: Future[Result] = callPublishWithFile(None, headers, "selectedFile", "text.txt")
 
       status(result) shouldBe BAD_REQUEST
 
@@ -211,7 +236,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
     }
 
     "return 400 when specType not set in header" in new Setup {
-      val result: Future[Result] = callPublish(None, validHeaders.filterNot(_._1.equals(HeaderKeys.specificationTypeKey)), "selectedFile", "text.txt")
+      val result: Future[Result] = callPublishWithFile(None, validHeaders.filterNot(_._1.equals(HeaderKeys.specificationTypeKey)), "selectedFile", "text.txt")
 
       status(result) shouldBe BAD_REQUEST
 
@@ -226,7 +251,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
         HeaderKeys.publisherRefKey -> "123456",
         HeaderNames.AUTHORIZATION -> encodedAuthHeader
       )
-      val result: Future[Result] = callPublish(None, headers, "selectedFile", "text.txt")
+      val result: Future[Result] = callPublishWithFile(None, headers, "selectedFile", "text.txt")
 
       status(result) shouldBe BAD_REQUEST
 
@@ -238,7 +263,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
     "return 200 when publisherRef not set in header" in new Setup {
 
       val id: UUID = UUID.randomUUID()
-      val result: Future[Result] = callPublish(
+      val result: Future[Result] = callPublishWithFile(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders.filterNot(_._1.equals(HeaderKeys.publisherRefKey)),
         "selectedFile",
@@ -259,7 +284,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
       )
 
      val id: UUID = UUID.randomUUID()
-      val result: Future[Result] = callPublish(
+      val result: Future[Result] = callPublishWithFile(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         invalidHeaders,
         "selectedFile",
@@ -271,7 +296,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
     }
 
     "return 401 when Authorization not set in header" in new Setup {
-      val result: Future[Result] = callPublish(None, validHeaders.filterNot(_._1.equals(HeaderNames.AUTHORIZATION)), "selectedFile", "text.txt")
+      val result: Future[Result] = callPublishWithFile(None, validHeaders.filterNot(_._1.equals(HeaderNames.AUTHORIZATION)), "selectedFile", "text.txt")
 
       status(result) shouldBe UNAUTHORIZED
 
@@ -288,7 +313,7 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
         HeaderNames.AUTHORIZATION -> "SOME_RUBBISH"
       )
 
-      val result: Future[Result] = callPublish(None, invalidHeaders, "selectedFile", "text.txt")
+      val result: Future[Result] = callPublishWithFile(None, invalidHeaders, "selectedFile", "text.txt")
 
       status(result) shouldBe UNAUTHORIZED
 
