@@ -80,17 +80,30 @@ class PublishController @Inject() (
     validateAuthorizationHeaderAction andThen
     validateApiPublishRequest).async(playBodyParsers.multipartFormData) {
     implicit request: ValidatedApiPublishRequest[MultipartFormData[Files.TemporaryFile]] =>
-      request.body.file("selectedFile") match {
-        case None               =>
-          logger.info("selectedFile is missing from requestBody")
-          Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
-        case Some(selectedFile) =>
+
+
+    (request.body.file("selectedFile"), request.body.dataParts.get("selectedFile")) match {
+      case (Some(selectedFile), _) => {
           val bufferedSource = Source.fromFile(selectedFile.ref.path.toFile)
           val fileContents = bufferedSource.getLines.mkString("\r\n")
           bufferedSource.close()
           publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, fileContents)
             .map(handlePublishResult)
       }
+     case (None, Some(dataParts: Seq[String])) => {
+         dataParts match {
+            case Nil =>
+              logger.info("selectedFile is missing from requestBody")
+              Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
+            case oasStringList: Seq[String]  =>
+              publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, oasStringList.head)
+                .map(handlePublishResult)
+          }
+     }
+     case (_, _) =>  logger.info("selectedFile is missing from requestBody")
+              Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
+    }
+     
 
   }
 
