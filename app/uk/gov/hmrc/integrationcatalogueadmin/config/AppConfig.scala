@@ -39,12 +39,16 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   val desAuthorizationKey: String = servicesConfig.getString("auth.authKey.DES")
   val cdsClassicAuthorizationKey: String = servicesConfig.getString("auth.authKey.cdsClassic")
   val transactionEngineAuthorizationKey: String = servicesConfig.getString("auth.authKey.transactionEngine")
+  val sdesAuthorizationKey: String = servicesConfig.getString("auth.authKey.SDES")
+  val digiDapiAuthorizationKey: String = servicesConfig.getString("auth.authKey.digiDapi")
 
   val authPlatformMap: Map[PlatformType, String] = Map (CMA -> cmaAuthorizationKey,
                                                         API_PLATFORM -> apiPlatformAuthorizationKey,
                                                         CORE_IF -> coreIfAuthorizationKey,
                                                         DES -> desAuthorizationKey,
                                                         CDS_CLASSIC -> cdsClassicAuthorizationKey,
-                                                        TRANSACTION_ENGINE -> transactionEngineAuthorizationKey)
+                                                        TRANSACTION_ENGINE -> transactionEngineAuthorizationKey,
+                                                        SDES -> sdesAuthorizationKey,
+                                                        DIGI_DAPI -> digiDapiAuthorizationKey)
 
 }
