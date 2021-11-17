@@ -29,6 +29,7 @@ import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Try, Failure, Success}
 
 @Singleton
 class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: ExecutionContext)
@@ -43,18 +44,22 @@ class ValidateFileTransferYamlPublishRequestAction @Inject() (implicit ec: Execu
     request.contentType match {
       case Some("application/x-yaml") =>
         parseYamlUsingCirce(request.body.toString) match {
-          case Some(fileTransferPublishRequest) => Right(FileTransferYamlRequest[A](fileTransferPublishRequest, request))
-          case None => Left(BadRequest(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Error parsing yaml"))))))
+          case Success(fileTransferPublishRequest) => Right(FileTransferYamlRequest[A](fileTransferPublishRequest, request))
+          case Failure(exception) => {
+            Left(
+              BadRequest(ScalaJson.toJson(ErrorResponse(List(
+                ErrorResponseMessage("Error parsing yaml"),
+                ErrorResponseMessage(exception.getMessage)
+              )))))
+          }
         }
       case _  => Left(UnsupportedMediaType(ScalaJson.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid Content-Type. Expecting application/x-yaml"))))))
     }
   }
 
-  private def parseYamlUsingCirce(payload: String): Option[FileTransferPublishRequest] =
+  private def parseYamlUsingCirce(payload: String): Try[FileTransferPublishRequest] =
     parser.parse(payload) match {
-      case Left(_) => None
+      case Left(exception) => Failure(exception)
       case Right(json: CirceJson)  => validateAndExtractJsonString[FileTransferPublishRequest](json.toString())
     }
-  
-
 }

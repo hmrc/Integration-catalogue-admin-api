@@ -368,8 +368,8 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
 
         val response: Future[Result] = route(app, invalidFileTransferJsonPublishRequest).get
         status(response) mustBe BAD_REQUEST
-        contentAsString(response) mustBe """{"errors":[{"message":"Invalid request body"}]}"""
-
+        contentAsString(response) must(include("""{"message":"Invalid request body"}"""))
+        contentAsString(response) must(include("""JsResultException(errors:List((,List(JsonValidationError(List(error.expected.jsobject),WrappedArray())))))"""))
       }
 
       "respond with 401 and error message Authorization header is missing" in new Setup{
@@ -439,8 +439,8 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
 
         val response: Future[Result] = route(app, invalidYamlFileTransferPublishRequest).get
         status(response) mustBe BAD_REQUEST
-        contentAsString(response) mustBe """{"errors":[{"message":"Error parsing yaml"}]}"""
-
+        contentAsString(response) must(include("""{"message":"Error parsing yaml"}"""))
+        contentAsString(response) must(include("""JsResultException(errors:List((,List(JsonValidationError(List(error.expected.jsobject),WrappedArray())))))"""))
       }
 
       "respond with 401 and error message Authorization header is missing" in new Setup{

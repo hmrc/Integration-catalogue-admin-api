@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
+import scala.util.{Success, Try, Failure}
 
 @Singleton
 class PublishController @Inject() (
@@ -60,15 +61,20 @@ class PublishController @Inject() (
     (Action andThen validateAuthorizationHeaderAction
       andThen validateFileTransferYamlPublishRequestAction).async(playBodyParsers.tolerantText) { implicit request =>
       val platformHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
-      handlepublishFileTransferRequest(Some(request.fileTransferRequest), platformHeader)
+      handlepublishFileTransferRequest(Success(request.fileTransferRequest), platformHeader)
     }
 
-  private def handlepublishFileTransferRequest(mayBeRequest: Option[FileTransferPublishRequest], platformHeader: String)(implicit hc: HeaderCarrier) = {
+  private def handlepublishFileTransferRequest(mayBeRequest: Try[FileTransferPublishRequest], platformHeader: String)(implicit hc: HeaderCarrier) = {
     mayBeRequest match {
-      case Some(validBody) => if (validatePlatformTypesMatch(validBody, platformHeader)) publishService.publishFileTransfer(validBody).map(handlePublishResult)
+      case Success(validBody) => if (validatePlatformTypesMatch(validBody, platformHeader)) publishService.publishFileTransfer(validBody).map(handlePublishResult)
         else Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body - platform type mismatch"))))))
-      case None            => logger.error("Invalid request body, must be a valid publish request")
-        Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body"))))))
+      case Failure(exception) => {
+        logger.info("Invalid request body, must be a valid publish request", exception)
+          Future.successful(BadRequest(Json.toJson(ErrorResponse(List(
+            ErrorResponseMessage("Invalid request body"),
+            ErrorResponseMessage(exception.getMessage)
+          )))))
+      }
     }
   }
 
