@@ -141,6 +141,38 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         Headers(basePublishHeaders: _*),
         Json.toJson(fileTransferPublishRequestObj))
 
+    val validFileTransferJsonPublishRequestWithAlternativeDate: FakeRequest[JsValue] = {
+      val json = """
+        {
+          "fileTransferSpecificationVersion":"1.0",
+          "publisherReference":"validFileTransferJsonPublishRequestWithAlternativeDate",
+          "title":"XXX-YYY-ZZZMonthly-pull",
+          "description":"A file transfer",
+          "platformType":"CORE_IF",
+          "lastUpdated":"2020-11-04",
+          "reviewedDate":"2020-11-24",
+          "contact":{
+              "name":"Core IF Team",
+              "emailAddress":"example@gmail.com"
+          },
+          "sourceSystem":[
+              "XXX"
+          ],
+          "targetSystem":[
+              "YYY"
+          ],
+          "transports":[
+              "UTM"
+          ],
+          "fileTransferPattern":"Corporate to corporate"
+        }
+      """
+      FakeRequest(Helpers.PUT,
+        "/integration-catalogue-admin-api/services/filetransfers/publish",
+        Headers(basePublishHeaders: _*),
+        Json.parse(json))
+    }
+
     val validFileTransferYamlPublishRequest: FakeRequest[JsValue] =
       FakeRequest(Helpers.PUT,
         "/integration-catalogue-admin-api/services/filetransfers/publish/yaml",
@@ -343,6 +375,18 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         // check body
       }
 
+      "respond with 201 when valid request with alternative date format (yyyy-mm-dd)" in new Setup{
+        val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
+        primePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
+
+        val response: Future[Result] = route(app, validFileTransferJsonPublishRequestWithAlternativeDate
+          .withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader : _*))
+          .get
+
+        status(response) mustBe CREATED
+        // check body
+      }
+
       "respond with 400 and list of errors when backend returns isSuccess is false" in new Setup{
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
@@ -368,8 +412,8 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
 
         val response: Future[Result] = route(app, invalidFileTransferJsonPublishRequest).get
         status(response) mustBe BAD_REQUEST
-        contentAsString(response) mustBe """{"errors":[{"message":"Invalid request body"}]}"""
-
+        contentAsString(response) must(include("""{"message":"Invalid request body"}"""))
+        contentAsString(response) must(include("""JsResultException(errors:List((,List(JsonValidationError(List(error.expected.jsobject),WrappedArray())))))"""))
       }
 
       "respond with 401 and error message Authorization header is missing" in new Setup{
@@ -439,8 +483,8 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
 
         val response: Future[Result] = route(app, invalidYamlFileTransferPublishRequest).get
         status(response) mustBe BAD_REQUEST
-        contentAsString(response) mustBe """{"errors":[{"message":"Error parsing yaml"}]}"""
-
+        contentAsString(response) must(include("""{"message":"Error parsing yaml"}"""))
+        contentAsString(response) must(include("""JsResultException(errors:List((,List(JsonValidationError(List(error.expected.jsobject),WrappedArray())))))"""))
       }
 
       "respond with 401 and error message Authorization header is missing" in new Setup{

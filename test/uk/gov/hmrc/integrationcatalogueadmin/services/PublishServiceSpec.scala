@@ -19,7 +19,6 @@ package uk.gov.hmrc.integrationcatalogueadmin.services
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.scalatest.MockitoSugar
-import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.integrationcatalogue.models._
@@ -29,14 +28,15 @@ import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConn
 import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should
 
+class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite with MockitoSugar  {
 
-class PublishServiceSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar  {
+  val mockIntegrationCatalogueConnector: IntegrationCatalogueConnector = mock[IntegrationCatalogueConnector]
+  private implicit val hc: HeaderCarrier = HeaderCarrier()
 
-val mockIntegrationCatalogueConnector: IntegrationCatalogueConnector = mock[IntegrationCatalogueConnector]
-private implicit val hc: HeaderCarrier = HeaderCarrier()
-
-trait SetUp {
+  trait SetUp {
     val objInTest = new PublishService(mockIntegrationCatalogueConnector)
     val apiPublishRequest: ApiPublishRequest = ApiPublishRequest(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents")
     val expectedApiPublishResult: PublishResult =
@@ -63,39 +63,39 @@ trait SetUp {
       transports = List.empty,
       fileTransferPattern = "Pattern1"
     )
-}
-
-"publishApi" should {
-  "return value from connector" in new SetUp {
-    when(mockIntegrationCatalogueConnector.publishApis(eqTo(apiPublishRequest))(*)).thenReturn(Future.successful(Right(expectedApiPublishResult)))
-
-    val result: Either[Throwable, PublishResult] =
-      Await.result(objInTest.publishApi(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents"), 500 millis)
-
-    result match {
-      case Left(_) => fail()
-      case Right(publishResult: PublishResult) => publishResult shouldBe expectedApiPublishResult
-    }
-
-    verify(mockIntegrationCatalogueConnector).publishApis(eqTo(apiPublishRequest))(eqTo(hc))
   }
-}
 
-"publishFileTransfer" should {
-  "return value from connector" in new SetUp {
-    when(mockIntegrationCatalogueConnector.publishFileTransfer(eqTo(fileTransferPublishRequest))(*))
-      .thenReturn(Future.successful(Right(expectedFileTransferPublishResult)))
+  "publishApi" should {
+    "return value from connector" in new SetUp {
+      when(mockIntegrationCatalogueConnector.publishApis(eqTo(apiPublishRequest))(*)).thenReturn(Future.successful(Right(expectedApiPublishResult)))
 
-    val result: Either[Throwable, PublishResult] =
-      Await.result(objInTest.publishFileTransfer(fileTransferPublishRequest), 500 millis)
+      val result: Either[Throwable, PublishResult] =
+        Await.result(objInTest.publishApi(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents"), 500 millis)
 
-    result match {
-      case Left(_) => fail()
-      case Right(publishResult: PublishResult) => publishResult shouldBe expectedFileTransferPublishResult
+      result match {
+        case Left(_) => fail()
+        case Right(publishResult: PublishResult) => publishResult shouldBe expectedApiPublishResult
+      }
+
+      verify(mockIntegrationCatalogueConnector).publishApis(eqTo(apiPublishRequest))(eqTo(hc))
     }
-
-    verify(mockIntegrationCatalogueConnector).publishFileTransfer(eqTo(fileTransferPublishRequest))(eqTo(hc))
   }
-}
+
+  "publishFileTransfer" should {
+    "return value from connector" in new SetUp {
+      when(mockIntegrationCatalogueConnector.publishFileTransfer(eqTo(fileTransferPublishRequest))(*))
+        .thenReturn(Future.successful(Right(expectedFileTransferPublishResult)))
+
+      val result: Either[Throwable, PublishResult] =
+        Await.result(objInTest.publishFileTransfer(fileTransferPublishRequest), 500 millis)
+
+      result match {
+        case Left(_) => fail()
+        case Right(publishResult: PublishResult) => publishResult shouldBe expectedFileTransferPublishResult
+      }
+
+      verify(mockIntegrationCatalogueConnector).publishFileTransfer(eqTo(fileTransferPublishRequest))(eqTo(hc))
+    }
+  }
 
 }

@@ -17,22 +17,17 @@
 package uk.gov.hmrc.integrationcatalogueadmin.utils
 
 import play.api.libs.json.{JsValue, Json, Reads}
+import play.api.Logging
+import scala.util.Try
 
-import scala.util.{Failure, Success, Try}
-
-trait JsonUtils {
-
-  def validateAndExtractJsonString[T](body: String)(implicit  reads: Reads[T]) = {
+trait JsonUtils extends Logging {
+  def validateAndExtractJsonString[T](body: String)(implicit  reads: Reads[T]) : Try[T] = {
     validateJsonAndExtract[T](body, body => Json.parse(body))
   }
 
-  private def validateJsonAndExtract[T](body: String, f: String => JsValue)(implicit reads: Reads[T]) = {
+  private def validateJsonAndExtract[T](body: String, f: String => JsValue)(implicit reads: Reads[T]) : Try[T] = {
     Try[T] {
       f(body).as[T]
-    } match {
-      case Success(result) => Some(result)
-      case Failure(_) => None
     }
   }
-
 }
