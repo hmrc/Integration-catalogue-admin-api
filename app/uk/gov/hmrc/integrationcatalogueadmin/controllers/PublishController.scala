@@ -69,7 +69,7 @@ class PublishController @Inject() (
       case Success(validBody) => if (validatePlatformTypesMatch(validBody, platformHeader)) publishService.publishFileTransfer(validBody).map(handlePublishResult)
         else Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body - platform type mismatch"))))))
       case Failure(exception) => {
-        logger.info("Invalid request body, must be a valid publish request", exception)
+        logger.error("Invalid request body, must be a valid publish request", exception)
           Future.successful(BadRequest(Json.toJson(ErrorResponse(List(
             ErrorResponseMessage("Invalid request body"),
             ErrorResponseMessage(exception.getMessage)
