@@ -19,12 +19,7 @@ package uk.gov.hmrc.integrationcatalogue.models
 import play.api.libs.json._
 import uk.gov.hmrc.integrationcatalogue.models.common._
 
-object JsonFormatters {
-
-  val dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-  implicit val JodaDateReads: Reads[org.joda.time.DateTime] = JodaReads.jodaDateReads(dateFormat)
-  implicit val JodaDateWrites: Writes[org.joda.time.DateTime] = JodaWrites.jodaDateWrites(dateFormat)
-  implicit val JodaDateTimeFormat: Format[org.joda.time.DateTime] = Format(JodaDateReads, JodaDateWrites)
+object JsonFormatters extends JodaReads with JodaWrites {
 
   implicit val formatContactInformation: Format[ContactInformation] = Json.format[ContactInformation]
 
