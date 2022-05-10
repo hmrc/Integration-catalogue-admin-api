@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,8 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
       stubPlayBodyParsers(mat)
     )
 
-    def callPublishWithFile(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
+    def callPublishWithFile(expectedConnectorResponse: Option[PublishResult],
+                            headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
       expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
       val tempFile = SingletonTemporaryFileCreator.create("text", "txt")
       tempFile.deleteOnExit()
@@ -95,7 +96,8 @@ class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSu
      callPublishCommon(dataWithFile, headers)
     }
 
-     def callPublishWithDataPart(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], dataPart: Seq[String]): Future[Result] = {
+     def callPublishWithDataPart(expectedConnectorResponse: Option[PublishResult],
+                                 headers: Seq[(String, String)], dataPart: Seq[String]): Future[Result] = {
        if(dataPart.nonEmpty) {
         expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
        }
