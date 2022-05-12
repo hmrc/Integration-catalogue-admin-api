@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.integrationcatalogue.models.common
 
-import java.util.UUID
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+
+import java.util.UUID
 import scala.collection.immutable
 
 case class IntegrationId(value: UUID) extends AnyVal
@@ -42,6 +43,7 @@ object PlatformType extends Enum[PlatformType] with PlayJsonEnum[PlatformType] {
   case object DIGI extends PlatformType
   case object SDES extends PlatformType
   case object TRANSACTION_ENGINE extends PlatformType
+  case object CIP extends PlatformType
 
 }
 

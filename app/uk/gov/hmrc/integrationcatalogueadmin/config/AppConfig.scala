@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   val sdesAuthorizationKey: String = servicesConfig.getString("auth.authKey.SDES")
   val digiAuthorizationKey: String = servicesConfig.getString("auth.authKey.DIGI")
   val dapiAuthorizationKey: String = servicesConfig.getString("auth.authKey.DAPI")
+  val cipAuthorizationKey: String = servicesConfig.getString("auth.authKey.CIP")
 
   val authPlatformMap: Map[PlatformType, String] = Map (CMA -> cmaAuthorizationKey,
                                                         API_PLATFORM -> apiPlatformAuthorizationKey,
@@ -51,6 +52,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
                                                         TRANSACTION_ENGINE -> transactionEngineAuthorizationKey,
                                                         SDES -> sdesAuthorizationKey,
                                                         DIGI -> digiAuthorizationKey,
-                                                        DAPI -> dapiAuthorizationKey)
+                                                        DAPI -> dapiAuthorizationKey,
+                                                        CIP -> cipAuthorizationKey)
 
 }
