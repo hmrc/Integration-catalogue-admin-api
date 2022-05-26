@@ -18,7 +18,8 @@ package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
 import akka.stream.Materializer
 import org.mockito.scalatest.MockitoSugar
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HeaderNames
 import play.api.libs.Files.{SingletonTemporaryFileCreator, TemporaryFile}
@@ -42,7 +43,7 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class PublishControllerSpec extends WordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar with StubBodyParserFactory {
+class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar with StubBodyParserFactory {
 
   implicit lazy val mat: Materializer = app.materializer
 

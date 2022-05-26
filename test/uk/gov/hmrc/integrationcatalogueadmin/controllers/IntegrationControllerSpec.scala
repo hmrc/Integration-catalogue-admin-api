@@ -18,7 +18,9 @@ package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
 import akka.stream.Materializer
 import org.mockito.scalatest.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
@@ -37,12 +39,11 @@ import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
 
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class IntegrationControllerSpec
-    extends WordSpec
+    extends AnyWordSpec
     with Matchers
     with GuiceOneAppPerSuite
     with MockitoSugar

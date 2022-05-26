@@ -51,7 +51,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
   .settings(unmanagedResourceDirectories in IntegrationTest += (baseDirectory in IntegrationTest).value / "it" / "resources")
   .settings(unmanagedSourceDirectories in IntegrationTest += (baseDirectory in IntegrationTest).value / "test-common")
-  
+
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .settings(scalacOptions ++= Seq("-deprecation", "-feature", "-Ypartial-unification"))
 
