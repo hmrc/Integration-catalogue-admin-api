@@ -43,6 +43,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
   val digiAuthorizationKey: String = servicesConfig.getString("auth.authKey.DIGI")
   val dapiAuthorizationKey: String = servicesConfig.getString("auth.authKey.DAPI")
   val cipAuthorizationKey: String = servicesConfig.getString("auth.authKey.CIP")
+  val hipAuthorizationKey: String = servicesConfig.getString("auth.authKey.HIP")
 
   val authPlatformMap: Map[PlatformType, String] = Map (CMA -> cmaAuthorizationKey,
                                                         API_PLATFORM -> apiPlatformAuthorizationKey,
@@ -53,6 +54,7 @@ class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig)
                                                         SDES -> sdesAuthorizationKey,
                                                         DIGI -> digiAuthorizationKey,
                                                         DAPI -> dapiAuthorizationKey,
-                                                        CIP -> cipAuthorizationKey)
+                                                        CIP -> cipAuthorizationKey,
+                                                        HIP -> hipAuthorizationKey)
 
 }
