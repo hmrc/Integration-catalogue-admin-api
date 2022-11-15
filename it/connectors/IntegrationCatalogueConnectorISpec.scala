@@ -153,7 +153,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
       "return a Right containing a publish result when integration catalogue returns a publish result" in new Setup {
 
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
-        primePutWithBody("/integration-catalogue/filetransfer/publish", OK, Json.toJson(backendResponse).toString)
+        primePutWithBody("/integration-catalogue/filetransfers/publish", OK, Json.toJson(backendResponse).toString)
 
         await(objInTest.publishFileTransfer(fileTransferPublishRequestObj)) match {
           case Right(result: PublishResult) =>
@@ -171,7 +171,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
 
 
       "return a Left when we receive a failure from the integration connector" in new Setup {
-        primePutReturnsBadRequestWithoutBody("/integration-catalogue/filetransfer/publish")
+        primePutReturnsBadRequestWithoutBody("/integration-catalogue/filetransfers/publish")
 
         await(objInTest.publishFileTransfer(fileTransferPublishRequestObj)) match {
           case Right(_: PublishResult) => fail

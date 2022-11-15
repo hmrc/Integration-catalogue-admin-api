@@ -43,7 +43,7 @@ class IntegrationCatalogueConnector @Inject()(http: HttpClient, appConfig: AppCo
 
   def publishFileTransfer(publishRequest: FileTransferPublishRequest)(implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]] = {
     handleResult(
-      http.PUT[FileTransferPublishRequest, PublishResult](s"$externalServiceUri/filetransfer/publish", publishRequest))
+      http.PUT[FileTransferPublishRequest, PublishResult](s"$externalServiceUri/filetransfers/publish", publishRequest))
   }
 
   def findWithFilters(integrationFilter: IntegrationFilter)
