@@ -49,8 +49,8 @@ lazy val microservice = Project(appName, file("."))
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
-  .settings(unmanagedResourceDirectories in IntegrationTest += (baseDirectory in IntegrationTest).value / "it" / "resources")
-  .settings(unmanagedSourceDirectories in IntegrationTest += (baseDirectory in IntegrationTest).value / "test-common")
+  .settings(IntegrationTest / unmanagedResourceDirectories  += (IntegrationTest / baseDirectory).value / "it" / "resources")
+  .settings(IntegrationTest / unmanagedSourceDirectories += (IntegrationTest / baseDirectory).value / "test-common")
 
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .settings(scalacOptions ++= Seq("-deprecation", "-feature", "-Ypartial-unification"))
@@ -63,6 +63,6 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageMinimum := 96,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in Test := false
+    Test / parallelExecution  := false
   )
 }
