@@ -16,7 +16,6 @@
 
 package support
 
-
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 
@@ -36,4 +35,3 @@ trait TestApplication {
       )
 
 }
-

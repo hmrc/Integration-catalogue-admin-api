@@ -16,13 +16,12 @@
 
 package utils
 
-import java.nio.file.{Files, Paths} 
+import java.nio.file.{Files, Paths}
 
 import play.api.http.{HeaderNames, Writeable}
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{Codec, MultipartFormData}
-
 
 object MultipartFormDataWritable {
   val boundary = "--------ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
@@ -41,15 +40,16 @@ object MultipartFormDataWritable {
   }
 
   private def filePartHeader(file: FilePart[TemporaryFile]) = {
-    val name     = s""""${file.key}""""
-    val filename = s""""${file.filename}""""
+    val name        = s""""${file.key}""""
+    val filename    = s""""${file.filename}""""
     val contentType = file.contentType
       .map { ct =>
         s"${HeaderNames.CONTENT_TYPE}: $ct\r\n"
       }
       .getOrElse("")
     Codec.utf_8.encode(
-      s"--$boundary\r\n${HeaderNames.CONTENT_DISPOSITION}: form-data; name=$name; filename=$filename\r\n$contentType\r\n")
+      s"--$boundary\r\n${HeaderNames.CONTENT_DISPOSITION}: form-data; name=$name; filename=$filename\r\n$contentType\r\n"
+    )
   }
 
   val writeable: Writeable[MultipartFormData[TemporaryFile]] = Writeable[MultipartFormData[TemporaryFile]](

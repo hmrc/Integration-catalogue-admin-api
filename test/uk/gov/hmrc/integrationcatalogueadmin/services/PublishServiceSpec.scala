@@ -37,8 +37,8 @@ class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneA
   private implicit val hc: HeaderCarrier                               = HeaderCarrier()
 
   trait SetUp {
-    val objInTest                               = new PublishService(mockIntegrationCatalogueConnector)
-    val apiPublishRequest: ApiPublishRequest    = ApiPublishRequest(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents")
+    val objInTest                            = new PublishService(mockIntegrationCatalogueConnector)
+    val apiPublishRequest: ApiPublishRequest = ApiPublishRequest(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents")
 
     val expectedApiPublishResult: PublishResult =
       PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(UUID.randomUUID()), "publisherReference", PlatformType.CORE_IF)))

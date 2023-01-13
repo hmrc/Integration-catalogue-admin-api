@@ -35,16 +35,16 @@ import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import scala.concurrent.Future
 
 class IntegrationControllerISpec extends ServerBaseISpec
-  with IntegrationCatalogueConnectorStub with ApiDetailTestData {
+    with IntegrationCatalogueConnectorStub with ApiDetailTestData {
 
   protected override def appBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
-        "microservice.services.auth.port" -> wireMockPort,
-        "metrics.enabled" -> true,
-        "auditing.enabled" -> false,
-        "auditing.consumer.baseUri.host" -> wireMockHost,
-        "auditing.consumer.baseUri.port" -> wireMockPort,
+        "microservice.services.auth.port"                  -> wireMockPort,
+        "metrics.enabled"                                  -> true,
+        "auditing.enabled"                                 -> false,
+        "auditing.consumer.baseUri.host"                   -> wireMockHost,
+        "auditing.consumer.baseUri.port"                   -> wireMockPort,
         "microservice.services.integration-catalogue.host" -> wireMockHost,
         "microservice.services.integration-catalogue.port" -> wireMockPort
       )
@@ -55,17 +55,17 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
   trait Setup {
 
-    private val encodedMasterAuthKey = "dGVzdC1hdXRoLWtleQ=="
-    private val encodedCoreIfAuthKey = "c29tZUtleTM="
+    private val encodedMasterAuthKey      = "dGVzdC1hdXRoLWtleQ=="
+    private val encodedCoreIfAuthKey      = "c29tZUtleTM="
     private val encodedApiPlatformAuthKey = "c29tZUtleTI="
-    val coreIfAuthHeader = List(HeaderNames.AUTHORIZATION -> encodedCoreIfAuthKey)
-    val apiPlatformAuthHeader = List(HeaderNames.AUTHORIZATION -> encodedApiPlatformAuthKey)
-    val masterKeyHeader = List(HeaderNames.AUTHORIZATION -> encodedMasterAuthKey)
-    val coreIfPlatformTypeHeader =  List(HeaderKeys.platformKey -> "CORE_IF")
-    val apiPlatformPlatformTypeHeader =  List(HeaderKeys.platformKey -> "API_PLATFORM")
+    val coreIfAuthHeader                  = List(HeaderNames.AUTHORIZATION -> encodedCoreIfAuthKey)
+    val apiPlatformAuthHeader             = List(HeaderNames.AUTHORIZATION -> encodedApiPlatformAuthKey)
+    val masterKeyHeader                   = List(HeaderNames.AUTHORIZATION -> encodedMasterAuthKey)
+    val coreIfPlatformTypeHeader          = List(HeaderKeys.platformKey -> "CORE_IF")
+    val apiPlatformPlatformTypeHeader     = List(HeaderKeys.platformKey -> "API_PLATFORM")
 
+    val exampleIntegrationId                                     = "2840ce2d-03fa-46bb-84d9-0299402b7b32"
 
-    val exampleIntegrationId = "2840ce2d-03fa-46bb-84d9-0299402b7b32"
     val validGetApisRequest: FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest(Helpers.GET, "/integration-catalogue-admin-api/services/integrations")
 
@@ -75,15 +75,12 @@ class IntegrationControllerISpec extends ServerBaseISpec
     def validFindwithFilterRequest(searchTerm: String): FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest(Helpers.GET, s"/integration-catalogue-admin-api/services/integrations$searchTerm")
 
-
-
     def validCatalogueReportRequest(): FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest(Helpers.GET, "/integration-catalogue-admin-api/services/report")
 
-
     def validDeleteIntegrationRequest(integrationId: String): FakeRequest[AnyContentAsEmpty.type] = {
       FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$integrationId")
-        .withHeaders(masterKeyHeader : _*)
+        .withHeaders(masterKeyHeader: _*)
     }
 
     def validDeleteIntegrationRequestWithNoHeaders(integrationId: String): FakeRequest[AnyContentAsEmpty.type] = {
@@ -92,7 +89,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
     def validDeleteByPlatformRequest(queryParam: String): FakeRequest[AnyContentAsEmpty.type] = {
       FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$queryParam")
-        .withHeaders(masterKeyHeader : _*)
+        .withHeaders(masterKeyHeader: _*)
     }
 
     def invalidPathRequest(): FakeRequest[AnyContentAsEmpty.type] = {
@@ -104,13 +101,13 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
     "DELETE [some unknown path]" should {
       "return blah" in new Setup {
-         val response: Future[Result] = route(app, invalidPathRequest()).get
-         status(response) mustBe NOT_FOUND
-         contentAsString(response) mustBe """{"errors":[{"message":"Path or Http method may be wrong. "}]}"""
+        val response: Future[Result] = route(app, invalidPathRequest()).get
+        status(response) mustBe NOT_FOUND
+        contentAsString(response) mustBe """{"errors":[{"message":"Path or Http method may be wrong. "}]}"""
       }
     }
 
-    "GET /services/integrations/{id}" should  {
+    "GET /services/integrations/{id}" should {
 
       "return 400 when using invalid integrationId" in new Setup {
         val unknownIntegrationId = "UNKNOWN"
@@ -122,16 +119,15 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
       "return 200 and integration detail from backend" in new Setup {
         val jsonAsString: String = Json.toJson(exampleApiDetail.asInstanceOf[IntegrationDetail]).toString
-       primeGetByIdWithBody(OK, jsonAsString, exampleApiDetail.id)
+        primeGetByIdWithBody(OK, jsonAsString, exampleApiDetail.id)
 
         val response: Future[Result] = route(app, validFindByIntegrationIdRequest(exampleApiDetail.id.value.toString)).get
         status(response) mustBe OK
         contentAsString(response) mustBe jsonAsString
       }
 
-
       "return 404 when backend returns 404" in new Setup {
-       primeGetByIdWithBody(NOT_FOUND, "", exampleApiDetail.id)
+        primeGetByIdWithBody(NOT_FOUND, "", exampleApiDetail.id)
 
         val response: Future[Result] = route(app, validFindByIntegrationIdRequest(exampleApiDetail.id.value.toString)).get
         status(response) mustBe NOT_FOUND
@@ -139,7 +135,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
       }
 
       "return 400 when backend returns 400" in new Setup {
-       primeGetByIdWithBody(BAD_REQUEST, "", exampleApiDetail.id)
+        primeGetByIdWithBody(BAD_REQUEST, "", exampleApiDetail.id)
 
         val response: Future[Result] = route(app, validFindByIntegrationIdRequest(exampleApiDetail.id.value.toString)).get
         status(response) mustBe BAD_REQUEST
@@ -147,83 +143,80 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
     }
 
-     "GET /integrations" should {
-        "return 200 and integration response from backend when using searchTerm" in new Setup {
+    "GET /integrations" should {
+      "return 200 and integration response from backend when using searchTerm" in new Setup {
         val searchTerm = "?searchTerm=API-1001"
         primeFindWithFilterWithBody(OK, Json.toJson(IntegrationResponse(0, List.empty)).toString, searchTerm)
 
-          val response: Future[Result] = route(app, validFindwithFilterRequest(searchTerm)).get
-          status(response) mustBe OK
-          contentAsString(response) mustBe """{"count":0,"results":[]}"""
-        }
+        val response: Future[Result] = route(app, validFindwithFilterRequest(searchTerm)).get
+        status(response) mustBe OK
+        contentAsString(response) mustBe """{"count":0,"results":[]}"""
+      }
 
-        "return 200 and integration response from backend when using platformFilter" in new Setup {
+      "return 200 and integration response from backend when using platformFilter" in new Setup {
         val platformFilter = "?platformFilter=CORE_IF"
         primeFindWithFilterWithBody(OK, Json.toJson(IntegrationResponse(0, List.empty)).toString, platformFilter)
 
-          val response: Future[Result] = route(app, validFindwithFilterRequest(platformFilter)).get
-          status(response) mustBe OK
-          contentAsString(response) mustBe """{"count":0,"results":[]}"""
-        }
+        val response: Future[Result] = route(app, validFindwithFilterRequest(platformFilter)).get
+        status(response) mustBe OK
+        contentAsString(response) mustBe """{"count":0,"results":[]}"""
+      }
 
-        "return 200 and integration response from backend when using backendsFilter" in new Setup {
+      "return 200 and integration response from backend when using backendsFilter" in new Setup {
         val backendsFilter = "?backendsFilter=ETMP"
         primeFindWithFilterWithBody(OK, Json.toJson(IntegrationResponse(0, List.empty)).toString, backendsFilter)
 
-          val response: Future[Result] = route(app, validFindwithFilterRequest(backendsFilter)).get
-          status(response) mustBe OK
-          contentAsString(response) mustBe """{"count":0,"results":[]}"""
-        }
+        val response: Future[Result] = route(app, validFindwithFilterRequest(backendsFilter)).get
+        status(response) mustBe OK
+        contentAsString(response) mustBe """{"count":0,"results":[]}"""
+      }
 
+      "return 400 when using invalid filter key" in new Setup {
+        val invalidFilterKey = "?invalidFilterKey=UNKNOWN"
 
-        "return 400 when using invalid filter key" in new Setup {
-          val invalidFilterKey = "?invalidFilterKey=UNKNOWN"
-
-          val response: Future[Result] = route(app, validFindwithFilterRequest(invalidFilterKey)).get
-          status(response) mustBe 400
-          contentAsString(response) mustBe """{"errors":[{"message":"Invalid query parameter key provided. It is case sensitive"}]}"""
-        }
-
+        val response: Future[Result] = route(app, validFindwithFilterRequest(invalidFilterKey)).get
+        status(response) mustBe 400
+        contentAsString(response) mustBe """{"errors":[{"message":"Invalid query parameter key provided. It is case sensitive"}]}"""
+      }
 
       "return 400 when using invalid platformFilter" in new Setup {
         val platformFilter = "?platformFilter=UNKNOWN"
 
-          val response: Future[Result] = route(app, validFindwithFilterRequest(platformFilter)).get
-          status(response) mustBe 400
-          contentAsString(response) mustBe """{"errors":[{"message":"Cannot accept UNKNOWN as PlatformType"}]}"""
-        }
+        val response: Future[Result] = route(app, validFindwithFilterRequest(platformFilter)).get
+        status(response) mustBe 400
+        contentAsString(response) mustBe """{"errors":[{"message":"Cannot accept UNKNOWN as PlatformType"}]}"""
+      }
 
       "return 400 when using empty platformFilter value" in new Setup {
         val platformFilter = "?platformFilter="
 
-          val response: Future[Result] = route(app, validFindwithFilterRequest(platformFilter)).get
-          status(response) mustBe 400
-          contentAsString(response) mustBe """{"errors":[{"message":"platformType cannot be empty"}]}"""
-        }
+        val response: Future[Result] = route(app, validFindwithFilterRequest(platformFilter)).get
+        status(response) mustBe 400
+        contentAsString(response) mustBe """{"errors":[{"message":"platformType cannot be empty"}]}"""
+      }
 
       "return 500 and when 404 returned from backend" in new Setup {
         val searchTerm = "?searchTerm=API-1001"
         primeFindWithFilterWithBody(NOT_FOUND, "", searchTerm)
 
-          val response: Future[Result] = route(app, validFindwithFilterRequest(searchTerm)).get
-          status(response) mustBe INTERNAL_SERVER_ERROR
-          contentAsString(response) mustBe """{"errors":[{"message":"Unable to process your request"}]}"""
+        val response: Future[Result] = route(app, validFindwithFilterRequest(searchTerm)).get
+        status(response) mustBe INTERNAL_SERVER_ERROR
+        contentAsString(response) mustBe """{"errors":[{"message":"Unable to process your request"}]}"""
 
-        }
+      }
 
       "return 500 and when 400 returned from backend" in new Setup {
         val searchTerm = "?searchTerm=API-1001"
         primeFindWithFilterWithBody(BAD_REQUEST, "", searchTerm)
 
-          val response: Future[Result] = route(app, validFindwithFilterRequest(searchTerm)).get
-          status(response) mustBe INTERNAL_SERVER_ERROR
+        val response: Future[Result] = route(app, validFindwithFilterRequest(searchTerm)).get
+        status(response) mustBe INTERNAL_SERVER_ERROR
 
-        }
+      }
 
-     }
+    }
 
     "DELETE /services/integrations/{id}" should {
-
 
       "respond with 200 when api results returned from backend" in new Setup {
         primeFindWithFilterWithBody(OK, Json.toJson(IntegrationResponse(1, List(exampleApiDetail3))).toString, "")
@@ -247,11 +240,11 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeDeleteByIdWithoutBody(exampleApiDetail.id.value.toString, NO_CONTENT)
 
         val response: Future[Result] =
-          route(app, validDeleteIntegrationRequest(exampleApiDetail.id.value.toString).withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader : _*)).get
+          route(app, validDeleteIntegrationRequest(exampleApiDetail.id.value.toString).withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
         status(response) mustBe NO_CONTENT
       }
 
-     "respond with 400 when non uuid id provided" in new Setup {
+      "respond with 400 when non uuid id provided" in new Setup {
 
         val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/invalidId")
 
@@ -259,7 +252,6 @@ class IntegrationControllerISpec extends ServerBaseISpec
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"Cannot accept invalidId as IntegrationId"}]}"""
       }
-
 
       "respond with 500 when backend returns an error" in new Setup {
         primeGetByIdWithBody(OK, Json.toJson(exampleApiDetail.asInstanceOf[IntegrationDetail]).toString, exampleApiDetail.id)
@@ -275,9 +267,9 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeDeleteByIdWithoutBody(exampleIntegrationId, NOT_FOUND)
 
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
+          FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
-        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfPlatformTypeHeader : _*)).get
+        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfPlatformTypeHeader: _*)).get
         status(response) mustBe UNAUTHORIZED
 
         contentAsString(response) mustBe """{"errors":[{"message":"Authorisation failed"}]}"""
@@ -287,9 +279,9 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeDeleteByIdWithoutBody(exampleIntegrationId, NOT_FOUND)
 
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
+          FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
-        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader : _*)).get
+        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader: _*)).get
         status(response) mustBe BAD_REQUEST
 
         contentAsString(response) mustBe """{"errors":[{"message":"platform type header is missing or invalid"}]}"""
@@ -299,7 +291,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeDeleteByIdWithoutBody(exampleIntegrationId, NOT_FOUND)
 
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
+          FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] =
           route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "INVALID_PLATFORM"): _*)).get
@@ -312,11 +304,10 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeGetByIdWithoutResponseBody(NOT_FOUND, exampleIntegrationId)
 
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
+          FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
         status(response) mustBe NOT_FOUND
-
 
         contentAsString(response) mustBe """{"errors":[{"message":"Integration with ID: 2840ce2d-03fa-46bb-84d9-0299402b7b32 not found"}]}"""
       }
@@ -326,7 +317,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeGetByIdWithBody(OK, Json.toJson(integrationWithApiPlatform.asInstanceOf[IntegrationDetail]).toString, integrationWithApiPlatform.id)
 
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
-          FakeRequest(Helpers.DELETE,s"/integration-catalogue-admin-api/services/integrations/${integrationWithApiPlatform.id.value.toString}")
+          FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/${integrationWithApiPlatform.id.value.toString}")
 
         val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
         status(response) mustBe UNAUTHORIZED
@@ -363,7 +354,6 @@ class IntegrationControllerISpec extends ServerBaseISpec
         status(response) mustBe OK
         contentAsString(response) mustBe """[{"platformType":"CORE_IF","integrationType":"API","count":3}]"""
       }
-
 
       "return 500 when call to backend fails" in new Setup {
         primeCatalogueReportReturnsBadRequest()

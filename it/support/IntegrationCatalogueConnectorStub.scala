@@ -23,9 +23,9 @@ import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
 
 trait IntegrationCatalogueConnectorStub {
-  val publishUrl = "/integration-catalogue/apis/publish"
+  val publishUrl             = "/integration-catalogue/apis/publish"
   val publishFileTransferUrl = "/integration-catalogue/filetransfer/publish"
-  val getApisUrl = "/integration-catalogue/integrations"
+  val getApisUrl             = "/integration-catalogue/integrations"
 
   def deleteIntegrationByIdUrl(integrationId: String) = s"/integration-catalogue/integrations/$integrationId"
 
@@ -101,8 +101,7 @@ trait IntegrationCatalogueConnectorStub {
         aResponse()
           .withStatus(status)
           .withHeader("Content-Type", "application/json")
-      )
-    )
+      ))
   }
 
   private def primeWithBody(x: MappingBuilder, status: Int, responseBody: String) = {
@@ -112,8 +111,7 @@ trait IntegrationCatalogueConnectorStub {
           .withStatus(status)
           .withHeader("Content-Type", "application/json")
           .withBody(responseBody)
-      )
-    )
+      ))
   }
 
 }

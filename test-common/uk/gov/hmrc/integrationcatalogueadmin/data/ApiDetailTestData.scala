@@ -99,7 +99,7 @@ trait ApiDetailTestData {
   val exampleRequest1: Example = Example(exampleRequest1name, exampleRequest1Body)
   val exampleResponse1         = new Example("example response name", "example response body")
 
-  val request: Request   = Request(description = Some("request"), schema = Some(schema1), mediaType = Some(jsonMediaType), examples = List(exampleRequest1))
+  val request: Request = Request(description = Some("request"), schema = Some(schema1), mediaType = Some(jsonMediaType), examples = List(exampleRequest1))
 
   val response: Response =
     Response(
@@ -111,7 +111,7 @@ trait ApiDetailTestData {
       headers = List(headerRef)
     )
 
-  val reqHeaderRef       = Parameter(Some("userId"), Some("components/parameters/userId"))
+  val reqHeaderRef = Parameter(Some("userId"), Some("components/parameters/userId"))
 
   val reqHeaderParameter = Parameter(
     name = Some("userId"),
