@@ -65,9 +65,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(IntegrationTest / unmanagedSourceDirectories += (IntegrationTest / baseDirectory).value / "test-common")
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .settings(scalacOptions ++= Seq("-deprecation", "-feature", "-Ypartial-unification"))
-  .settings(headerSettings(IntegrationTest) ++ automateHeaderSettings(IntegrationTest),
-    scalafixConfigSettings(IntegrationTest)
-  )
+  .settings(scalafixConfigSettings(IntegrationTest): _*)
+
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
