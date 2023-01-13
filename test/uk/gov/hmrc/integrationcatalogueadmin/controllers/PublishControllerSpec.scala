@@ -16,11 +16,16 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
+import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 import akka.stream.Materializer
 import org.mockito.scalatest.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.http.HeaderNames
 import play.api.libs.Files.{SingletonTemporaryFileCreator, TemporaryFile}
 import play.api.libs.json.{JsObject, Json}
@@ -38,10 +43,6 @@ import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.services.PublishService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
-
-import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar with StubBodyParserFactory {
 

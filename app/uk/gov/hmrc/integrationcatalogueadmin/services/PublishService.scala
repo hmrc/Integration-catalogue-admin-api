@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.integrationcatalogue.models.{ApiPublishRequest, PublishResult}
-import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
-import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
+
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
+import uk.gov.hmrc.integrationcatalogue.models.{ApiPublishRequest, FileTransferPublishRequest, PublishResult}
+import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
 @Singleton
 class PublishService @Inject() (integrationCatalogueConnector: IntegrationCatalogueConnector) {

@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.integrationcatalogue.models.common
 
-import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
-
 import java.util.UUID
 import scala.collection.immutable
+
+import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
 
 case class IntegrationId(value: UUID) extends AnyVal
 

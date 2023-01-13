@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
@@ -34,9 +37,6 @@ import uk.gov.hmrc.integrationcatalogueadmin.models.IntegrationDetailRequest
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class IntegrationController @Inject() (

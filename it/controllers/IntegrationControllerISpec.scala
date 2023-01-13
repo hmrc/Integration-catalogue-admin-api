@@ -16,6 +16,10 @@
 
 package controllers
 
+import scala.concurrent.Future
+
+import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
+
 import play.api.http.HeaderNames
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
@@ -23,7 +27,6 @@ import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
-import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationType.API
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
@@ -31,8 +34,6 @@ import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
 import uk.gov.hmrc.integrationcatalogue.models.{ApiDetail, DeleteIntegrationsResponse, IntegrationDetail, IntegrationPlatformReport, IntegrationResponse}
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
-
-import scala.concurrent.Future
 
 class IntegrationControllerISpec extends ServerBaseISpec
     with IntegrationCatalogueConnectorStub with ApiDetailTestData {
@@ -64,7 +65,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
     val coreIfPlatformTypeHeader          = List(HeaderKeys.platformKey -> "CORE_IF")
     val apiPlatformPlatformTypeHeader     = List(HeaderKeys.platformKey -> "API_PLATFORM")
 
-    val exampleIntegrationId                                     = "2840ce2d-03fa-46bb-84d9-0299402b7b32"
+    val exampleIntegrationId = "2840ce2d-03fa-46bb-84d9-0299402b7b32"
 
     val validGetApisRequest: FakeRequest[AnyContentAsEmpty.type] =
       FakeRequest(Helpers.GET, "/integration-catalogue-admin-api/services/integrations")

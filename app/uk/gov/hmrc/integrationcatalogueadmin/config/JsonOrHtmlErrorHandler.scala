@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.config
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
+
 import play.api.Environment
 import play.api.http.JsonHttpErrorHandler
 import play.api.libs.json.Json
 import play.api.mvc.{RequestHeader, Result, Results}
-import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import play.mvc.Http.Status._
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
 
 @Singleton
 class CustomJsonErrorHandler @Inject() (environment: Environment)()

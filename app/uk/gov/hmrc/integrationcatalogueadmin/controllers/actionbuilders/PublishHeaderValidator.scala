@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import javax.inject.Singleton
+
 import cats.data.Validated._
 import cats.data._
 import cats.implicits._
-import play.api.mvc.Request
+
+import play.api.mvc.{Headers, Request}
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponseMessage
 import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
 import uk.gov.hmrc.integrationcatalogueadmin.models.{ExtractedHeaders, HeaderKeys}
-
-import javax.inject.Singleton
-import play.api.mvc.Headers
 
 @Singleton
 class PublishHeaderValidator {

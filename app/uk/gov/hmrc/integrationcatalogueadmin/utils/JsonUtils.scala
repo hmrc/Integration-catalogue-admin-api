@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.utils
 
-import play.api.libs.json.{JsValue, Json, Reads}
-import play.api.Logging
 import scala.util.Try
+
+import play.api.Logging
+import play.api.libs.json.{JsValue, Json, Reads}
 
 trait JsonUtils extends Logging {
 

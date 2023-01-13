@@ -16,11 +16,12 @@
 
 package support
 
+import scala.collection.JavaConverters
+
 import com.kenshoo.play.metrics.Metrics
 import org.scalatest.Suite
-import play.api.Application
 
-import scala.collection.JavaConverters
+import play.api.Application
 
 trait MetricsTestSupport {
   self: Suite =>

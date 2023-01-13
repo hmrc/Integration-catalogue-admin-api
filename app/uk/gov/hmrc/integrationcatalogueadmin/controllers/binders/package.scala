@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
-import play.api.mvc.PathBindable
-import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
 import java.util.UUID
 import scala.util.Try
-import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
-import play.api.mvc.QueryStringBindable
+
+import play.api.mvc.{PathBindable, QueryStringBindable}
+import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
 
 package object binders {
 

@@ -16,17 +16,18 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import cats.data.Validated.{Invalid, Valid}
+
 import play.api.libs.json.Json
-import play.api.mvc.{ActionRefiner, Request, Result}
 import play.api.mvc.Results.BadRequest
+import play.api.mvc.{ActionRefiner, Request, Result}
 import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponse
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogueadmin.models.{ExtractedHeaders, ValidatedApiPublishRequest}
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ValidateApiPublishRequestAction @Inject() (headerValidator: PublishHeaderValidator)(implicit ec: ExecutionContext)

@@ -16,12 +16,16 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.connectors
 
+import java.util.UUID
+import scala.concurrent.{ExecutionContext, Future}
+
 import org.mockito.captor.{ArgCaptor, Captor}
 import org.mockito.scalatest.MockitoSugar
 import org.mockito.stubbing.ScalaOngoingStubbing
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
+
 import play.api.libs.json.Writes
 import play.api.test.Helpers
 import play.api.test.Helpers._
@@ -31,9 +35,6 @@ import uk.gov.hmrc.integrationcatalogue.models.common._
 import uk.gov.hmrc.integrationcatalogueadmin.AwaitTestSupport
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
-
-import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
 
 class IntegrationCatalogueConnectorSpec extends AnyWordSpec
     with Matchers

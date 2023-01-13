@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.integrationcatalogue.models.{DeleteApiResult, IntegrationDetail, IntegrationFilter, IntegrationPlatformReport, IntegrationResponse}
-import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
-import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
+
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
+import uk.gov.hmrc.integrationcatalogue.models.{DeleteApiResult, IntegrationDetail, IntegrationFilter, IntegrationPlatformReport, IntegrationResponse}
+import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
 @Singleton
 class IntegrationService @Inject() (integrationCatalogueConnector: IntegrationCatalogueConnector) {

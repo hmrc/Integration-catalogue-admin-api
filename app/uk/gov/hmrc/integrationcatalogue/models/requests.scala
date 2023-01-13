@@ -17,6 +17,7 @@
 package uk.gov.hmrc.integrationcatalogue.models
 
 import org.joda.time.DateTime
+
 import uk.gov.hmrc.integrationcatalogue.models.common._
 
 case class IntegrationResponse(count: Int, results: List[IntegrationDetail])

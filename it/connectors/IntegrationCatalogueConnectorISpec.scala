@@ -16,14 +16,17 @@
 
 package connectors
 
+import java.util.UUID
+
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.scalatest.BeforeAndAfterEach
+import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
+
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.test.Helpers._
-import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models._
@@ -32,8 +35,6 @@ import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
 import uk.gov.hmrc.integrationcatalogue.models.common._
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
-
-import java.util.UUID
 
 class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailTestData with BeforeAndAfterEach with IntegrationCatalogueConnectorStub {
 

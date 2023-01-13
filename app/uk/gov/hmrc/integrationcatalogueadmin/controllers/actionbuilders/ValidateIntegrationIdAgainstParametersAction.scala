@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, Result}
@@ -26,9 +29,6 @@ import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMess
 import uk.gov.hmrc.integrationcatalogueadmin.models.{HeaderKeys, IntegrationDetailRequest}
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
 import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ValidateIntegrationIdAgainstParametersAction @Inject() (integrationService: IntegrationService)(implicit ec: ExecutionContext)

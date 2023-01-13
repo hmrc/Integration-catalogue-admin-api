@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionRefiner, Request, Result, WrappedRequest}
@@ -24,8 +26,6 @@ import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
-
-import scala.concurrent.{ExecutionContext, Future}
 
 case class ValidatedDeleteByPlatformRequest[A](platform: PlatformType, request: Request[A]) extends WrappedRequest[A](request)
 

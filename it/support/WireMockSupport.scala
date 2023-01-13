@@ -22,8 +22,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatest.Suite
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Suite}
 
 case class WireMockBaseUrl(value: URL)
 

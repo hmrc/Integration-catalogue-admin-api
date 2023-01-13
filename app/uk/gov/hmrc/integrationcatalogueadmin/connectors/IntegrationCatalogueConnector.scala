@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.connectors
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
+
 import play.api.Logging
 import play.api.http.Status._
 import uk.gov.hmrc.http.HttpReads.Implicits._
@@ -24,10 +28,6 @@ import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.control.NonFatal
 
 @Singleton
 class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppConfig)(implicit ec: ExecutionContext) extends Logging {

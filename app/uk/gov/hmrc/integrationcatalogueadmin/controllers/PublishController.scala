@@ -16,6 +16,11 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.io.Source
+import scala.util.{Failure, Success, Try}
+
 import play.api.Logging
 import play.api.libs.Files
 import play.api.libs.json.{JsValue, Json}
@@ -29,11 +34,6 @@ import uk.gov.hmrc.integrationcatalogueadmin.models.{HeaderKeys, ValidatedApiPub
 import uk.gov.hmrc.integrationcatalogueadmin.services.PublishService
 import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.io.Source
-import scala.util.{Failure, Success, Try}
 
 @Singleton
 class PublishController @Inject() (

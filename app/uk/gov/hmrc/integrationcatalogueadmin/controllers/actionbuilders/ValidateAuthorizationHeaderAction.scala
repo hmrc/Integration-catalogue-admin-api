@@ -16,6 +16,12 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import java.nio.charset.StandardCharsets
+import java.util.Base64
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
+
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
@@ -28,12 +34,6 @@ import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMess
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
-
-import java.nio.charset.StandardCharsets
-import java.util.Base64
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 @Singleton
 class ValidateAuthorizationHeaderAction @Inject() (appConfig: AppConfig)(implicit ec: ExecutionContext) extends ActionFilter[Request] with HttpErrorFunctions

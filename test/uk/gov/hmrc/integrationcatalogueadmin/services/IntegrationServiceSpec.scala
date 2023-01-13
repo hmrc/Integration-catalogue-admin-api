@@ -16,11 +16,15 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
+import java.util.UUID
+import scala.concurrent.Future
+
 import org.mockito.scalatest.MockitoSugar
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{Assertion, BeforeAndAfterEach}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationType.{API, FILE_TRANSFER}
@@ -29,9 +33,6 @@ import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformTy
 import uk.gov.hmrc.integrationcatalogueadmin.AwaitTestSupport
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
-
-import java.util.UUID
-import scala.concurrent.Future
 
 class IntegrationServiceSpec extends AnyWordSpec
     with Matchers with GuiceOneAppPerSuite with MockitoSugar with ApiDetailTestData with AwaitTestSupport with BeforeAndAfterEach {
