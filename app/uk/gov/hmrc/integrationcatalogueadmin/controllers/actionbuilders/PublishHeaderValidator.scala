@@ -23,8 +23,10 @@ import cats.data._
 import cats.implicits._
 
 import play.api.mvc.{Headers, Request}
+
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponseMessage
 import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
+
 import uk.gov.hmrc.integrationcatalogueadmin.models.{ExtractedHeaders, HeaderKeys}
 
 @Singleton

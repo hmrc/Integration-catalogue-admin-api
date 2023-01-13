@@ -19,6 +19,7 @@ package uk.gov.hmrc.integrationcatalogueadmin.utils
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.mvc.Results.BadRequest
+
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}

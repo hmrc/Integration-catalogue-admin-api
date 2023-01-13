@@ -27,8 +27,10 @@ import play.api.libs.json.{Json => ScalaJson}
 import play.api.mvc.Results.{BadRequest, UnsupportedMediaType}
 import play.api.mvc.{ActionRefiner, Request, Result}
 import uk.gov.hmrc.http.HttpErrorFunctions
+
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage, FileTransferPublishRequest}
+
 import uk.gov.hmrc.integrationcatalogueadmin.models.FileTransferYamlRequest
 import uk.gov.hmrc.integrationcatalogueadmin.utils.JsonUtils
 

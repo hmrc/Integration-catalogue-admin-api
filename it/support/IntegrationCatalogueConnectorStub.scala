@@ -21,6 +21,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 
 import play.api.test.Helpers.BAD_REQUEST
+
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
 
 trait IntegrationCatalogueConnectorStub {

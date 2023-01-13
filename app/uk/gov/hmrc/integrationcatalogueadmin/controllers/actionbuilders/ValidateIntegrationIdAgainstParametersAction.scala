@@ -23,9 +23,11 @@ import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionFilter, Result}
 import uk.gov.hmrc.http.HttpErrorFunctions
+
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage, IntegrationDetail}
+
 import uk.gov.hmrc.integrationcatalogueadmin.models.{HeaderKeys, IntegrationDetailRequest}
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
 import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters

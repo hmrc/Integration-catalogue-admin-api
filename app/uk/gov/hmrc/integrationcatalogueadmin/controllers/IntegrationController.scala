@@ -23,9 +23,13 @@ import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
 import uk.gov.hmrc.integrationcatalogue.models.{Request => _, _}
+
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.ValidateDeleteByPlatformAction._
 import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.{
@@ -35,8 +39,6 @@ import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.{
 }
 import uk.gov.hmrc.integrationcatalogueadmin.models.IntegrationDetailRequest
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 @Singleton
 class IntegrationController @Inject() (

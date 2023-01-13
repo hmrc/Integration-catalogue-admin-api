@@ -20,8 +20,10 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 import uk.gov.hmrc.http.HeaderCarrier
+
 import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
 import uk.gov.hmrc.integrationcatalogue.models.{ApiPublishRequest, FileTransferPublishRequest, PublishResult}
+
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
 @Singleton

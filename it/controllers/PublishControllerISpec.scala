@@ -38,9 +38,11 @@ import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.test.Helpers.{BAD_REQUEST, _}
 import play.api.test.{FakeRequest, Helpers}
+
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
+
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 
 class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach with IntegrationCatalogueConnectorStub {

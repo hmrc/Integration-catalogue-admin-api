@@ -27,11 +27,13 @@ import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
+
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationType.API
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
 import uk.gov.hmrc.integrationcatalogue.models.{ApiDetail, DeleteIntegrationsResponse, IntegrationDetail, IntegrationPlatformReport, IntegrationResponse}
+
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 

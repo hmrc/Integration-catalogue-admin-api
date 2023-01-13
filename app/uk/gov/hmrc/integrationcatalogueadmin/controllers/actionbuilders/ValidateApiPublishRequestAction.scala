@@ -25,8 +25,10 @@ import play.api.libs.json.Json
 import play.api.mvc.Results.BadRequest
 import play.api.mvc.{ActionRefiner, Request, Result}
 import uk.gov.hmrc.http.HttpErrorFunctions
+
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponse
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+
 import uk.gov.hmrc.integrationcatalogueadmin.models.{ExtractedHeaders, ValidatedApiPublishRequest}
 
 @Singleton

@@ -30,8 +30,10 @@ import play.api.libs.json.Writes
 import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{BadGatewayException, HttpClient, _}
+
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
+
 import uk.gov.hmrc.integrationcatalogueadmin.AwaitTestSupport
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData

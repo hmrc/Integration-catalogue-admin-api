@@ -20,6 +20,7 @@ import java.util.UUID
 import scala.util.Try
 
 import play.api.mvc.{PathBindable, QueryStringBindable}
+
 import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
 
 package object binders {
