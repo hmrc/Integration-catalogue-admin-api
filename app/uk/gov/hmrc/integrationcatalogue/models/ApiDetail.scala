@@ -51,15 +51,15 @@ case class NumberAttributes(
 sealed trait Schema {
   def name: Option[String]
   def not: Option[Schema]
-  def `type`: Option[String] // scalastyle:ignore
+  def `type`: Option[String]     // scalastyle:ignore
   def pattern: Option[String]
   def description: Option[String]
   def ref: Option[String]
   def properties: List[Schema]
-  def `enum`: List[String]// scalastyle:ignore
+  def `enum`: List[String]       // scalastyle:ignore
   def required: List[String]
-  def minProperties: Option[Int]// scalastyle:ignore
-  def maxProperties: Option[Int]// scalastyle:ignore
+  def minProperties: Option[Int] // scalastyle:ignore
+  def maxProperties: Option[Int] // scalastyle:ignore
 }
 
 case class DefaultSchema(
