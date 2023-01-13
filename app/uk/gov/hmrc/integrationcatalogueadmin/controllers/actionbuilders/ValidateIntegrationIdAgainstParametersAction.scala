@@ -51,8 +51,9 @@ class ValidateIntegrationIdAgainstParametersAction @Inject() (integrationService
   private def validateIntegrationIdAgainstPlatform(integrationDetail: IntegrationDetail, platform: PlatformType) = {
 
     if (integrationDetail.platform == platform) None
-    else
+    else {
       Some(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage(s"Authorisation failed - ${platform.toString} is not authorised to delete an integration on ${integrationDetail.platform.toString}"))))))
+    }
 
   }
 

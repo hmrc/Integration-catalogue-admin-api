@@ -31,20 +31,21 @@ case class ValidatedDeleteByPlatformRequest[A](platform: PlatformType, request: 
 
 object ValidateDeleteByPlatformAction extends ValidateParameters {
 
-  def ValidatePlatformTypeParams(platforms: List[PlatformType])(implicit ec: ExecutionContext): ActionRefiner[Request, ValidatedDeleteByPlatformRequest] = {
+  def validatePlatformTypeParams(platforms: List[PlatformType])(implicit ec: ExecutionContext): ActionRefiner[Request, ValidatedDeleteByPlatformRequest] = {
     new ActionRefiner[Request, ValidatedDeleteByPlatformRequest] {
 
       override def executionContext: ExecutionContext = ec
 
       override def refine[A](request: Request[A]): Future[Either[Result, ValidatedDeleteByPlatformRequest[A]]] = {
         val platformTypeHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
-        if ((!platforms.isEmpty) && platforms.size == 1) {
+        if (platforms.nonEmpty && platforms.size == 1) {
 
-          if (platformTypeHeader.isEmpty || validatePlatformType(platformTypeHeader) == Some(platforms.head)) {
+          if (platformTypeHeader.isEmpty || validatePlatformType(platformTypeHeader).contains(platforms.head)) {
             Future.successful(Right(ValidatedDeleteByPlatformRequest(platforms.head, request)))
           } else Future.successful(Left(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("You are not authorised to delete integrations on this Platform")))))))
-        } else
+        } else {
           Future.successful(Left(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platforms query parameter is either invalid, missing or multiple have been provided")))))))
+        }
 
       }
 

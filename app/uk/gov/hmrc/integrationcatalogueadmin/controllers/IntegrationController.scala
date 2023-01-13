@@ -93,7 +93,7 @@ class IntegrationController @Inject() (
 
   def deleteByPlatform(platformFilter: List[PlatformType]): Action[AnyContent] =
     (Action andThen validateAuthorizationHeaderAction
-      andThen ValidatePlatformTypeParams(platformFilter)).async { implicit request =>
+      andThen validatePlatformTypeParams(platformFilter)).async { implicit request =>
       integrationService.deleteByPlatform(platformFilter.head).map {
         case DeleteIntegrationsSuccess(result)       => Ok(Json.toJson(result))
         case DeleteIntegrationsFailure(errorMessage) => InternalServerError(Json.toJson(ErrorResponse(List(ErrorResponseMessage(errorMessage)))))
