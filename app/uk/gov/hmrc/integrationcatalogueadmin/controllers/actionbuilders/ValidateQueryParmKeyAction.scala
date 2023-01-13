@@ -27,29 +27,27 @@ import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton
-class ValidateQueryParamKeyAction @Inject()()(implicit ec: ExecutionContext)
-  extends ActionFilter[Request] with HttpErrorFunctions with ValidateParameters {
+class ValidateQueryParamKeyAction @Inject() ()(implicit ec: ExecutionContext)
+    extends ActionFilter[Request] with HttpErrorFunctions with ValidateParameters {
   override def executionContext: ExecutionContext = ec
-  val BACKENDFILTERKEY =  "backendsFilter"
+  val BACKENDFILTERKEY                            = "backendsFilter"
 
-  private def validateBackendFiltersIfPresent(request: Request[Any]): Option[Result] ={
-    if(request.queryString.keys.toList.contains(BACKENDFILTERKEY)){
-         request.getQueryString(BACKENDFILTERKEY) match {
-           case Some(value) if(value.nonEmpty) =>  None 
-           case _ => Some(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("backendsFilter cannot be empty"))))))
-         }
+  private def validateBackendFiltersIfPresent(request: Request[Any]): Option[Result] = {
+    if (request.queryString.keys.toList.contains(BACKENDFILTERKEY)) {
+      request.getQueryString(BACKENDFILTERKEY) match {
+        case Some(value) if (value.nonEmpty) => None
+        case _                               => Some(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("backendsFilter cannot be empty"))))))
+      }
     } else None
-   
 
   }
+
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = {
-    val validKeys = List("platformFilter", "searchTerm", "platform", BACKENDFILTERKEY)
+    val validKeys      = List("platformFilter", "searchTerm", "platform", BACKENDFILTERKEY)
     val queryParamKeys = request.queryString.keys
-    val result = validateQueryParamKey(validKeys, queryParamKeys).fold(validateBackendFiltersIfPresent(request))(Some(_))
+    val result         = validateQueryParamKey(validKeys, queryParamKeys).fold(validateBackendFiltersIfPresent(request))(Some(_))
     Future.successful(result)
   }
-
 
 }

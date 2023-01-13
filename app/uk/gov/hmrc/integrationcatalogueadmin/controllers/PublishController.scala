@@ -33,7 +33,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
-import scala.util.{Success, Try, Failure}
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class PublishController @Inject() (
@@ -44,8 +44,8 @@ class PublishController @Inject() (
     validateAuthorizationHeaderAction: ValidateAuthorizationHeaderAction,
     validateFileTransferYamlPublishRequestAction: ValidateFileTransferYamlPublishRequestAction,
     playBodyParsers: PlayBodyParsers
-  )(implicit ec: ExecutionContext)
-    extends BackendController(cc)
+  )(implicit ec: ExecutionContext
+  ) extends BackendController(cc)
     with Logging
     with JsonUtils {
 
@@ -70,10 +70,10 @@ class PublishController @Inject() (
         else Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body - platform type mismatch"))))))
       case Failure(exception) => {
         logger.error("Invalid request body, must be a valid publish request", exception)
-          Future.successful(BadRequest(Json.toJson(ErrorResponse(List(
-            ErrorResponseMessage("Invalid request body"),
-            ErrorResponseMessage(exception.getMessage)
-          )))))
+        Future.successful(BadRequest(Json.toJson(ErrorResponse(List(
+          ErrorResponseMessage("Invalid request body"),
+          ErrorResponseMessage(exception.getMessage)
+        )))))
       }
     }
   }
@@ -86,30 +86,28 @@ class PublishController @Inject() (
     validateAuthorizationHeaderAction andThen
     validateApiPublishRequest).async(playBodyParsers.multipartFormData) {
     implicit request: ValidatedApiPublishRequest[MultipartFormData[Files.TemporaryFile]] =>
-
-
-    (request.body.file("selectedFile"), request.body.dataParts.get("selectedFile")) match {
-      case (Some(selectedFile), _) => {
+      (request.body.file("selectedFile"), request.body.dataParts.get("selectedFile")) match {
+        case (Some(selectedFile), _)              => {
           val bufferedSource = Source.fromFile(selectedFile.ref.path.toFile)
-          val fileContents = bufferedSource.getLines.mkString("\r\n")
+          val fileContents   = bufferedSource.getLines.mkString("\r\n")
           bufferedSource.close()
           publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, fileContents)
             .map(handlePublishResult)
-      }
-     case (None, Some(dataParts: Seq[String])) => {
-         dataParts match {
-            case Nil =>
+        }
+        case (None, Some(dataParts: Seq[String])) => {
+          dataParts match {
+            case Nil                        =>
               logger.info("selectedFile is missing from requestBody")
               Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
-            case oasStringList: Seq[String]  =>
+            case oasStringList: Seq[String] =>
               publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, oasStringList.head)
                 .map(handlePublishResult)
           }
-     }
-     case (_, _) =>  logger.info("selectedFile is missing from requestBody")
-              Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
-    }
-     
+        }
+        case (_, _)                               =>
+          logger.info("selectedFile is missing from requestBody")
+          Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
+      }
 
   }
 

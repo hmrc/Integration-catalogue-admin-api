@@ -43,7 +43,8 @@ object ValidateDeleteByPlatformAction extends ValidateParameters {
           if (platformTypeHeader.isEmpty || validatePlatformType(platformTypeHeader) == Some(platforms.head)) {
             Future.successful(Right(ValidatedDeleteByPlatformRequest(platforms.head, request)))
           } else Future.successful(Left(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("You are not authorised to delete integrations on this Platform")))))))
-        } else Future.successful(Left(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platforms query parameter is either invalid, missing or multiple have been provided")))))))
+        } else
+          Future.successful(Left(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platforms query parameter is either invalid, missing or multiple have been provided")))))))
 
       }
 

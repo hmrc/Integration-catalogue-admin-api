@@ -25,31 +25,26 @@ import scala.concurrent.Future
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 
-
 @Singleton
-class IntegrationService @Inject()(integrationCatalogueConnector: IntegrationCatalogueConnector){
+class IntegrationService @Inject() (integrationCatalogueConnector: IntegrationCatalogueConnector) {
 
-  def deleteByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier) : Future[Boolean] = {
+  def deleteByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier): Future[Boolean] = {
     integrationCatalogueConnector.deleteByIntegrationId(integrationId)
   }
 
-  def deleteByPlatform(platform: PlatformType)(implicit hc: HeaderCarrier) : Future[DeleteApiResult] = {
+  def deleteByPlatform(platform: PlatformType)(implicit hc: HeaderCarrier): Future[DeleteApiResult] = {
     integrationCatalogueConnector.deleteByPlatform(platform)
   }
 
-  def findWithFilters(integrationFilter: IntegrationFilter)
-  (implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationResponse]] = {
-        integrationCatalogueConnector.findWithFilters(integrationFilter)
+  def findWithFilters(integrationFilter: IntegrationFilter)(implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationResponse]] = {
+    integrationCatalogueConnector.findWithFilters(integrationFilter)
   }
 
-  def findByIntegrationId(integrationId: IntegrationId)
-    (implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationDetail]] = {
-         integrationCatalogueConnector.findByIntegrationId(integrationId)
+  def findByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationDetail]] = {
+    integrationCatalogueConnector.findByIntegrationId(integrationId)
   }
 
-  def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] ={
+  def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] = {
     integrationCatalogueConnector.catalogueReport()
   }
 }
-
-

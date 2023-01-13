@@ -25,20 +25,21 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
 
-
 @Singleton
-class PublishService @Inject()(integrationCatalogueConnector: IntegrationCatalogueConnector){
-    
-    def publishApi(publisherRef: Option[String], platformType: PlatformType, specType: SpecificationType, contents: String)
-    (implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]]  ={
-         integrationCatalogueConnector.publishApis(ApiPublishRequest(publisherRef, platformType, specType, contents))
-    }
+class PublishService @Inject() (integrationCatalogueConnector: IntegrationCatalogueConnector) {
 
-  def publishFileTransfer(publishRequest: FileTransferPublishRequest)
-    (implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]]  ={
-         integrationCatalogueConnector.publishFileTransfer(publishRequest)
-    }
+  def publishApi(
+      publisherRef: Option[String],
+      platformType: PlatformType,
+      specType: SpecificationType,
+      contents: String
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[Throwable, PublishResult]] = {
+    integrationCatalogueConnector.publishApis(ApiPublishRequest(publisherRef, platformType, specType, contents))
+  }
+
+  def publishFileTransfer(publishRequest: FileTransferPublishRequest)(implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]] = {
+    integrationCatalogueConnector.publishFileTransfer(publishRequest)
+  }
 
 }
-
-

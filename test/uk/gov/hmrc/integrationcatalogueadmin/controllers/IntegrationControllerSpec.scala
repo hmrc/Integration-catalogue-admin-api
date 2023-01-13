@@ -53,11 +53,11 @@ class IntegrationControllerSpec
 
   implicit lazy val mat: Materializer = app.materializer
 
-  val mockAppConfig: AppConfig = mock[AppConfig]
+  val mockAppConfig: AppConfig                   = mock[AppConfig]
   val mockIntegrationService: IntegrationService = mock[IntegrationService]
 
-  private val validateQueryParamKeyAction = app.injector.instanceOf[ValidateQueryParamKeyAction]
-  private val authAction = new ValidateAuthorizationHeaderAction(mockAppConfig)
+  private val validateQueryParamKeyAction                    = app.injector.instanceOf[ValidateQueryParamKeyAction]
+  private val authAction                                     = new ValidateAuthorizationHeaderAction(mockAppConfig)
   private val validateIntegrationIdAgainstPlatformTypeAction = new ValidateIntegrationIdAgainstParametersAction(mockIntegrationService)
 
   override def beforeEach(): Unit = {
@@ -77,14 +77,13 @@ class IntegrationControllerSpec
     )
 
     private val encodedCoreIfAuthKey = "c29tZUtleTM="
-    val coreIfAuthHeader = List(HeaderNames.AUTHORIZATION -> encodedCoreIfAuthKey)
-    val coreIfPlatformTypeHeader = List(HeaderKeys.platformKey -> "CORE_IF")
+    val coreIfAuthHeader             = List(HeaderNames.AUTHORIZATION -> encodedCoreIfAuthKey)
+    val coreIfPlatformTypeHeader     = List(HeaderKeys.platformKey -> "CORE_IF")
 
     private val encodedMasterAuthKey = "dGVzdC1hdXRoLWtleQ=="
-    val masterKeyHeader = List(HeaderNames.AUTHORIZATION -> encodedMasterAuthKey)
+    val masterKeyHeader              = List(HeaderNames.AUTHORIZATION -> encodedMasterAuthKey)
 
   }
-
 
   "DELETE /services/integrations/{id}" should {
 

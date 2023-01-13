@@ -31,7 +31,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ValidateIntegrationIdAgainstParametersAction @Inject()(integrationService: IntegrationService)(implicit ec: ExecutionContext)
+class ValidateIntegrationIdAgainstParametersAction @Inject() (integrationService: IntegrationService)(implicit ec: ExecutionContext)
     extends ActionFilter[IntegrationDetailRequest]
     with HttpErrorFunctions
     with ValidateParameters {

@@ -47,24 +47,24 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
   implicit lazy val mat: Materializer = app.materializer
 
-  private val env = Environment.simple()
+  private val env           = Environment.simple()
   private val configuration = Configuration.load(env)
 
   private val serviceConfig = new ServicesConfig(configuration)
-  private val appConfig = new AppConfig(configuration, serviceConfig)
+  private val appConfig     = new AppConfig(configuration, serviceConfig)
 
-  private val headerValidator = app.injector.instanceOf[ValidateApiPublishRequestAction]
-  private val authAction = app.injector.instanceOf[ValidateAuthorizationHeaderAction]
+  private val headerValidator                              = app.injector.instanceOf[ValidateApiPublishRequestAction]
+  private val authAction                                   = app.injector.instanceOf[ValidateAuthorizationHeaderAction]
   private val validateFileTransferYamlPublishRequestAction = app.injector.instanceOf[ValidateFileTransferYamlPublishRequestAction]
-  private val encodedAuthHeader = "dGVzdC1hdXRoLWtleQ==" // authorizationKey = test-auth-key
+  private val encodedAuthHeader                            = "dGVzdC1hdXRoLWtleQ==" // authorizationKey = test-auth-key
 
   private val publisherReference = "123456"
 
   val validHeaders = Seq(
-    HeaderKeys.platformKey -> PlatformType.CORE_IF.toString,
+    HeaderKeys.platformKey          -> PlatformType.CORE_IF.toString,
     HeaderKeys.specificationTypeKey -> "OAS_V3",
-    HeaderKeys.publisherRefKey -> publisherReference,
-    HeaderNames.AUTHORIZATION -> encodedAuthHeader
+    HeaderKeys.publisherRefKey      -> publisherReference,
+    HeaderNames.AUTHORIZATION       -> encodedAuthHeader
   )
 
   implicit class MyWrappedResult(result: Future[Result]) extends Matchers {
@@ -87,28 +87,26 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
       stubPlayBodyParsers(mat)
     )
 
-    def callPublishWithFile(expectedConnectorResponse: Option[PublishResult],
-                            headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
+    def callPublishWithFile(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
       expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
       val tempFile = SingletonTemporaryFileCreator.create("text", "txt")
       tempFile.deleteOnExit()
 
       val dataWithFile = new MultipartFormData[TemporaryFile](Map(), List(FilePart(filePartKey, fileName, Some("text/plain"), tempFile)), List())
-     callPublishCommon(dataWithFile, headers)
+      callPublishCommon(dataWithFile, headers)
     }
 
-     def callPublishWithDataPart(expectedConnectorResponse: Option[PublishResult],
-                                 headers: Seq[(String, String)], dataPart: Seq[String]): Future[Result] = {
-       if(dataPart.nonEmpty) {
+    def callPublishWithDataPart(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], dataPart: Seq[String]): Future[Result] = {
+      if (dataPart.nonEmpty) {
         expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
-       }
-     
-       val dataWithDataParts = new MultipartFormData[TemporaryFile](Map("selectedFile" -> dataPart), List.empty, List())
+      }
+
+      val dataWithDataParts = new MultipartFormData[TemporaryFile](Map("selectedFile" -> dataPart), List.empty, List())
       callPublishCommon(dataWithDataParts, headers)
     }
 
-    private def callPublishCommon(publishBody: MultipartFormData[TemporaryFile], headers: Seq[(String, String)]) ={
-       val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
+    private def callPublishCommon(publishBody: MultipartFormData[TemporaryFile], headers: Seq[(String, String)]) = {
+      val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
         .withHeaders(headers: _*)
         .withBody(publishBody)
 
@@ -121,7 +119,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
       val tempFile = SingletonTemporaryFileCreator.create("text", "txt")
       tempFile.deleteOnExit()
 
-      val data = new MultipartFormData[TemporaryFile](Map(), List(FilePart(filePartKey, fileName, Some("text/plain"), tempFile)), List())
+      val data           = new MultipartFormData[TemporaryFile](Map(), List(FilePart(filePartKey, fileName, Some("text/plain"), tempFile)), List())
       val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
         .withHeaders(headers: _*)
         .withBody(data)
@@ -136,7 +134,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 201 when valid File payload is sent" in new Setup {
 
-      val id: UUID = UUID.randomUUID()
+      val id: UUID               = UUID.randomUUID()
       val result: Future[Result] = callPublishWithFile(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = false, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders,
@@ -150,7 +148,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 201 when valid Data part payload is sent" in new Setup {
 
-      val id: UUID = UUID.randomUUID()
+      val id: UUID               = UUID.randomUUID()
       val result: Future[Result] = callPublishWithDataPart(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = false, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders,
@@ -163,7 +161,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 200 when valid File payload is sent" in new Setup {
 
-      val id: UUID = UUID.randomUUID()
+      val id: UUID               = UUID.randomUUID()
       val result: Future[Result] = callPublishWithFile(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders,
@@ -177,7 +175,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 200 when valid Data part payload is sent" in new Setup {
 
-      val id: UUID = UUID.randomUUID()
+      val id: UUID               = UUID.randomUUID()
       val result: Future[Result] = callPublishWithDataPart(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders,
@@ -190,7 +188,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 400 when empty Data part payload is sent" in new Setup {
 
-      val id: UUID = UUID.randomUUID()
+      val id: UUID               = UUID.randomUUID()
       val result: Future[Result] = callPublishWithDataPart(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders,
@@ -219,13 +217,14 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 400 when valid payload is sent but publish fails" in new Setup {
       val result: Future[Result] =
-        callPublishWithFile(Some(
-          PublishResult(isSuccess = false,
-          None,
-          List(PublishError(123, "some message")))),
+        callPublishWithFile(
+          Some(
+            PublishResult(isSuccess = false, None, List(PublishError(123, "some message")))
+          ),
           validHeaders,
           "selectedFile",
-          "text.txt")
+          "text.txt"
+        )
 
       result shouldBeResult BAD_REQUEST
       contentAsString(result) shouldBe """{"errors":[{"message":"some message"}]}"""
@@ -251,11 +250,11 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
     }
 
     "return 400 when platform is invalid in header" in new Setup {
-      val headers = Seq(
-        HeaderKeys.platformKey -> "SOME_RUBBISH",
+      val headers                = Seq(
+        HeaderKeys.platformKey          -> "SOME_RUBBISH",
         HeaderKeys.specificationTypeKey -> "OAS_V3",
-        HeaderKeys.publisherRefKey -> "123456",
-        HeaderNames.AUTHORIZATION -> encodedAuthHeader
+        HeaderKeys.publisherRefKey      -> "123456",
+        HeaderNames.AUTHORIZATION       -> encodedAuthHeader
       )
       val result: Future[Result] = callPublishWithFile(None, headers, "selectedFile", "text.txt")
 
@@ -275,11 +274,11 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
     }
 
     "return 400 when specType is invalid in header" in new Setup {
-      val headers = Seq(
-        HeaderKeys.platformKey -> "CORE_IF",
+      val headers                = Seq(
+        HeaderKeys.platformKey          -> "CORE_IF",
         HeaderKeys.specificationTypeKey -> "SOME_RUBBISH",
-        HeaderKeys.publisherRefKey -> "123456",
-        HeaderNames.AUTHORIZATION -> encodedAuthHeader
+        HeaderKeys.publisherRefKey      -> "123456",
+        HeaderNames.AUTHORIZATION       -> encodedAuthHeader
       )
       val result: Future[Result] = callPublishWithFile(None, headers, "selectedFile", "text.txt")
 
@@ -292,7 +291,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 200 when publisherRef not set in header" in new Setup {
 
-      val id: UUID = UUID.randomUUID()
+      val id: UUID               = UUID.randomUUID()
       val result: Future[Result] = callPublishWithFile(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         validHeaders.filterNot(_._1.equals(HeaderKeys.publisherRefKey)),
@@ -307,13 +306,13 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 200 when publisherRef is invalid in header" in new Setup {
       val invalidHeaders = Seq(
-        HeaderKeys.platformKey -> "CORE_IF",
+        HeaderKeys.platformKey          -> "CORE_IF",
         HeaderKeys.specificationTypeKey -> "OAS_V3",
-        HeaderKeys.publisherRefKey -> "",
-        HeaderNames.AUTHORIZATION -> encodedAuthHeader
+        HeaderKeys.publisherRefKey      -> "",
+        HeaderNames.AUTHORIZATION       -> encodedAuthHeader
       )
 
-     val id: UUID = UUID.randomUUID()
+      val id: UUID               = UUID.randomUUID()
       val result: Future[Result] = callPublishWithFile(
         Some(PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(id), publisherReference, PlatformType.CORE_IF)), List.empty)),
         invalidHeaders,
@@ -337,10 +336,10 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     "return 401 when Authorization is invalid in header" in new Setup {
       val invalidHeaders = Seq(
-        HeaderKeys.platformKey -> PlatformType.CORE_IF.toString,
+        HeaderKeys.platformKey          -> PlatformType.CORE_IF.toString,
         HeaderKeys.specificationTypeKey -> "OAS_V3",
-        HeaderKeys.publisherRefKey -> publisherReference,
-        HeaderNames.AUTHORIZATION -> "SOME_RUBBISH"
+        HeaderKeys.publisherRefKey      -> publisherReference,
+        HeaderNames.AUTHORIZATION       -> "SOME_RUBBISH"
       )
 
       val result: Future[Result] = callPublishWithFile(None, invalidHeaders, "selectedFile", "text.txt")

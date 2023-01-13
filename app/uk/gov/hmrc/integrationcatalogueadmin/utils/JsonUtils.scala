@@ -21,11 +21,12 @@ import play.api.Logging
 import scala.util.Try
 
 trait JsonUtils extends Logging {
-  def validateAndExtractJsonString[T](body: String)(implicit  reads: Reads[T]) : Try[T] = {
+
+  def validateAndExtractJsonString[T](body: String)(implicit reads: Reads[T]): Try[T] = {
     validateJsonAndExtract[T](body, body => Json.parse(body))
   }
 
-  private def validateJsonAndExtract[T](body: String, f: String => JsValue)(implicit reads: Reads[T]) : Try[T] = {
+  private def validateJsonAndExtract[T](body: String, f: String => JsValue)(implicit reads: Reads[T]): Try[T] = {
     Try[T] {
       f(body).as[T]
     }

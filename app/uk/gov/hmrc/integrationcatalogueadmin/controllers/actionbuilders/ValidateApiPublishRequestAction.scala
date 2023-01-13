@@ -28,22 +28,17 @@ import uk.gov.hmrc.integrationcatalogueadmin.models.{ExtractedHeaders, Validated
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-
 @Singleton
-class ValidateApiPublishRequestAction @Inject()(headerValidator: PublishHeaderValidator)
-                                               (implicit ec: ExecutionContext)
-  extends ActionRefiner[Request, ValidatedApiPublishRequest] with HttpErrorFunctions {
+class ValidateApiPublishRequestAction @Inject() (headerValidator: PublishHeaderValidator)(implicit ec: ExecutionContext)
+    extends ActionRefiner[Request, ValidatedApiPublishRequest] with HttpErrorFunctions {
   actionName =>
   override def executionContext: ExecutionContext = ec
 
   override def refine[A](request: Request[A]): Future[Either[Result, ValidatedApiPublishRequest[A]]] = Future.successful {
     headerValidator.validateHeaders(request) match {
       case Valid(a: ExtractedHeaders) =>
-        Right(ValidatedApiPublishRequest(a.publisherReference,
-          a.platformType,
-          a.specificationType,
-          request))
-      case Invalid(e) => Left(BadRequest(Json.toJson(ErrorResponse(e.toList))))
+        Right(ValidatedApiPublishRequest(a.publisherReference, a.platformType, a.specificationType, request))
+      case Invalid(e)                 => Left(BadRequest(Json.toJson(ErrorResponse(e.toList))))
     }
 
   }

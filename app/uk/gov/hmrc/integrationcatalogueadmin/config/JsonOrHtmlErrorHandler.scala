@@ -28,17 +28,15 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
 
 @Singleton
-class CustomJsonErrorHandler @Inject()(environment: Environment)()
+class CustomJsonErrorHandler @Inject() (environment: Environment)()
     extends JsonHttpErrorHandler(environment, None) {
 
-
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
-      val errorMessage = statusCode match {
-        case NOT_FOUND  => s"Path or Http method may be wrong. $message"
-        case _ => message
-      }
-      Future.successful(Results.Status(statusCode)(Json.toJson(ErrorResponse(List(ErrorResponseMessage(errorMessage))))))
+    val errorMessage = statusCode match {
+      case NOT_FOUND => s"Path or Http method may be wrong. $message"
+      case _         => message
     }
-
+    Future.successful(Results.Status(statusCode)(Json.toJson(ErrorResponse(List(ErrorResponseMessage(errorMessage))))))
+  }
 
 }

@@ -31,23 +31,23 @@ import scala.concurrent.{Await, Future}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should
 
-class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite with MockitoSugar  {
+class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite with MockitoSugar {
 
   val mockIntegrationCatalogueConnector: IntegrationCatalogueConnector = mock[IntegrationCatalogueConnector]
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private implicit val hc: HeaderCarrier                               = HeaderCarrier()
 
   trait SetUp {
-    val objInTest = new PublishService(mockIntegrationCatalogueConnector)
-    val apiPublishRequest: ApiPublishRequest = ApiPublishRequest(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents")
+    val objInTest                               = new PublishService(mockIntegrationCatalogueConnector)
+    val apiPublishRequest: ApiPublishRequest    = ApiPublishRequest(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents")
+
     val expectedApiPublishResult: PublishResult =
-      PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(UUID.randomUUID()),  "publisherReference", PlatformType.CORE_IF)))
+      PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(UUID.randomUUID()), "publisherReference", PlatformType.CORE_IF)))
 
     val expectedFileTransferPublishResult: PublishResult =
-      PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(UUID.randomUUID()),  "BVD-DPS-PCPMonthly-pull", PlatformType.CORE_IF)))
-    
-    val dateValue: DateTime = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
-    val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+      PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(UUID.randomUUID()), "BVD-DPS-PCPMonthly-pull", PlatformType.CORE_IF)))
 
+    val dateValue: DateTime    = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+    val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
 
     val fileTransferPublishRequest: FileTransferPublishRequest = FileTransferPublishRequest(
       fileTransferSpecificationVersion = "1.0",
@@ -55,7 +55,7 @@ class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneA
       title = "XXX-YYY-ZZZMonthly-pull",
       description = "A file transfer",
       platformType = PlatformType.CORE_IF,
-      lastUpdated =  dateValue,
+      lastUpdated = dateValue,
       reviewedDate = reviewedDate,
       contact = ContactInformation(Some("Core IF Team"), Some("example@gmail.com")),
       sourceSystem = List("XXX"),
@@ -73,7 +73,7 @@ class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneA
         Await.result(objInTest.publishApi(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents"), 500 millis)
 
       result match {
-        case Left(_) => fail()
+        case Left(_)                             => fail()
         case Right(publishResult: PublishResult) => publishResult shouldBe expectedApiPublishResult
       }
 
@@ -90,7 +90,7 @@ class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneA
         Await.result(objInTest.publishFileTransfer(fileTransferPublishRequest), 500 millis)
 
       result match {
-        case Left(_) => fail()
+        case Left(_)                             => fail()
         case Right(publishResult: PublishResult) => publishResult shouldBe expectedFileTransferPublishResult
       }
 

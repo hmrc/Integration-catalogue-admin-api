@@ -24,37 +24,39 @@ import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType._
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 
 @Singleton
-class AppConfig @Inject()(config: Configuration, servicesConfig: ServicesConfig) {
+class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
   val welshLanguageSupportEnabled: Boolean = config.getOptional[Boolean]("features.welsh-language-support").getOrElse(false)
 
   val en: String            = "en"
   val cy: String            = "cy"
   val defaultLanguage: Lang = Lang(en)
 
-  val integrationCatalogueUrl: String = servicesConfig.baseUrl("integration-catalogue")
-  val authorizationKey: String = servicesConfig.getString("authorizationKey")
-  val cmaAuthorizationKey: String = servicesConfig.getString("auth.authKey.cma")
-  val apiPlatformAuthorizationKey: String = servicesConfig.getString("auth.authKey.apiPlatform")
-  val coreIfAuthorizationKey: String = servicesConfig.getString("auth.authKey.coreIF")
-  val desAuthorizationKey: String = servicesConfig.getString("auth.authKey.DES")
-  val cdsClassicAuthorizationKey: String = servicesConfig.getString("auth.authKey.cdsClassic")
+  val integrationCatalogueUrl: String           = servicesConfig.baseUrl("integration-catalogue")
+  val authorizationKey: String                  = servicesConfig.getString("authorizationKey")
+  val cmaAuthorizationKey: String               = servicesConfig.getString("auth.authKey.cma")
+  val apiPlatformAuthorizationKey: String       = servicesConfig.getString("auth.authKey.apiPlatform")
+  val coreIfAuthorizationKey: String            = servicesConfig.getString("auth.authKey.coreIF")
+  val desAuthorizationKey: String               = servicesConfig.getString("auth.authKey.DES")
+  val cdsClassicAuthorizationKey: String        = servicesConfig.getString("auth.authKey.cdsClassic")
   val transactionEngineAuthorizationKey: String = servicesConfig.getString("auth.authKey.transactionEngine")
-  val sdesAuthorizationKey: String = servicesConfig.getString("auth.authKey.SDES")
-  val digiAuthorizationKey: String = servicesConfig.getString("auth.authKey.DIGI")
-  val dapiAuthorizationKey: String = servicesConfig.getString("auth.authKey.DAPI")
-  val cipAuthorizationKey: String = servicesConfig.getString("auth.authKey.CIP")
-  val hipAuthorizationKey: String = servicesConfig.getString("auth.authKey.HIP")
+  val sdesAuthorizationKey: String              = servicesConfig.getString("auth.authKey.SDES")
+  val digiAuthorizationKey: String              = servicesConfig.getString("auth.authKey.DIGI")
+  val dapiAuthorizationKey: String              = servicesConfig.getString("auth.authKey.DAPI")
+  val cipAuthorizationKey: String               = servicesConfig.getString("auth.authKey.CIP")
+  val hipAuthorizationKey: String               = servicesConfig.getString("auth.authKey.HIP")
 
-  val authPlatformMap: Map[PlatformType, String] = Map (CMA -> cmaAuthorizationKey,
-                                                        API_PLATFORM -> apiPlatformAuthorizationKey,
-                                                        CORE_IF -> coreIfAuthorizationKey,
-                                                        DES -> desAuthorizationKey,
-                                                        CDS_CLASSIC -> cdsClassicAuthorizationKey,
-                                                        TRANSACTION_ENGINE -> transactionEngineAuthorizationKey,
-                                                        SDES -> sdesAuthorizationKey,
-                                                        DIGI -> digiAuthorizationKey,
-                                                        DAPI -> dapiAuthorizationKey,
-                                                        CIP -> cipAuthorizationKey,
-                                                        HIP -> hipAuthorizationKey)
+  val authPlatformMap: Map[PlatformType, String] = Map(
+    CMA                -> cmaAuthorizationKey,
+    API_PLATFORM       -> apiPlatformAuthorizationKey,
+    CORE_IF            -> coreIfAuthorizationKey,
+    DES                -> desAuthorizationKey,
+    CDS_CLASSIC        -> cdsClassicAuthorizationKey,
+    TRANSACTION_ENGINE -> transactionEngineAuthorizationKey,
+    SDES               -> sdesAuthorizationKey,
+    DIGI               -> digiAuthorizationKey,
+    DAPI               -> dapiAuthorizationKey,
+    CIP                -> cipAuthorizationKey,
+    HIP                -> hipAuthorizationKey
+  )
 
 }

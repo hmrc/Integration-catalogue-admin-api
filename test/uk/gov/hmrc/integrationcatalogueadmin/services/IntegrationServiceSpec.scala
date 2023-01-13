@@ -34,25 +34,26 @@ import java.util.UUID
 import scala.concurrent.Future
 
 class IntegrationServiceSpec extends AnyWordSpec
-  with Matchers with GuiceOneAppPerSuite with MockitoSugar with ApiDetailTestData with AwaitTestSupport with BeforeAndAfterEach {
+    with Matchers with GuiceOneAppPerSuite with MockitoSugar with ApiDetailTestData with AwaitTestSupport with BeforeAndAfterEach {
 
   val mockIntegrationCatalogueConnector: IntegrationCatalogueConnector = mock[IntegrationCatalogueConnector]
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private implicit val hc: HeaderCarrier                               = HeaderCarrier()
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockIntegrationCatalogueConnector)
   }
+
   trait SetUp {
-    val objInTest = new IntegrationService(mockIntegrationCatalogueConnector)
+    val objInTest                           = new IntegrationService(mockIntegrationCatalogueConnector)
     val exampleIntegrationId: IntegrationId = IntegrationId(UUID.fromString("2840ce2d-03fa-46bb-84d9-0299402b7b32"))
 
-    def validateFailureCall[A](f: Future[A]): Assertion ={
+    def validateFailureCall[A](f: Future[A]): Assertion = {
       val result: A =
         await(f)
 
       result match {
-        case Left(_) => succeed
+        case Left(_)  => succeed
         case Right(_) => fail()
       }
     }
@@ -75,7 +76,6 @@ class IntegrationServiceSpec extends AnyWordSpec
     }
   }
 
-
   "findWithFilter" should {
     "return a Right when successful" in new SetUp {
       val expectedResult = List(exampleApiDetail, exampleApiDetail2, exampleFileTransfer)
@@ -86,7 +86,7 @@ class IntegrationServiceSpec extends AnyWordSpec
         await(objInTest.findWithFilters(IntegrationFilter(searchText = List("search"), platforms = List.empty)))
 
       result match {
-        case Left(_) => fail()
+        case Left(_)                                         => fail()
         case Right(integrationResponse: IntegrationResponse) => integrationResponse.results shouldBe expectedResult
       }
     }
@@ -109,7 +109,7 @@ class IntegrationServiceSpec extends AnyWordSpec
       verify(mockIntegrationCatalogueConnector).findByIntegrationId(eqTo(id))(eqTo(hc))
     }
 
-     "return apidetail from connector when returned from backend" in new SetUp {
+    "return apidetail from connector when returned from backend" in new SetUp {
       val id: IntegrationId = IntegrationId(UUID.randomUUID())
       when(mockIntegrationCatalogueConnector.findByIntegrationId(eqTo(id))(*)).thenReturn(Future.successful(Right(exampleApiDetail)))
 
@@ -118,13 +118,12 @@ class IntegrationServiceSpec extends AnyWordSpec
 
       result match {
         case Right(apiDetail) => apiDetail shouldBe exampleApiDetail
-        case Left(_) => fail()
+        case Left(_)          => fail()
       }
 
       verify(mockIntegrationCatalogueConnector).findByIntegrationId(eqTo(id))(eqTo(hc))
     }
   }
-
 
   "catalogueReport" should {
     "return error from connector" in new SetUp {
@@ -134,14 +133,12 @@ class IntegrationServiceSpec extends AnyWordSpec
     }
 
     "return results from connector" in new SetUp {
-      val reports = List(IntegrationPlatformReport(API_PLATFORM, API, 2),
-        IntegrationPlatformReport(CORE_IF, API, 5),
-        IntegrationPlatformReport(CORE_IF, FILE_TRANSFER, 2))
+      val reports = List(IntegrationPlatformReport(API_PLATFORM, API, 2), IntegrationPlatformReport(CORE_IF, API, 5), IntegrationPlatformReport(CORE_IF, FILE_TRANSFER, 2))
       when(mockIntegrationCatalogueConnector.catalogueReport()(*)).thenReturn(Future.successful(Right(reports)))
-     await(objInTest.catalogueReport()) match{
-       case Right(results) => results shouldBe reports
-       case _ => fail()
-     }
+      await(objInTest.catalogueReport()) match {
+        case Right(results) => results shouldBe reports
+        case _              => fail()
+      }
       verify(mockIntegrationCatalogueConnector).catalogueReport()(eqTo(hc))
     }
   }

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.utils
 
-
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.mvc.Results.BadRequest
@@ -37,8 +36,7 @@ trait ValidateParameters {
   def validateQueryParamKey(validKeys: List[String], queryParamKeys: Iterable[String]): Option[Result] = {
     if (!queryParamKeys.forall(validKeys.contains(_))) {
       Some(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid query parameter key provided. It is case sensitive"))))))
-    }
-    else None
+    } else None
   }
 
 }
