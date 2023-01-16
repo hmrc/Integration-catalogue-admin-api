@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,36 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
-import play.api.Logging
-import play.api.http.HeaderNames
-import play.api.libs.json.Json
-import play.api.mvc.Results._
-import play.api.mvc.{ActionFilter, Request, Result}
-import uk.gov.hmrc.http.HttpErrorFunctions
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
-import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
-import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
-import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
-import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
-import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
-
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+import play.api.Logging
+import play.api.http.HeaderNames
+import play.api.libs.json.Json
+import play.api.mvc.Results._
+import play.api.mvc.{ActionFilter, Request, Result}
+import uk.gov.hmrc.http.HttpErrorFunctions
+
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
+import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
+
+import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
+import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
+import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
+
 @Singleton
-class ValidateAuthorizationHeaderAction @Inject()
-(appConfig: AppConfig)(implicit ec: ExecutionContext) extends ActionFilter[Request] with HttpErrorFunctions with ValidateParameters with Logging{
+class ValidateAuthorizationHeaderAction @Inject() (appConfig: AppConfig)(implicit ec: ExecutionContext) extends ActionFilter[Request] with HttpErrorFunctions
+    with ValidateParameters with Logging {
 
   override def executionContext: ExecutionContext = ec
 
   override protected def filter[A](request: Request[A]): Future[Option[Result]] = {
 
-    val authHeader = request.headers.get(HeaderNames.AUTHORIZATION).getOrElse("")
+    val authHeader         = request.headers.get(HeaderNames.AUTHORIZATION).getOrElse("")
     val platformTypeHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
 
     if (authHeader.nonEmpty && base64Decode(authHeader).map(_ == appConfig.authorizationKey).getOrElse(false)) {
@@ -51,24 +53,25 @@ class ValidateAuthorizationHeaderAction @Inject()
     } else {
       validatePlatformType(platformTypeHeader) match {
         case Some(platformType) => validatePlatformAuthHeader(platformType, authHeader)
-        case None => Future.successful(Some(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platform type header is missing or invalid")))))))
+        case None               => Future.successful(Some(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platform type header is missing or invalid")))))))
       }
     }
 
   }
 
-  private def validatePlatformAuthHeader(platformType: PlatformType, authHeader: String)  = {
+  private def validatePlatformAuthHeader(platformType: PlatformType, authHeader: String) = {
     appConfig.authPlatformMap.foreach(k => {
-     val encodedString =  Try(new String(Base64.getEncoder.encode(k._2.getBytes), StandardCharsets.UTF_8))
+      val encodedString = Try(new String(Base64.getEncoder.encode(k._2.getBytes), StandardCharsets.UTF_8))
       logger.info(s"${k._1}  ${encodedString.getOrElse("ERROR-ENCODING")}")
     })
     appConfig.authPlatformMap.get(platformType) match {
       case Some(authKey) => if (base64Decode(authHeader).map(_ == authKey).getOrElse(false)) Future.successful(None)
-      else {
-         logger.info("Unauthorised -  key didn't match value in config")
+        else {
+          logger.info("Unauthorised -  key didn't match value in config")
           Future.successful(Some(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Authorisation failed")))))))
-      }
-      case None          => logger.info("Unauthorised - no config for platform type found")
+        }
+      case None          =>
+        logger.info("Unauthorised - no config for platform type found")
         Future.successful(Some(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Authorisation failed")))))))
     }
   }

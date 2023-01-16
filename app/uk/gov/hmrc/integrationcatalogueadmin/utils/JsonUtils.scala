@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.utils
 
-import play.api.libs.json.{JsValue, Json, Reads}
-import play.api.Logging
 import scala.util.Try
 
+import play.api.Logging
+import play.api.libs.json.{JsValue, Json, Reads}
+
 trait JsonUtils extends Logging {
-  def validateAndExtractJsonString[T](body: String)(implicit  reads: Reads[T]) : Try[T] = {
+
+  def validateAndExtractJsonString[T](body: String)(implicit reads: Reads[T]): Try[T] = {
     validateJsonAndExtract[T](body, body => Json.parse(body))
   }
 
-  private def validateJsonAndExtract[T](body: String, f: String => JsValue)(implicit reads: Reads[T]) : Try[T] = {
+  private def validateJsonAndExtract[T](body: String, f: String => JsValue)(implicit reads: Reads[T]): Try[T] = {
     Try[T] {
       f(body).as[T]
     }

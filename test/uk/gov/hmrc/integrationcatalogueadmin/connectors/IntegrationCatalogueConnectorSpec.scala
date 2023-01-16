@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,40 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.connectors
 
+import java.util.UUID
+import scala.concurrent.{ExecutionContext, Future}
+
 import org.mockito.captor.{ArgCaptor, Captor}
 import org.mockito.scalatest.MockitoSugar
 import org.mockito.stubbing.ScalaOngoingStubbing
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
+
 import play.api.libs.json.Writes
 import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{BadGatewayException, HttpClient, _}
+
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
+
 import uk.gov.hmrc.integrationcatalogueadmin.AwaitTestSupport
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 
-import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
-
 class IntegrationCatalogueConnectorSpec extends AnyWordSpec
-  with Matchers
-  with OptionValues
-  with MockitoSugar
-  with BeforeAndAfterEach
-  with AwaitTestSupport
-  with ApiDetailTestData {
+    with Matchers
+    with OptionValues
+    with MockitoSugar
+    with BeforeAndAfterEach
+    with AwaitTestSupport
+    with ApiDetailTestData {
 
-  private val mockHttpClient = mock[HttpClient]
-  private val mockAppConfig = mock[AppConfig]
+  private val mockHttpClient                = mock[HttpClient]
+  private val mockAppConfig                 = mock[AppConfig]
   private implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
-  private implicit val hc: HeaderCarrier = HeaderCarrier()
+  private implicit val hc: HeaderCarrier    = HeaderCarrier()
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -56,16 +59,16 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
   trait SetUp {
     val headerCarrierCaptor: Captor[HeaderCarrier] = ArgCaptor[HeaderCarrier]
 
-    val connector = new IntegrationCatalogueConnector(
+    val connector                                         = new IntegrationCatalogueConnector(
       mockHttpClient,
       mockAppConfig
     )
-    val integrationId: IntegrationId = IntegrationId(UUID.fromString("2840ce2d-03fa-46bb-84d9-0299402b7b32"))
-    val searchTerm = "API-1001"
-    val outboundUrl = "/integration-catalogue/apis/publish"
-    val findWithFilterUrl = "/integration-catalogue/integrations"
-    val reportUrl = "/integration-catalogue/report"
-    def deleteIntegrationsUrl(id: IntegrationId) = s"/integration-catalogue/integrations/${id.value}"
+    val integrationId: IntegrationId                      = IntegrationId(UUID.fromString("2840ce2d-03fa-46bb-84d9-0299402b7b32"))
+    val searchTerm                                        = "API-1001"
+    val outboundUrl                                       = "/integration-catalogue/apis/publish"
+    val findWithFilterUrl                                 = "/integration-catalogue/integrations"
+    val reportUrl                                         = "/integration-catalogue/report"
+    def deleteIntegrationsUrl(id: IntegrationId)          = s"/integration-catalogue/integrations/${id.value}"
     def deleteIntegrationsByPlatformUrl(platform: String) = s"/integration-catalogue/integrations?platformFilter=$platform"
 
     def httpCallToPublishWillSucceedWithResponse(response: PublishResult): ScalaOngoingStubbing[Future[PublishResult]] =
@@ -95,13 +98,10 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
     def httpCallToDeleteApiWillSucceed(response: HttpResponse, id: IntegrationId): ScalaOngoingStubbing[Future[HttpResponse]] =
       when(mockHttpClient.DELETE[HttpResponse](eqTo(deleteIntegrationsUrl(id)), *)(*, *, *)).thenReturn(Future.successful(response))
 
-    def httpCallToDeleteApiWillFail[A](exception: Throwable,
-                                       urlParam: A,
-                                       urlResolveFunction: A => String): ScalaOngoingStubbing[Future[HttpResponse]] =
+    def httpCallToDeleteApiWillFail[A](exception: Throwable, urlParam: A, urlResolveFunction: A => String): ScalaOngoingStubbing[Future[HttpResponse]] =
       when(mockHttpClient.DELETE[HttpResponse](eqTo(urlResolveFunction(urlParam)), *)(*, *, *)).thenReturn(Future.failed(exception))
 
-    def httpCallToDeleteByPlatformWillSucceed(response: DeleteIntegrationsResponse,
-                                              platform: String): ScalaOngoingStubbing[Future[DeleteIntegrationsResponse]] =
+    def httpCallToDeleteByPlatformWillSucceed(response: DeleteIntegrationsResponse, platform: String): ScalaOngoingStubbing[Future[DeleteIntegrationsResponse]] =
       when(mockHttpClient.DELETE[DeleteIntegrationsResponse](eqTo(deleteIntegrationsByPlatformUrl(platform)), *)(*, *, *))
         .thenReturn(Future.successful(response))
 
@@ -170,7 +170,7 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
   "findWithFilter" should {
 
     "return Right when successful" in new SetUp {
-      val expectedResult = List(exampleApiDetail, exampleApiDetail2)
+      val expectedResult            = List(exampleApiDetail, exampleApiDetail2)
       httpCallToFindWithFilterWillSucceedWithResponse(IntegrationResponse(2, expectedResult))
       val filter: IntegrationFilter = IntegrationFilter(searchText = List(searchTerm), platforms = List.empty)
 

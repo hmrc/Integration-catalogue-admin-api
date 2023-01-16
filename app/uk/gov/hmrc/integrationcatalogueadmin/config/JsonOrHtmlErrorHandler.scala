@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,28 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.config
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.Future
+
 import play.api.Environment
 import play.api.http.JsonHttpErrorHandler
 import play.api.libs.json.Json
 import play.api.mvc.{RequestHeader, Result, Results}
-import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import play.mvc.Http.Status._
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
 
 @Singleton
-class CustomJsonErrorHandler @Inject()(environment: Environment)()
+class CustomJsonErrorHandler @Inject() (environment: Environment)()
     extends JsonHttpErrorHandler(environment, None) {
 
-
   override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
-      val errorMessage = statusCode match {
-        case NOT_FOUND  => s"Path or Http method may be wrong. $message"
-        case _ => message
-      }
-      Future.successful(Results.Status(statusCode)(Json.toJson(ErrorResponse(List(ErrorResponseMessage(errorMessage))))))
+    val errorMessage = statusCode match {
+      case NOT_FOUND => s"Path or Http method may be wrong. $message"
+      case _         => message
     }
-
+    Future.successful(Results.Status(statusCode)(Json.toJson(ErrorResponse(List(ErrorResponseMessage(errorMessage))))))
+  }
 
 }

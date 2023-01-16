@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +16,34 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
+
 import akka.stream.Materializer
 import org.mockito.scalatest.MockitoSugar
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, StubBodyParserFactory}
 import uk.gov.hmrc.http.NotFoundException
+
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationType.{API, FILE_TRANSFER}
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
-import uk.gov.hmrc.integrationcatalogue.models.{DeleteIntegrationsFailure, DeleteIntegrationsResponse, DeleteIntegrationsSuccess, IntegrationPlatformReport}
 import uk.gov.hmrc.integrationcatalogue.models.common._
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.{DeleteIntegrationsFailure, DeleteIntegrationsResponse, DeleteIntegrationsSuccess, IntegrationPlatformReport}
+
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders._
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class IntegrationControllerSpec
     extends AnyWordSpec
@@ -53,11 +56,11 @@ class IntegrationControllerSpec
 
   implicit lazy val mat: Materializer = app.materializer
 
-  val mockAppConfig: AppConfig = mock[AppConfig]
+  val mockAppConfig: AppConfig                   = mock[AppConfig]
   val mockIntegrationService: IntegrationService = mock[IntegrationService]
 
-  private val validateQueryParamKeyAction = app.injector.instanceOf[ValidateQueryParamKeyAction]
-  private val authAction = new ValidateAuthorizationHeaderAction(mockAppConfig)
+  private val validateQueryParamKeyAction                    = app.injector.instanceOf[ValidateQueryParamKeyAction]
+  private val authAction                                     = new ValidateAuthorizationHeaderAction(mockAppConfig)
   private val validateIntegrationIdAgainstPlatformTypeAction = new ValidateIntegrationIdAgainstParametersAction(mockIntegrationService)
 
   override def beforeEach(): Unit = {
@@ -77,14 +80,13 @@ class IntegrationControllerSpec
     )
 
     private val encodedCoreIfAuthKey = "c29tZUtleTM="
-    val coreIfAuthHeader = List(HeaderNames.AUTHORIZATION -> encodedCoreIfAuthKey)
-    val coreIfPlatformTypeHeader = List(HeaderKeys.platformKey -> "CORE_IF")
+    val coreIfAuthHeader             = List(HeaderNames.AUTHORIZATION -> encodedCoreIfAuthKey)
+    val coreIfPlatformTypeHeader     = List(HeaderKeys.platformKey -> "CORE_IF")
 
     private val encodedMasterAuthKey = "dGVzdC1hdXRoLWtleQ=="
-    val masterKeyHeader = List(HeaderNames.AUTHORIZATION -> encodedMasterAuthKey)
+    val masterKeyHeader              = List(HeaderNames.AUTHORIZATION -> encodedMasterAuthKey)
 
   }
-
 
   "DELETE /services/integrations/{id}" should {
 

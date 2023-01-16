@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,34 +16,38 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.libs.json.Json
 import play.api.mvc.Results._
 import play.api.mvc.{ActionRefiner, Request, Result, WrappedRequest}
+
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
+
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.utils.ValidateParameters
-
-import scala.concurrent.{ExecutionContext, Future}
 
 case class ValidatedDeleteByPlatformRequest[A](platform: PlatformType, request: Request[A]) extends WrappedRequest[A](request)
 
 object ValidateDeleteByPlatformAction extends ValidateParameters {
 
-  def ValidatePlatformTypeParams(platforms: List[PlatformType])(implicit ec: ExecutionContext): ActionRefiner[Request, ValidatedDeleteByPlatformRequest] = {
+  def validatePlatformTypeParams(platforms: List[PlatformType])(implicit ec: ExecutionContext): ActionRefiner[Request, ValidatedDeleteByPlatformRequest] = {
     new ActionRefiner[Request, ValidatedDeleteByPlatformRequest] {
 
       override def executionContext: ExecutionContext = ec
 
       override def refine[A](request: Request[A]): Future[Either[Result, ValidatedDeleteByPlatformRequest[A]]] = {
         val platformTypeHeader = request.headers.get(HeaderKeys.platformKey).getOrElse("")
-        if ((!platforms.isEmpty) && platforms.size == 1) {
+        if (platforms.nonEmpty && platforms.size == 1) {
 
-          if (platformTypeHeader.isEmpty || validatePlatformType(platformTypeHeader) == Some(platforms.head)) {
+          if (platformTypeHeader.isEmpty || validatePlatformType(platformTypeHeader).contains(platforms.head)) {
             Future.successful(Right(ValidatedDeleteByPlatformRequest(platforms.head, request)))
           } else Future.successful(Left(Unauthorized(Json.toJson(ErrorResponse(List(ErrorResponseMessage("You are not authorised to delete integrations on this Platform")))))))
-        } else Future.successful(Left(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platforms query parameter is either invalid, missing or multiple have been provided")))))))
+        } else {
+          Future.successful(Left(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("platforms query parameter is either invalid, missing or multiple have been provided")))))))
+        }
 
       }
 

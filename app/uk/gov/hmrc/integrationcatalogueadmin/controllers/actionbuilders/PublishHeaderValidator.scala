@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders
 
+import javax.inject.Singleton
+
 import cats.data.Validated._
 import cats.data._
 import cats.implicits._
-import play.api.mvc.Request
+
+import play.api.mvc.{Headers, Request}
+
 import uk.gov.hmrc.integrationcatalogue.models.ErrorResponseMessage
 import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
-import uk.gov.hmrc.integrationcatalogueadmin.models.{ExtractedHeaders, HeaderKeys}
 
-import javax.inject.Singleton
-import play.api.mvc.Headers
+import uk.gov.hmrc.integrationcatalogueadmin.models.{ExtractedHeaders, HeaderKeys}
 
 @Singleton
 class PublishHeaderValidator {
@@ -37,26 +39,36 @@ class PublishHeaderValidator {
   }
 
   private def validatePlatformType[A](request: Request[A]): ValidationResult[PlatformType] = {
-    validateHeaderItem[PlatformType](HeaderKeys.platformKey, "platform type header is missing or invalid",
+    validateHeaderItem[PlatformType](
+      HeaderKeys.platformKey,
+      "platform type header is missing or invalid",
       x => PlatformType.values.map(_.toString()).contains(x.toUpperCase),
-      x => PlatformType.withNameInsensitive(x), request.headers)
+      x => PlatformType.withNameInsensitive(x),
+      request.headers
+    )
   }
 
   private def validateSpecificationType[A](request: Request[A]): ValidationResult[SpecificationType] = {
-    validateHeaderItem[SpecificationType](HeaderKeys.specificationTypeKey, "specification type header is missing or invalid",
+    validateHeaderItem[SpecificationType](
+      HeaderKeys.specificationTypeKey,
+      "specification type header is missing or invalid",
       x => SpecificationType.values.map(_.toString()).contains(x.toUpperCase),
-      x => SpecificationType.withNameInsensitive(x), request.headers)
+      x => SpecificationType.withNameInsensitive(x),
+      request.headers
+    )
   }
 
   private def validatePublisherReference[A](request: Request[A]): ValidationResult[Option[String]] = {
     request.headers.get(HeaderKeys.publisherRefKey).validNel
   }
 
-  private def validateHeaderItem[A](headerKey: String,
-                                    errorMessageStr: String,
-                                    validateFunc: String => Boolean,
-                                    extractFunc: String => A,
-                                    headers: Headers): ValidationResult[A] = {
+  private def validateHeaderItem[A](
+      headerKey: String,
+      errorMessageStr: String,
+      validateFunc: String => Boolean,
+      extractFunc: String => A,
+      headers: Headers
+    ): ValidationResult[A] = {
     val errorMessage = ErrorResponseMessage(errorMessageStr)
     val headerString = headers.get(headerKey).getOrElse("")
     if (validateFunc.apply(headerString)) extractFunc.apply(headerString).validNel else errorMessage.invalidNel

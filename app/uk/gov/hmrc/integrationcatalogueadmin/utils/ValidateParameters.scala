@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.utils
 
-
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.mvc.Results.BadRequest
-import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
-import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
+
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
+import uk.gov.hmrc.integrationcatalogue.models.{ErrorResponse, ErrorResponseMessage}
 
 trait ValidateParameters {
 
@@ -37,8 +37,7 @@ trait ValidateParameters {
   def validateQueryParamKey(validKeys: List[String], queryParamKeys: Iterable[String]): Option[Result] = {
     if (!queryParamKeys.forall(validKeys.contains(_))) {
       Some(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid query parameter key provided. It is case sensitive"))))))
-    }
-    else None
+    } else None
   }
 
 }

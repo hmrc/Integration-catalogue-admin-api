@@ -4,6 +4,18 @@ import bloop.integrations.sbt.BloopDefaults
 
 val appName = "integration-catalogue-admin-api"
 
+
+ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
+
+inThisBuild(
+  List(
+    scalaVersion := "2.12.15",
+    semanticdbEnabled := true,
+    semanticdbVersion := scalafixSemanticdb.revision
+  )
+)
+
+
 val silencerVersion = "1.7.0"
 
 val jettyVersion = "9.2.24.v20180105"
@@ -27,7 +39,7 @@ val jettyOverrides = Seq(
 
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin)
+  .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .settings(
     majorVersion                     := 0,
     scalaVersion                     := "2.12.12",
@@ -51,16 +63,17 @@ lazy val microservice = Project(appName, file("."))
   .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
   .settings(IntegrationTest / unmanagedResourceDirectories  += (IntegrationTest / baseDirectory).value / "it" / "resources")
   .settings(IntegrationTest / unmanagedSourceDirectories += (IntegrationTest / baseDirectory).value / "test-common")
-
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .settings(scalacOptions ++= Seq("-deprecation", "-feature", "-Ypartial-unification"))
+  .settings(scalafixConfigSettings(IntegrationTest): _*)
+
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := ";.*\\.domain\\.models\\..*;uk\\.gov\\.hmrc\\.BuildInfo;.*\\.Routes;.*\\.RoutesPrefix;;Module;GraphiteStartUp;.*\\.Reverse[^.]*",
-    ScoverageKeys.coverageMinimum := 96,
+    ScoverageKeys.coverageMinimumStmtTotal := 96,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     Test / parallelExecution  := false

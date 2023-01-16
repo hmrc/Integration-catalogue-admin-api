@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
-import play.api.mvc.PathBindable
-import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
 import java.util.UUID
 import scala.util.Try
-import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
-import play.api.mvc.QueryStringBindable
+
+import play.api.mvc.{PathBindable, QueryStringBindable}
+
+import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
 
 package object binders {
 
   private def integrationIdFromString(text: String): Either[String, IntegrationId] = {
     Try(UUID.fromString(text))
-    .toOption
-    .toRight(s"Cannot accept $text as IntegrationId")
-    .map(IntegrationId(_))
+      .toOption
+      .toRight(s"Cannot accept $text as IntegrationId")
+      .map(IntegrationId(_))
   }
 
   implicit def integrationIdPathBinder(implicit textBinder: PathBindable[String]): PathBindable[IntegrationId] = new PathBindable[IntegrationId] {
+
     override def bind(key: String, value: String): Either[String, IntegrationId] = {
       textBinder.bind(key, value).flatMap(integrationIdFromString)
     }
@@ -42,27 +43,25 @@ package object binders {
     }
   }
 
-    private def handleStringToPlatformType(stringVal: String): Either[String, PlatformType] = {
+  private def handleStringToPlatformType(stringVal: String): Either[String, PlatformType] = {
     Try(PlatformType.withNameInsensitive(stringVal))
       .toOption
       .toRight(
-        if(stringVal.nonEmpty){
-            s"Cannot accept $stringVal as PlatformType"
+        if (stringVal.nonEmpty) {
+          s"Cannot accept $stringVal as PlatformType"
         } else {
-            "platformType cannot be empty"
+          "platformType cannot be empty"
         }
-        
-        )
+      )
   }
-
-
 
   implicit def platformTypeQueryStringBindable(implicit textBinder: QueryStringBindable[String]): QueryStringBindable[PlatformType] =
     new QueryStringBindable[PlatformType] {
+
       override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, PlatformType]] = {
         textBinder.bind(key, params).map {
           case Right(platform) => handleStringToPlatformType(platform)
-          case Left(_) => Left("Unable to bind an platform") // unknown how we can test this scenario
+          case Left(_)         => Left("Unable to bind an platform") // unknown how we can test this scenario
         }
       }
 
@@ -70,6 +69,5 @@ package object binders {
         textBinder.unbind(key, platform.toString)
       }
     }
-
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,40 +16,36 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.integrationcatalogue.models.{DeleteApiResult, IntegrationDetail, IntegrationFilter, IntegrationPlatformReport, IntegrationResponse}
-import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
-import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType
 
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
+import uk.gov.hmrc.integrationcatalogue.models.{DeleteApiResult, IntegrationDetail, IntegrationFilter, IntegrationPlatformReport, IntegrationResponse}
+
+import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
 @Singleton
-class IntegrationService @Inject()(integrationCatalogueConnector: IntegrationCatalogueConnector){
+class IntegrationService @Inject() (integrationCatalogueConnector: IntegrationCatalogueConnector) {
 
-  def deleteByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier) : Future[Boolean] = {
+  def deleteByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier): Future[Boolean] = {
     integrationCatalogueConnector.deleteByIntegrationId(integrationId)
   }
 
-  def deleteByPlatform(platform: PlatformType)(implicit hc: HeaderCarrier) : Future[DeleteApiResult] = {
+  def deleteByPlatform(platform: PlatformType)(implicit hc: HeaderCarrier): Future[DeleteApiResult] = {
     integrationCatalogueConnector.deleteByPlatform(platform)
   }
 
-  def findWithFilters(integrationFilter: IntegrationFilter)
-  (implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationResponse]] = {
-        integrationCatalogueConnector.findWithFilters(integrationFilter)
+  def findWithFilters(integrationFilter: IntegrationFilter)(implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationResponse]] = {
+    integrationCatalogueConnector.findWithFilters(integrationFilter)
   }
 
-  def findByIntegrationId(integrationId: IntegrationId)
-    (implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationDetail]] = {
-         integrationCatalogueConnector.findByIntegrationId(integrationId)
+  def findByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationDetail]] = {
+    integrationCatalogueConnector.findByIntegrationId(integrationId)
   }
 
-  def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] ={
+  def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] = {
     integrationCatalogueConnector.catalogueReport()
   }
 }
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package uk.gov.hmrc.integrationcatalogueadmin.models
 
 import play.api.mvc.{Request, WrappedRequest}
+
 import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
-import uk.gov.hmrc.integrationcatalogue.models.IntegrationDetail
-import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
+import uk.gov.hmrc.integrationcatalogue.models.{FileTransferPublishRequest, IntegrationDetail}
 
 case class ExtractedHeaders(publisherReference: Option[String], platformType: PlatformType, specificationType: SpecificationType)
 

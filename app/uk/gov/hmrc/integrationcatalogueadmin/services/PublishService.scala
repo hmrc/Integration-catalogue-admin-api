@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,31 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.integrationcatalogue.models.{ApiPublishRequest, PublishResult}
-import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
-import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
-
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.Future
-import uk.gov.hmrc.integrationcatalogue.models.FileTransferPublishRequest
 
+import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.integrationcatalogue.models.common.{PlatformType, SpecificationType}
+import uk.gov.hmrc.integrationcatalogue.models.{ApiPublishRequest, FileTransferPublishRequest, PublishResult}
+
+import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
 @Singleton
-class PublishService @Inject()(integrationCatalogueConnector: IntegrationCatalogueConnector){
-    
-    def publishApi(publisherRef: Option[String], platformType: PlatformType, specType: SpecificationType, contents: String)
-    (implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]]  ={
-         integrationCatalogueConnector.publishApis(ApiPublishRequest(publisherRef, platformType, specType, contents))
-    }
+class PublishService @Inject() (integrationCatalogueConnector: IntegrationCatalogueConnector) {
 
-  def publishFileTransfer(publishRequest: FileTransferPublishRequest)
-    (implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]]  ={
-         integrationCatalogueConnector.publishFileTransfer(publishRequest)
-    }
+  def publishApi(
+      publisherRef: Option[String],
+      platformType: PlatformType,
+      specType: SpecificationType,
+      contents: String
+    )(implicit hc: HeaderCarrier
+    ): Future[Either[Throwable, PublishResult]] = {
+    integrationCatalogueConnector.publishApis(ApiPublishRequest(publisherRef, platformType, specType, contents))
+  }
+
+  def publishFileTransfer(publishRequest: FileTransferPublishRequest)(implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]] = {
+    integrationCatalogueConnector.publishFileTransfer(publishRequest)
+  }
 
 }
-
-

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.data
 
+import java.util.UUID
+
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, Maintainer, PlatformType, SpecificationType}
-import uk.gov.hmrc.integrationcatalogue.models._
 
-import java.util.UUID
+import uk.gov.hmrc.integrationcatalogue.models._
+import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, Maintainer, PlatformType, SpecificationType}
 
 trait ApiDetailTestData {
 
-  val filename = "API-1001_1.1.0.yaml"
-  val fileContents = "{}"
-  val uuid: UUID = UUID.fromString("28c0bd67-4176-42c7-be13-53be98a4db58")
-  val dateValue: DateTime = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+  val filename               = "API-1001_1.1.0.yaml"
+  val fileContents           = "{}"
+  val uuid: UUID             = UUID.fromString("28c0bd67-4176-42c7-be13-53be98a4db58")
+  val dateValue: DateTime    = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
   val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
 
   val apiPlatformMaintainer: Maintainer = Maintainer("API Platform Team", "#team-api-platform-sup")
-  val coreIfMaintainer: Maintainer = Maintainer("IF Team", "N/A", List.empty)
+  val coreIfMaintainer: Maintainer      = Maintainer("IF Team", "N/A", List.empty)
 
   val jsonMediaType = "application/json"
 
@@ -90,22 +91,31 @@ trait ApiDetailTestData {
           name = Some("PlatFormType"),
           `type` = Some("string"),
           pattern = Some("^[A-Z](ARN)[0-9]{7}$")
-        ))
+        )
+      )
     )
 
-
-
-  val exampleRequest1name = "example request 1"
-  val exampleRequest1Body = "{\"someValue\": \"abcdefg\"}"
+  val exampleRequest1name      = "example request 1"
+  val exampleRequest1Body      = "{\"someValue\": \"abcdefg\"}"
   val exampleRequest1: Example = Example(exampleRequest1name, exampleRequest1Body)
-  val exampleResponse1 = new Example("example response name", "example response body")
+  val exampleResponse1         = new Example("example response name", "example response body")
 
   val request: Request = Request(description = Some("request"), schema = Some(schema1), mediaType = Some(jsonMediaType), examples = List(exampleRequest1))
+
   val response: Response =
-    Response(statusCode = "200", description = Some("response"), schema = Some(schema2), mediaType = Some("application/json"), examples = List(exampleResponse1), headers = List(headerRef))
+    Response(
+      statusCode = "200",
+      description = Some("response"),
+      schema = Some(schema2),
+      mediaType = Some("application/json"),
+      examples = List(exampleResponse1),
+      headers = List(headerRef)
+    )
 
   val reqHeaderRef = Parameter(Some("userId"), Some("components/parameters/userId"))
-  val reqHeaderParameter = Parameter(name = Some("userId"),
+
+  val reqHeaderParameter = Parameter(
+    name = Some("userId"),
     in = Some("header"),
     description = Some("The UserId"),
     required = Some(true),
@@ -114,21 +124,24 @@ trait ApiDetailTestData {
       DefaultSchema(
         `type` = Some("string"),
         pattern = Some("^[A-Z](ARN)[0-9]{7}$")
-      )) )
+      )
+    )
+  )
 
   val endpointGetMethod: EndpointMethod = EndpointMethod("GET", Some("operationId"), Some("some summary"), Some("some description"), None, List(response))
+
   val endpointPutMethod: EndpointMethod =
     EndpointMethod(
-    "PUT",
-    Some("operationId2"),
-    Some("some summary"),
-    Some("some description"),
-    Some(request),
-    List.empty,
-    List(reqHeaderRef)
-  )
-  val endpoint1: Endpoint = Endpoint("/some/url", List(endpointGetMethod))
-  val endpoint2: Endpoint = Endpoint("/some/url", List(endpointPutMethod))
+      "PUT",
+      Some("operationId2"),
+      Some("some summary"),
+      Some("some description"),
+      Some(request),
+      List.empty,
+      List(reqHeaderRef)
+    )
+  val endpoint1: Endpoint               = Endpoint("/some/url", List(endpointGetMethod))
+  val endpoint2: Endpoint               = Endpoint("/some/url", List(endpointPutMethod))
 
   val endpoints: List[Endpoint] = List(endpoint1, endpoint2, Endpoint("/some/url", List.empty))
 
@@ -145,7 +158,7 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     components = Components(List(schema1), List(platformTypeHeader), List(reqHeaderParameter)),
-    shortDescription = None, 
+    shortDescription = None,
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
   )
@@ -163,7 +176,7 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     components = Components(List(schema1), List.empty),
-    shortDescription = None, 
+    shortDescription = None,
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
   )
@@ -181,7 +194,7 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     components = Components(List(schema1), List.empty),
-    shortDescription = Some("short description"), 
+    shortDescription = Some("short description"),
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
   )

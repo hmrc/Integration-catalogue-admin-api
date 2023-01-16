@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,40 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
+
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
-import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
-import uk.gov.hmrc.integrationcatalogue.models.{Request => _, _}
-import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
-import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.ValidateDeleteByPlatformAction._
-import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.{ValidateAuthorizationHeaderAction, ValidateIntegrationIdAgainstParametersAction, ValidateQueryParamKeyAction}
-import uk.gov.hmrc.integrationcatalogueadmin.models.IntegrationDetailRequest
-import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
+import uk.gov.hmrc.integrationcatalogue.models.{Request => _, _}
 
+import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
+import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.ValidateDeleteByPlatformAction._
+import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.{
+  ValidateAuthorizationHeaderAction,
+  ValidateIntegrationIdAgainstParametersAction,
+  ValidateQueryParamKeyAction
+}
+import uk.gov.hmrc.integrationcatalogueadmin.models.IntegrationDetailRequest
+import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
 
 @Singleton
-class IntegrationController @Inject()(appConfig: AppConfig,
-                                      integrationService: IntegrationService,
-                                      validateQueryParamKeyAction: ValidateQueryParamKeyAction,
-                                      validateAuthorizationHeaderAction: ValidateAuthorizationHeaderAction,
-                                      validateIntegrationIdAgainstPlatformTypeAction: ValidateIntegrationIdAgainstParametersAction,
-                                      cc: ControllerComponents)
-                                     (implicit ec: ExecutionContext) extends BackendController(cc) with Logging {
+class IntegrationController @Inject() (
+    appConfig: AppConfig,
+    integrationService: IntegrationService,
+    validateQueryParamKeyAction: ValidateQueryParamKeyAction,
+    validateAuthorizationHeaderAction: ValidateAuthorizationHeaderAction,
+    validateIntegrationIdAgainstPlatformTypeAction: ValidateIntegrationIdAgainstParametersAction,
+    cc: ControllerComponents
+  )(implicit ec: ExecutionContext
+  ) extends BackendController(cc) with Logging {
 
   implicit val config: AppConfig = appConfig
 
@@ -50,7 +57,7 @@ class IntegrationController @Inject()(appConfig: AppConfig,
     (Action andThen validateQueryParamKeyAction).async { implicit request =>
       integrationService.findWithFilters(IntegrationFilter(searchTerm, platformFilter, backendsFilter))
         .map {
-          case Right(response) => Ok(Json.toJson(response))
+          case Right(response)        => Ok(Json.toJson(response))
           case Left(error: Throwable) =>
             logger.error(s"findWithFilters error integration-catalogue ${error.getMessage}")
             InternalServerError(Json.toJson(ErrorResponse(List(ErrorResponseMessage(s"Unable to process your request")))))
@@ -60,10 +67,10 @@ class IntegrationController @Inject()(appConfig: AppConfig,
   def findByIntegrationId(id: IntegrationId): Action[AnyContent] =
     Action.async { implicit request =>
       integrationService.findByIntegrationId(id) map {
-        case Right(response) => Ok(Json.toJson(response))
+        case Right(response)                                                     => Ok(Json.toJson(response))
         case Left(error: UpstreamErrorResponse) if error.statusCode == NOT_FOUND =>
           NotFound(Json.toJson(ErrorResponse(List(ErrorResponseMessage("findByIntegrationId: The requested resource could not be found.")))))
-        case Left(error: Throwable) =>
+        case Left(error: Throwable)                                              =>
           BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("findByIntegrationId error integration-catalogue ${error.getMessage}")))))
       }
     }
@@ -72,32 +79,30 @@ class IntegrationController @Inject()(appConfig: AppConfig,
     Action.async { implicit request =>
       integrationService.catalogueReport().map {
         case Right(result) => Ok(Json.toJson(result))
-        case Left(_) => InternalServerError(Json.toJson(ErrorResponse(List(ErrorResponseMessage("catalogueReport: error retrieving the report")))))
+        case Left(_)       => InternalServerError(Json.toJson(ErrorResponse(List(ErrorResponseMessage("catalogueReport: error retrieving the report")))))
       }
     }
-
 
   def deleteByIntegrationId(integrationId: IntegrationId): Action[AnyContent] =
     (Action andThen validateAuthorizationHeaderAction
       andThen integrationDetailActionRefiner(integrationId)
       andThen validateIntegrationIdAgainstPlatformTypeAction).async { implicit request =>
       integrationService.deleteByIntegrationId(integrationId).map {
-        case true => NoContent
+        case true  => NoContent
         case false => InternalServerError(Json.toJson(ErrorResponse(List(ErrorResponseMessage("InternalServerError from integration-catalogue")))))
       }
     }
 
   def deleteByPlatform(platformFilter: List[PlatformType]): Action[AnyContent] =
     (Action andThen validateAuthorizationHeaderAction
-      andThen ValidatePlatformTypeParams(platformFilter)).async { implicit request =>
+      andThen validatePlatformTypeParams(platformFilter)).async { implicit request =>
       integrationService.deleteByPlatform(platformFilter.head).map {
-        case DeleteIntegrationsSuccess(result) => Ok(Json.toJson(result))
+        case DeleteIntegrationsSuccess(result)       => Ok(Json.toJson(result))
         case DeleteIntegrationsFailure(errorMessage) => InternalServerError(Json.toJson(ErrorResponse(List(ErrorResponseMessage(errorMessage)))))
       }
     }
 
-  private def integrationDetailActionRefiner(integrationId: IntegrationId)
-                                            (implicit ec: ExecutionContext): ActionRefiner[Request, IntegrationDetailRequest] = {
+  private def integrationDetailActionRefiner(integrationId: IntegrationId)(implicit ec: ExecutionContext): ActionRefiner[Request, IntegrationDetailRequest] = {
     new ActionRefiner[Request, IntegrationDetailRequest] {
 
       override def executionContext: ExecutionContext = ec
@@ -108,8 +113,9 @@ class IntegrationController @Inject()(appConfig: AppConfig,
 
       override def refine[A](request: Request[A]): Future[Either[Result, IntegrationDetailRequest[A]]] =
         integrationService.findByIntegrationId(integrationId)(hc(request)).map {
-          case Left(_) => Left(NotFound(
-            Json.toJson(ErrorResponse(List(ErrorResponseMessage(s"Integration with ID: ${integrationId.value.toString} not found"))))))
+          case Left(_)                                     => Left(NotFound(
+              Json.toJson(ErrorResponse(List(ErrorResponseMessage(s"Integration with ID: ${integrationId.value.toString} not found"))))
+            ))
           case Right(integrationDetail: IntegrationDetail) => Right(IntegrationDetailRequest(integrationDetail, request))
         }
 

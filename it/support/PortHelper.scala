@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,24 @@
 package support
 
 import java.net.ServerSocket
-import play.api.Logger
-
 import scala.annotation.tailrec
 import scala.collection.immutable
 import scala.language.postfixOps
 
+import play.api.Logger
 
 object PortHelper {
-  val rnd = new scala.util.Random
+  val rnd                       = new scala.util.Random
   val range: immutable.Seq[Int] = 8000 to 39999
-  val logger: Logger = Logger(this.getClass)
+  val logger: Logger            = Logger(this.getClass)
 
   // scalastyle:off magic.number
 
   @tailrec
   def randomAvailable: Int = {
     range(rnd.nextInt(range length)) match {
-      case 8080 => randomAvailable
-      case 8090 => randomAvailable
+      case 8080   => randomAvailable
+      case 8090   => randomAvailable
       case p: Int =>
         if (available(p)) {
           logger.debug("Taking port : " + p)
@@ -50,9 +49,9 @@ object PortHelper {
   private def available(p: Int): Boolean = {
     var socket: ServerSocket = null
     try {
-        socket = new ServerSocket(p)
-        socket.setReuseAddress(true)
-        true
+      socket = new ServerSocket(p)
+      socket.setReuseAddress(true)
+      true
     } catch {
       case _: Throwable => false
     } finally {
