@@ -16,29 +16,23 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
-
 import play.api.Logging
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.Json
 import play.api.mvc._
 import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
-import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
-
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
 import uk.gov.hmrc.integrationcatalogue.models.{Request => _, _}
-
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.ValidateDeleteByPlatformAction._
-import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.{
-  ValidateAuthorizationHeaderAction,
-  ValidateIntegrationIdAgainstParametersAction,
-  ValidateQueryParamKeyAction
-}
+import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.{ValidateAuthorizationHeaderAction, ValidateIntegrationIdAgainstParametersAction, ValidateQueryParamKeyAction}
 import uk.gov.hmrc.integrationcatalogueadmin.models.IntegrationDetailRequest
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
+
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class IntegrationController @Inject() (
@@ -70,8 +64,8 @@ class IntegrationController @Inject() (
         case Right(response)                                                     => Ok(Json.toJson(response))
         case Left(error: UpstreamErrorResponse) if error.statusCode == NOT_FOUND =>
           NotFound(Json.toJson(ErrorResponse(List(ErrorResponseMessage("findByIntegrationId: The requested resource could not be found.")))))
-        case Left(error: Throwable)                                              =>
-          BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("findByIntegrationId error integration-catalogue ${error.getMessage}")))))
+        case Left(error: Throwable)                                                  =>
+          BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage(s"findByIntegrationId error integration-catalogue ${error.getMessage}")))))
       }
     }
 
