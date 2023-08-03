@@ -51,7 +51,7 @@ class IntegrationServiceSpec extends AnyWordSpec
     val objInTest                           = new IntegrationService(mockIntegrationCatalogueConnector)
     val exampleIntegrationId: IntegrationId = IntegrationId(UUID.fromString("2840ce2d-03fa-46bb-84d9-0299402b7b32"))
 
-    def validateFailureCall[A](f: Future[A]): Assertion = {
+    def validateFailureCall[A <: Either[_, _]](f: Future[A]): Assertion = {
       val result: A =
         await(f)
 

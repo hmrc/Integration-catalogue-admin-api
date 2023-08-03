@@ -99,7 +99,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
 
         await(objInTest.findByIntegrationId(exampleApiDetail.id)) match {
           case Right(result: ApiDetail) => result mustBe exampleApiDetail
-          case _                        => fail
+          case _                        => fail()
         }
       }
       "return Left when any error from backend" in new Setup {
@@ -107,7 +107,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
 
         await(objInTest.findByIntegrationId(exampleApiDetail.id)) match {
           case Left(_) => succeed
-          case _       => fail
+          case _       => fail()
         }
       }
     }
@@ -117,7 +117,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
         primeCatalogueReportReturnsBadRequest()
         await(objInTest.catalogueReport()) match {
           case Left(_) => succeed
-          case _       => fail
+          case _       => fail()
         }
 
       }
@@ -126,7 +126,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
         primeCatalogueReportWithBody(Json.toJson(returnedResults).toString, OK)
         await(objInTest.catalogueReport()) match {
           case Right(results: List[IntegrationPlatformReport]) => results mustBe returnedResults
-          case _                                               => fail
+          case _                                               => fail()
         }
       }
     }
@@ -136,7 +136,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
         primeFindWithFilterWithBody(OK, Json.toJson(integrationResponse).toString(), "?searchTerm=API-1001&platformFilter=CORE_IF&backendsFilter=HODS")
         await(objInTest.findWithFilters(IntegrationFilter(searchText = List("API-1001"), platforms = List(CORE_IF), backends = List("HODS")))) match {
           case Right(result: IntegrationResponse) => result mustBe integrationResponse
-          case _                                  => fail
+          case _                                  => fail()
         }
       }
 
@@ -144,7 +144,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
         primeFindWithFilterReturnsBadRequestWithoutBody("?searchTerm=API-1001")
         await(objInTest.findWithFilters(IntegrationFilter(searchText = List("API-1001"), platforms = List.empty))) match {
           case Left(_) => succeed
-          case _       => fail
+          case _       => fail()
         }
       }
     }
@@ -166,7 +166,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
             publishDetails.integrationId mustBe integrationId
             publishDetails.platformType mustBe fileTransferPublishRequestObj.platformType
             publishDetails.publisherReference mustBe publisherReference
-          case Left(_)                      => fail
+          case Left(_)                      => fail()
         }
       }
 
@@ -174,7 +174,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
         primePutReturnsBadRequestWithoutBody("/integration-catalogue/filetransfers/publish")
 
         await(objInTest.publishFileTransfer(fileTransferPublishRequestObj)) match {
-          case Right(_: PublishResult) => fail
+          case Right(_: PublishResult) => fail()
           case Left(_)                 => succeed
         }
       }

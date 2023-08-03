@@ -27,7 +27,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.scalatest.BeforeAndAfterEach
 import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
-import utils.MultipartFormDataWritable
+import utils.MultipartFormDataWriteable
 
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.{HeaderNames, Writeable}
@@ -98,7 +98,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       HeaderNames.CONTENT_TYPE        -> "application/x-yaml"
     )
 
-    implicit val writer: Writeable[MultipartFormData[TemporaryFile]] = MultipartFormDataWritable.writeable
+    implicit val writer: Writeable[MultipartFormData[TemporaryFile]] = MultipartFormDataWriteable.writeable
 
     val dateValue: DateTime    = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
     val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))

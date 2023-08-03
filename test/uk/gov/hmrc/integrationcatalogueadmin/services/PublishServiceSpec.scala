@@ -19,20 +19,18 @@ package uk.gov.hmrc.integrationcatalogueadmin.services
 import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.mockito.scalatest.MockitoSugar
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
-
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
+
+import scala.language.postfixOps
 
 class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite with MockitoSugar {
 

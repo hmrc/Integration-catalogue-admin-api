@@ -70,13 +70,12 @@ class PublishController @Inject() (
     mayBeRequest match {
       case Success(validBody) => if (validatePlatformTypesMatch(validBody, platformHeader)) publishService.publishFileTransfer(validBody).map(handlePublishResult)
         else Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("Invalid request body - platform type mismatch"))))))
-      case Failure(exception) => {
+      case Failure(exception) =>
         logger.error("Invalid request body, must be a valid publish request", exception)
         Future.successful(BadRequest(Json.toJson(ErrorResponse(List(
           ErrorResponseMessage("Invalid request body"),
           ErrorResponseMessage(exception.getMessage)
         )))))
-      }
     }
   }
 
@@ -89,14 +88,13 @@ class PublishController @Inject() (
     validateApiPublishRequest).async(playBodyParsers.multipartFormData) {
     implicit request: ValidatedApiPublishRequest[MultipartFormData[Files.TemporaryFile]] =>
       (request.body.file("selectedFile"), request.body.dataParts.get("selectedFile")) match {
-        case (Some(selectedFile), _)              => {
+        case (Some(selectedFile), _)              =>
           val bufferedSource = Source.fromFile(selectedFile.ref.path.toFile)
-          val fileContents   = bufferedSource.getLines.mkString("\r\n")
+          val fileContents   = bufferedSource.getLines().mkString("\r\n")
           bufferedSource.close()
           publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, fileContents)
             .map(handlePublishResult)
-        }
-        case (None, Some(dataParts: Seq[String])) => {
+        case (None, Some(dataParts: Seq[String])) =>
           dataParts match {
             case Nil                        =>
               logger.info("selectedFile is missing from requestBody")
@@ -105,7 +103,6 @@ class PublishController @Inject() (
               publishService.publishApi(request.publisherReference, request.platformType, request.specificationType, oasStringList.head)
                 .map(handlePublishResult)
           }
-        }
         case (_, _)                               =>
           logger.info("selectedFile is missing from requestBody")
           Future.successful(BadRequest(Json.toJson(ErrorResponse(List(ErrorResponseMessage("selectedFile is missing from requestBody"))))))
