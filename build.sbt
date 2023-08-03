@@ -16,7 +16,7 @@ inThisBuild(
 )
 
 
-val silencerVersion = "1.7.1"
+val silencerVersion = "1.17.13"
 
 val jettyVersion = "9.2.24.v20180105"
 
@@ -46,7 +46,16 @@ lazy val microservice = Project(appName, file("."))
     routesImport                     += "uk.gov.hmrc.integrationcatalogueadmin.controllers.binders._",
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     Test / unmanagedSourceDirectories += baseDirectory(_ / "test-common").value,
-    dependencyOverrides ++= jettyOverrides
+    dependencyOverrides ++= jettyOverrides,
+    // ***************
+    // Use the silencer plugin to suppress warnings
+    // You may turn it on for `views` too to suppress warnings from unused imports in compiled twirl templates, but this will hide other warnings.
+    scalacOptions += "-P:silencer:pathFilters=views;routes",
+    libraryDependencies ++= Seq(
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    )
+    // ***************
   )
   .settings(scoverageSettings)
   .configs(IntegrationTest)
