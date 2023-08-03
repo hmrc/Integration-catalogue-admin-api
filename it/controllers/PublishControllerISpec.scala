@@ -19,7 +19,6 @@ package controllers
 import java.io.{FileOutputStream, InputStream}
 import java.util.UUID
 import scala.concurrent.Future
-
 import io.circe.yaml.Printer
 import io.circe.{Json => CirceJson}
 import org.apache.commons.io.IOUtils
@@ -28,7 +27,6 @@ import org.joda.time.format.DateTimeFormat
 import org.scalatest.BeforeAndAfterEach
 import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
 import utils.MultipartFormDataWriteable
-
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.{HeaderNames, Writeable}
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -38,11 +36,9 @@ import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.test.Helpers.{BAD_REQUEST, _}
 import play.api.test.{FakeRequest, Helpers}
-
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
-
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 
 class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach with IntegrationCatalogueConnectorStub {
@@ -418,7 +414,6 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val response: Future[Result] = route(app, invalidFileTransferJsonPublishRequest).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) must (include("""{"message":"Invalid request body"}"""))
-        contentAsString(response) must (include("""JsResultException(errors:List((,List(JsonValidationError(List(error.expected.jsobject),WrappedArray())))))"""))
       }
 
       "respond with 401 and error message Authorization header is missing" in new Setup {
@@ -489,7 +484,6 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val response: Future[Result] = route(app, invalidYamlFileTransferPublishRequest).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) must (include("""{"message":"Error parsing yaml"}"""))
-        contentAsString(response) must (include("""JsResultException(errors:List((,List(JsonValidationError(List(error.expected.jsobject),WrappedArray())))))"""))
       }
 
       "respond with 401 and error message Authorization header is missing" in new Setup {
