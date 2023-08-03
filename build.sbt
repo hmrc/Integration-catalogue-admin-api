@@ -46,18 +46,9 @@ lazy val microservice = Project(appName, file("."))
     routesImport                     += "uk.gov.hmrc.integrationcatalogueadmin.controllers.binders._",
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     Test / unmanagedSourceDirectories += baseDirectory(_ / "test-common").value,
-//    // ***************
-//    // Use the silencer plugin to suppress warnings
-//    // You may turn it on for `views` too to suppress warnings from unused imports in compiled twirl templates, but this will hide other warnings.
-//    libraryDependencies ++= Seq(
-//      compilerPlugin("com.github.ghik" %% "silencer-plugin" % silencerVersion cross CrossVersion.full),
-//      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-//    ),
     dependencyOverrides ++= jettyOverrides
-    // ***************
   )
-  .settings(publishingSettings,
-    scoverageSettings)
+  .settings(scoverageSettings)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
   .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
@@ -66,7 +57,6 @@ lazy val microservice = Project(appName, file("."))
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .settings(scalacOptions ++= Seq("-deprecation", "-feature"))
   .settings(scalafixConfigSettings(IntegrationTest): _*)
-
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys

@@ -6,7 +6,7 @@ import sbt._
 object AppDependencies {
 
   lazy val enumeratumVersion = "1.6.3"
-  lazy val bootstrapVersion = "7.12.0"
+  lazy val bootstrapVersion = "7.21.0"
   lazy val jacksonVersion = "2.12.2"
 
   val compile = Seq(
