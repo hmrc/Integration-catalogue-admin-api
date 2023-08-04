@@ -21,6 +21,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 import play.api.Logging
+import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.http.Status._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
@@ -38,28 +39,50 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
 
   def publishApis(publishRequest: ApiPublishRequest)(implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]] = {
     handleResult(
-      http.PUT[ApiPublishRequest, PublishResult](s"$externalServiceUri/apis/publish", publishRequest)
+      http.PUT[ApiPublishRequest, PublishResult](
+        url = s"$externalServiceUri/apis/publish",
+        body = publishRequest,
+        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
+      )
     )
   }
 
   def publishFileTransfer(publishRequest: FileTransferPublishRequest)(implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]] = {
     handleResult(
-      http.PUT[FileTransferPublishRequest, PublishResult](s"$externalServiceUri/filetransfers/publish", publishRequest)
+      http.PUT[FileTransferPublishRequest, PublishResult](
+        url = s"$externalServiceUri/filetransfers/publish",
+        body = publishRequest,
+        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
+      )
     )
   }
 
   def findWithFilters(integrationFilter: IntegrationFilter)(implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationResponse]] = {
     val queryParamsValues = buildQueryParams(integrationFilter)
 
-    handleResult(http.GET[IntegrationResponse](s"$externalServiceUri/integrations", queryParams = queryParamsValues))
+    handleResult(
+      http.GET[IntegrationResponse](
+        url = s"$externalServiceUri/integrations",
+        queryParams = queryParamsValues,
+        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
+      )
+    )
   }
 
   def findByIntegrationId(id: IntegrationId)(implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationDetail]] = {
-    handleResult(http.GET[IntegrationDetail](s"$externalServiceUri/integrations/${id.value.toString}"))
+    handleResult(
+      http.GET[IntegrationDetail](
+        url = s"$externalServiceUri/integrations/${id.value.toString}",
+        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
+      )
+    )
   }
 
   def deleteByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    http.DELETE[HttpResponse](s"$externalServiceUri/integrations/${integrationId.value}")
+    http.DELETE[HttpResponse](
+      url = s"$externalServiceUri/integrations/${integrationId.value}",
+      headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
+    )
       .map(_.status == NO_CONTENT)
       .recover {
         case NonFatal(e) =>
@@ -69,7 +92,10 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
   }
 
   def deleteByPlatform(platform: PlatformType)(implicit hc: HeaderCarrier): Future[DeleteApiResult] = {
-    http.DELETE[DeleteIntegrationsResponse](s"$externalServiceUri/integrations?platformFilter=${platform.toString}")
+    http.DELETE[DeleteIntegrationsResponse](
+      url = s"$externalServiceUri/integrations?platformFilter=${platform.toString}",
+      headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
+    )
       .map(x => DeleteIntegrationsSuccess(x))
       .recover {
         case NonFatal(e) =>
@@ -80,7 +106,10 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
 
   def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] = {
     handleResult(
-      http.GET[List[IntegrationPlatformReport]](s"$externalServiceUri/report")
+      http.GET[List[IntegrationPlatformReport]](
+        url = s"$externalServiceUri/report",
+        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
+      )
     )
   }
 
