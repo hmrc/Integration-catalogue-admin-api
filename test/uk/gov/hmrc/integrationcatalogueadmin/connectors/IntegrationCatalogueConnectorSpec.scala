@@ -47,7 +47,7 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
   private val mockHttpClient                = mock[HttpClient]
   private val mockAppConfig                 = mock[AppConfig]
   private implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
-  private implicit val hc: HeaderCarrier    = HeaderCarrier()
+  private implicit val hc: HeaderCarrier    = HeaderCarrier(authorization = Some(Authorization("test-inbound-token")))
   private val internalAuthToken             = "test-internal-auth-token"
 
   override def beforeEach(): Unit = {

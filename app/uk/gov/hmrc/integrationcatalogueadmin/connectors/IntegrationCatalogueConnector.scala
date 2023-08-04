@@ -43,7 +43,7 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
         url = s"$externalServiceUri/apis/publish",
         body = publishRequest,
         headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )
+      )(implicitly, implicitly, treatHeaderCarrier(hc), implicitly)
     )
   }
 
@@ -53,7 +53,7 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
         url = s"$externalServiceUri/filetransfers/publish",
         body = publishRequest,
         headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )
+      )(implicitly, implicitly, treatHeaderCarrier(hc), implicitly)
     )
   }
 
@@ -65,7 +65,7 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
         url = s"$externalServiceUri/integrations",
         queryParams = queryParamsValues,
         headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )
+      )(implicitly, treatHeaderCarrier(hc), implicitly)
     )
   }
 
@@ -74,7 +74,7 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
       http.GET[IntegrationDetail](
         url = s"$externalServiceUri/integrations/${id.value.toString}",
         headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )
+      )(implicitly, treatHeaderCarrier(hc), implicitly)
     )
   }
 
@@ -82,7 +82,7 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
     http.DELETE[HttpResponse](
       url = s"$externalServiceUri/integrations/${integrationId.value}",
       headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-    )
+    )(implicitly, treatHeaderCarrier(hc), implicitly)
       .map(_.status == NO_CONTENT)
       .recover {
         case NonFatal(e) =>
@@ -95,7 +95,7 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
     http.DELETE[DeleteIntegrationsResponse](
       url = s"$externalServiceUri/integrations?platformFilter=${platform.toString}",
       headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-    )
+    )(implicitly, treatHeaderCarrier(hc), implicitly)
       .map(x => DeleteIntegrationsSuccess(x))
       .recover {
         case NonFatal(e) =>
@@ -109,7 +109,7 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
       http.GET[List[IntegrationPlatformReport]](
         url = s"$externalServiceUri/report",
         headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )
+      )(implicitly, treatHeaderCarrier(hc), implicitly)
     )
   }
 
@@ -128,6 +128,10 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
           logger.error(e.getMessage)
           Left(e)
       }
+  }
+
+  private def treatHeaderCarrier(hc: HeaderCarrier): HeaderCarrier = {
+    hc.copy(authorization = None)
   }
 
 }
