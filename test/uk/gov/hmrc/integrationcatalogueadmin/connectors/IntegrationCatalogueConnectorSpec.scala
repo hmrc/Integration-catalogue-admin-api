@@ -16,24 +16,22 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.connectors
 
+import org.mockito.IdiomaticMockito.StubbingOps
+
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
-
 import org.mockito.captor.{ArgCaptor, Captor}
 import org.mockito.scalatest.MockitoSugar
 import org.mockito.stubbing.ScalaOngoingStubbing
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
-
 import play.api.libs.json.Writes
 import play.api.test.Helpers
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{BadGatewayException, HttpClient, _}
-
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
-
 import uk.gov.hmrc.integrationcatalogueadmin.AwaitTestSupport
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
@@ -49,11 +47,14 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
   private val mockHttpClient                = mock[HttpClient]
   private val mockAppConfig                 = mock[AppConfig]
   private implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
-  private implicit val hc: HeaderCarrier    = HeaderCarrier()
+  private implicit val hc: HeaderCarrier    = HeaderCarrier(authorization = Some(Authorization("test-inbound-token")))
+  private val internalAuthToken             = "test-internal-auth-token"
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockHttpClient)
+    reset(mockAppConfig)
+    mockAppConfig.internalAuthToken returns internalAuthToken
   }
 
   trait SetUp {
@@ -114,12 +115,20 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
     }
 
     def httpCallToGETEndpointWillSucceed[A](returnValue: A, urlString: String, queryParams: Seq[(String, String)]): ScalaOngoingStubbing[Future[A]] = {
-      when(mockHttpClient.GET[A](eqTo(urlString), eqTo(queryParams), eqTo(Seq.empty))(any[HttpReads[A]], any[HeaderCarrier], any[ExecutionContext]))
+      when(mockHttpClient.GET[A](
+        eqTo(urlString),
+        eqTo(queryParams),
+        eqTo(Seq((AUTHORIZATION, internalAuthToken)))
+      )(any[HttpReads[A]], any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(Future.successful(returnValue))
     }
 
     def httpCallToGETEndpointWillFail[A](exception: Throwable, url: String, queryParams: Seq[(String, String)]): ScalaOngoingStubbing[Future[A]] =
-      when(mockHttpClient.GET[A](eqTo(url), eqTo(queryParams), eqTo(Seq.empty))(any[HttpReads[A]], any[HeaderCarrier], any[ExecutionContext]))
+      when(mockHttpClient.GET[A](
+        eqTo(url),
+        eqTo(queryParams),
+        eqTo(Seq((AUTHORIZATION, internalAuthToken)))
+      )(any[HttpReads[A]], any[HeaderCarrier], any[ExecutionContext]))
         .thenReturn(Future.failed(exception))
   }
 

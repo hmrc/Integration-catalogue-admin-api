@@ -61,4 +61,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
     HIP                -> hipAuthorizationKey
   )
 
+  val internalAuthToken: String = config.get[String]("internal-auth.token")
+
 }

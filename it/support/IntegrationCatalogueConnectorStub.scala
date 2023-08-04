@@ -19,15 +19,15 @@ package support
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
-
-import play.api.test.Helpers.BAD_REQUEST
-
+import play.api.test.Helpers.{AUTHORIZATION, BAD_REQUEST}
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationId
 
 trait IntegrationCatalogueConnectorStub {
   val publishUrl             = "/integration-catalogue/apis/publish"
   val publishFileTransferUrl = "/integration-catalogue/filetransfer/publish"
   val getApisUrl             = "/integration-catalogue/integrations"
+
+  private val internalAuthToken = "A dummy token unique to integration-catalogue-admin-api only used when running local."
 
   def deleteIntegrationByIdUrl(integrationId: String) = s"/integration-catalogue/integrations/$integrationId"
 
@@ -99,6 +99,7 @@ trait IntegrationCatalogueConnectorStub {
 
   private def primeWithoutBody(x: => MappingBuilder, status: Int) = {
     stubFor(x
+      .withHeader(AUTHORIZATION, equalTo(internalAuthToken))
       .willReturn(
         aResponse()
           .withStatus(status)
@@ -108,6 +109,7 @@ trait IntegrationCatalogueConnectorStub {
 
   private def primeWithBody(x: MappingBuilder, status: Int, responseBody: String) = {
     stubFor(x
+      .withHeader(AUTHORIZATION, equalTo(internalAuthToken))
       .willReturn(
         aResponse()
           .withStatus(status)
