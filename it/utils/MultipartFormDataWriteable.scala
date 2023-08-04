@@ -16,14 +16,15 @@
 
 package utils
 
-import java.nio.file.{Files, Paths}
+import akka.util.ByteString
 
+import java.nio.file.{Files, Paths}
 import play.api.http.{HeaderNames, Writeable}
 import play.api.libs.Files.TemporaryFile
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{Codec, MultipartFormData}
 
-object MultipartFormDataWritable {
+object MultipartFormDataWriteable {
   val boundary = "--------ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
   private def formatDataParts(data: Map[String, Seq[String]]) = {
@@ -55,10 +56,10 @@ object MultipartFormDataWritable {
   val writeable: Writeable[MultipartFormData[TemporaryFile]] = Writeable[MultipartFormData[TemporaryFile]](
     transform = { form: MultipartFormData[TemporaryFile] =>
       formatDataParts(form.dataParts) ++
-        form.files.flatMap { file =>
+        form.files.map { file =>
           val fileBytes = Files.readAllBytes(Paths.get(file.ref.path.toFile.getAbsolutePath))
-          filePartHeader(file) ++ fileBytes ++ Codec.utf_8.encode("\r\n")
-        } ++
+          filePartHeader(file) ++ ByteString(fileBytes) ++ Codec.utf_8.encode("\r\n")
+        }.foldRight(ByteString.empty)((a, b) => a ++ b) ++
         Codec.utf_8.encode(s"--$boundary--")
     },
     contentType = Some(s"multipart/form-data; boundary=$boundary")
