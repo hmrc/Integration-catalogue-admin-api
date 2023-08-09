@@ -75,13 +75,13 @@ trait ApiDetailTestData {
     example = None
   )
 
-  val headerRef =
+  val headerRef: Header =
     Header(
       name = "x-platform-type",
       ref = Some("components/headers/platformType")
     )
 
-  val platformTypeHeader =
+  val platformTypeHeader: Header =
     Header(
       name = "PlatformType",
       description = Some("this is platform type"),
@@ -95,10 +95,10 @@ trait ApiDetailTestData {
       )
     )
 
-  val exampleRequest1name      = "example request 1"
-  val exampleRequest1Body      = "{\"someValue\": \"abcdefg\"}"
-  val exampleRequest1: Example = Example(exampleRequest1name, exampleRequest1Body)
-  val exampleResponse1         = new Example("example response name", "example response body")
+  val exampleRequest1name       = "example request 1"
+  val exampleRequest1Body       = "{\"someValue\": \"abcdefg\"}"
+  val exampleRequest1: Example  = Example(exampleRequest1name, exampleRequest1Body)
+  val exampleResponse1: Example = Example("example response name", "example response body")
 
   val request: Request = Request(description = Some("request"), schema = Some(schema1), mediaType = Some(jsonMediaType), examples = List(exampleRequest1))
 
@@ -112,9 +112,9 @@ trait ApiDetailTestData {
       headers = List(headerRef)
     )
 
-  val reqHeaderRef = Parameter(Some("userId"), Some("components/parameters/userId"))
+  val reqHeaderRef: Parameter = Parameter(Some("userId"), Some("components/parameters/userId"))
 
-  val reqHeaderParameter = Parameter(
+  val reqHeaderParameter: Parameter = Parameter(
     name = Some("userId"),
     in = Some("header"),
     description = Some("The UserId"),
@@ -128,18 +128,18 @@ trait ApiDetailTestData {
     )
   )
 
-  val endpointGetMethod: EndpointMethod = EndpointMethod("GET", Some("operationId"), Some("some summary"), Some("some description"), None, List(response))
+  val endpointGetMethod: EndpointMethod =
+    EndpointMethod(
+      "GET",
+      Some("some description")
+    )
 
   val endpointPutMethod: EndpointMethod =
     EndpointMethod(
       "PUT",
-      Some("operationId2"),
-      Some("some summary"),
-      Some("some description"),
-      Some(request),
-      List.empty,
-      List(reqHeaderRef)
+      Some("some description")
     )
+
   val endpoint1: Endpoint               = Endpoint("/some/url", List(endpointGetMethod))
   val endpoint2: Endpoint               = Endpoint("/some/url", List(endpointPutMethod))
 
@@ -157,7 +157,6 @@ trait ApiDetailTestData {
     specificationType = SpecificationType.OAS_V3,
     hods = List("ETMP"),
     endpoints = endpoints,
-    components = Components(List(schema1), List(platformTypeHeader), List(reqHeaderParameter)),
     shortDescription = None,
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
@@ -175,7 +174,6 @@ trait ApiDetailTestData {
     specificationType = SpecificationType.OAS_V3,
     hods = List("ETMP"),
     endpoints = endpoints,
-    components = Components(List(schema1), List.empty),
     shortDescription = None,
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
@@ -193,7 +191,6 @@ trait ApiDetailTestData {
     specificationType = SpecificationType.OAS_V3,
     hods = List("ETMP"),
     endpoints = endpoints,
-    components = Components(List(schema1), List.empty),
     shortDescription = Some("short description"),
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
