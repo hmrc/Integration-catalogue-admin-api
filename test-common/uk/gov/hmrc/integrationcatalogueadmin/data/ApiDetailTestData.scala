@@ -131,12 +131,14 @@ trait ApiDetailTestData {
   val endpointGetMethod: EndpointMethod =
     EndpointMethod(
       "GET",
+      Some("some summary"),
       Some("some description")
     )
 
   val endpointPutMethod: EndpointMethod =
     EndpointMethod(
       "PUT",
+      Some("some summary"),
       Some("some description")
     )
 
