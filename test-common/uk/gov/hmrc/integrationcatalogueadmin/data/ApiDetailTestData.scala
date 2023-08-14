@@ -160,6 +160,7 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     shortDescription = None,
+    openApiSpecification = "OAS content for API-1001",
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
   )
@@ -177,6 +178,7 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     shortDescription = None,
+    openApiSpecification = "OAS content for API-1002",
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
   )
@@ -194,6 +196,7 @@ trait ApiDetailTestData {
     hods = List("ETMP"),
     endpoints = endpoints,
     shortDescription = Some("short description"),
+    openApiSpecification = "OAS content for API-1003",
     apiStatus = ApiStatus.LIVE,
     reviewedDate = reviewedDate
   )
