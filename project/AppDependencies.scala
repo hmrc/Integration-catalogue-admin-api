@@ -5,30 +5,31 @@ import sbt._
 
 object AppDependencies {
 
-  lazy val enumeratumVersion = "1.6.3"
-  lazy val bootstrapVersion = "7.21.0"
-  lazy val jacksonVersion = "2.12.2"
+  lazy val enumeratumVersion = "1.8.0"
+  lazy val bootstrapVersion = "8.4.0"
+  lazy val jacksonVersion = "2.16.1"
 
   val compile = Seq(
-    "uk.gov.hmrc"                     %% "bootstrap-backend-play-28" % bootstrapVersion,
+    "uk.gov.hmrc"                     %% "bootstrap-backend-play-30" % bootstrapVersion,
     "com.beachape"                    %% "enumeratum-play-json"       % enumeratumVersion,
     "com.fasterxml.jackson.core"       % "jackson-core"               % jacksonVersion,
     "com.fasterxml.jackson.core"       % "jackson-annotations"        % jacksonVersion,
     "com.fasterxml.jackson.core"       % "jackson-databind"           % jacksonVersion,
     "com.fasterxml.jackson.module"     %% "jackson-module-scala"      % jacksonVersion,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml"    % jacksonVersion,
-    "com.typesafe.play"               %% "play-json-joda"             % "2.9.0",
-    "org.typelevel"                   %% "cats-core"                  % "2.4.2",
-    "io.circe"                        %% "circe-yaml"                 % "0.12.0"
+    "org.typelevel"                   %% "cats-core"                  % "2.10.0",
+    "io.circe"                        %% "circe-yaml"                 % "1.15.0"
   )
 
   val test = Seq(
-    "uk.gov.hmrc"            %% "bootstrap-test-play-28"   % bootstrapVersion % "test, it",
-    "org.pegdown"             % "pegdown"                  % "1.6.0"  % "test, it",
-    "org.jsoup"               % "jsoup"                    % "1.13.1" % Test,
-    "com.vladsch.flexmark"    % "flexmark-all"             % "0.36.8" % "test, it",
-    "org.mockito"            %% "mockito-scala-scalatest"  % "1.14.4" % "test, it",
-    "com.github.tomakehurst"  % "wiremock"                 % "2.25.1" % "test, it",
-    "com.github.tomakehurst"  % "wiremock-jre8-standalone" % "2.27.1" % "test, it"
+    "uk.gov.hmrc"            %% "bootstrap-test-play-30"   % bootstrapVersion % Test,
+    "org.pegdown"             % "pegdown"                  % "1.6.0"  % Test,
+    "org.jsoup"               % "jsoup"                    % "1.17.2" % Test,
+    "org.mockito"            %% "mockito-scala-scalatest"  % "1.17.30" % Test,
+    "com.github.tomakehurst"  % "wiremock"                 % "3.0.1" % Test,
+    "com.github.tomakehurst"  % "wiremock-jre8-standalone" % "3.0.1" % Test
   )
+
+  val it = Seq.empty
+
 }

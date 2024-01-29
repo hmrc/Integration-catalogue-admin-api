@@ -20,7 +20,7 @@ import play.api.libs.json._
 
 import uk.gov.hmrc.integrationcatalogue.models.common._
 
-object JsonFormatters extends JodaReads with JodaWrites {
+object JsonFormatters {
 
   implicit val formatContactInformation: Format[ContactInformation] = Json.format[ContactInformation]
 
