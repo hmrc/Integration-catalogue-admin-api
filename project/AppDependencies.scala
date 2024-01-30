@@ -26,9 +26,7 @@ object AppDependencies {
     "uk.gov.hmrc"            %% "bootstrap-test-play-30"   % bootstrapVersion % Test,
     "org.pegdown"             % "pegdown"                  % "1.6.0"  % Test,
     "org.jsoup"               % "jsoup"                    % "1.17.2" % Test,
-    "org.mockito"            %% "mockito-scala-scalatest"  % "1.17.30" % Test,
-    "com.github.tomakehurst"  % "wiremock"                 % "3.0.1" % Test,
-    "com.github.tomakehurst"  % "wiremock-jre8-standalone" % "3.0.1" % Test
+    "org.mockito"            %% "mockito-scala-scalatest"  % "1.17.30" % Test
   )
 
   val it = Seq.empty
