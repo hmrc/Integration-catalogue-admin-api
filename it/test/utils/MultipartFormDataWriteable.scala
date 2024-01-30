@@ -16,7 +16,7 @@
 
 package utils
 
-import akka.util.ByteString
+import org.apache.pekko.util.ByteString
 
 import java.nio.file.{Files, Paths}
 import play.api.http.{HeaderNames, Writeable}

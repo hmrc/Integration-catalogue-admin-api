@@ -16,7 +16,7 @@
 
 package support
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.play.PlaySpec
 

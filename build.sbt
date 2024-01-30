@@ -2,37 +2,8 @@ import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "integration-catalogue-admin-api"
 
-//ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-
-inThisBuild(
-  List(
-    majorVersion := 0,
-    scalaVersion := "2.13.12"
-//    semanticdbEnabled := true,
-//    semanticdbVersion := scalafixSemanticdb.revision
-  )
-)
-
-//val silencerVersion = "1.17.13"
-//
-//val jettyVersion = "9.2.24.v20180105"
-//
-//val jettyOverrides = Seq(
-//  "org.eclipse.jetty" % "jetty-server" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-security" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-servlets" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-continuation" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-webapp" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-xml" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-client" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-http" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-io" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty" % "jetty-util" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty.websocket" % "websocket-api" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty.websocket" % "websocket-common" % jettyVersion % IntegrationTest,
-//  "org.eclipse.jetty.websocket" % "websocket-client" % jettyVersion % IntegrationTest
-//)
+ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion := "2.13.12"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
@@ -40,7 +11,6 @@ lazy val microservice = Project(appName, file("."))
     routesImport                     += "uk.gov.hmrc.integrationcatalogueadmin.controllers.binders._",
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     Test / unmanagedSourceDirectories += baseDirectory(_ / "test-common").value
-//    dependencyOverrides ++= jettyOverrides
   )
   .settings(scoverageSettings)
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)

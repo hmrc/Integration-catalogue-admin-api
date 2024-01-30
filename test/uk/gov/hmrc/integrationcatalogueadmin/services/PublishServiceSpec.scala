@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+
 import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -28,8 +31,6 @@ import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import scala.language.postfixOps
 
 class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite with MockitoSugar {
@@ -47,8 +48,8 @@ class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneA
     val expectedFileTransferPublishResult: PublishResult =
       PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(UUID.randomUUID()), "BVD-DPS-PCPMonthly-pull", PlatformType.CORE_IF)))
 
-    val dateValue: LocalDateTime    = LocalDateTime.parse("04/11/2020 20:27:05", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
-    val reviewedDate: LocalDateTime = LocalDateTime.parse("24/11/2020 20:27:05", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
+    val dateValue: DateTime    = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+    val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
 
     val fileTransferPublishRequest: FileTransferPublishRequest = FileTransferPublishRequest(
       fileTransferSpecificationVersion = "1.0",

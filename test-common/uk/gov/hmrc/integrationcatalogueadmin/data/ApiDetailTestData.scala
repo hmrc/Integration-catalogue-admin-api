@@ -16,20 +16,20 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.data
 
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+
 import java.util.UUID
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, Maintainer, PlatformType, SpecificationType}
-
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 trait ApiDetailTestData {
 
   val filename               = "API-1001_1.1.0.yaml"
   val fileContents           = "{}"
   val uuid: UUID             = UUID.fromString("28c0bd67-4176-42c7-be13-53be98a4db58")
-  val dateValue: LocalDateTime    = LocalDateTime.parse("04/11/2020 20:27:05", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
-  val reviewedDate: LocalDateTime = LocalDateTime.parse("24/11/2020 20:27:05", DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss"))
+  val dateValue: DateTime    = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+  val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
 
   val apiPlatformMaintainer: Maintainer = Maintainer("API Platform Team", "#team-api-platform-sup")
   val coreIfMaintainer: Maintainer      = Maintainer("IF Team", "N/A", List.empty)

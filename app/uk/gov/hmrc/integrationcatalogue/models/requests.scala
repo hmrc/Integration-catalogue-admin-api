@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.integrationcatalogue.models
 
+import org.joda.time.DateTime
 import uk.gov.hmrc.integrationcatalogue.models.common._
-
-import java.time.LocalDateTime
 
 case class IntegrationResponse(count: Int, results: List[IntegrationDetail])
 
@@ -32,8 +31,8 @@ case class FileTransferPublishRequest(
     title: String,
     description: String,
     platformType: PlatformType,               // Split this to Platform and type. TBD
-    lastUpdated: LocalDateTime,
-    reviewedDate: LocalDateTime,
+    lastUpdated: DateTime,
+    reviewedDate: DateTime,
     contact: ContactInformation,              // (single name + email)
     sourceSystem: List[String],               // One or many
     targetSystem: List[String],

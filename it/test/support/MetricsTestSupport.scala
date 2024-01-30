@@ -16,7 +16,7 @@
 
 package support
 
-import com.kenshoo.play.metrics.Metrics
+import com.codahale.metrics.MetricRegistry
 import org.scalatest.Suite
 
 import play.api.Application
@@ -28,7 +28,7 @@ trait MetricsTestSupport {
   def app: Application
 
   def givenCleanMetricRegistry(): Unit = {
-    val registry = app.injector.instanceOf[Metrics].defaultRegistry
+    val registry = app.injector.instanceOf[MetricRegistry]
     for (
       metric <- registry.getMetrics.keySet().iterator().asScala
     ) {
