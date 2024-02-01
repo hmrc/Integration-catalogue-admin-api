@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,14 @@ package uk.gov.hmrc.integrationcatalogue.models.common
 
 import java.util.UUID
 import scala.collection.immutable
-
 import enumeratum.{Enum, EnumEntry, PlayJsonEnum}
+import play.api.libs.json.Format
 
 case class IntegrationId(value: UUID) extends AnyVal
 
 object IntegrationId {
   import play.api.libs.json.Json
-  implicit val apiIdFormat = Json.valueFormat[IntegrationId]
+  implicit val apiIdFormat: Format[IntegrationId] = Json.valueFormat[IntegrationId]
 }
 
 sealed trait PlatformType extends EnumEntry

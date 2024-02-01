@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,22 @@
 
 package connectors
 
-import java.util.UUID
-
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+
+import java.util.UUID
 import org.scalatest.BeforeAndAfterEach
 import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
-
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
-
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationType.API
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
 import uk.gov.hmrc.integrationcatalogue.models.common._
-
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 

@@ -1,71 +1,21 @@
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import bloop.integrations.sbt.BloopDefaults
+import uk.gov.hmrc.DefaultBuildSettings
 
 val appName = "integration-catalogue-admin-api"
 
-
-ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.6.0"
-
-inThisBuild(
-  List(
-    scalaVersion := "2.13.8",
-    semanticdbEnabled := true,
-    semanticdbVersion := scalafixSemanticdb.revision
-  )
-)
-
-
-val silencerVersion = "1.17.13"
-
-val jettyVersion = "9.2.24.v20180105"
-
-val jettyOverrides = Seq(
-  "org.eclipse.jetty" % "jetty-server" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-security" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-servlets" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-continuation" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-webapp" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-xml" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-client" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-http" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-io" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty" % "jetty-util" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty.websocket" % "websocket-api" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty.websocket" % "websocket-common" % jettyVersion % IntegrationTest,
-  "org.eclipse.jetty.websocket" % "websocket-client" % jettyVersion % IntegrationTest
-)
-
+ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion := "2.13.12"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .settings(
-    majorVersion                     := 0,
-    scalaVersion                     := "2.13.8",
     routesImport                     += "uk.gov.hmrc.integrationcatalogueadmin.controllers.binders._",
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
-    Test / unmanagedSourceDirectories += baseDirectory(_ / "test-common").value,
-    dependencyOverrides ++= jettyOverrides,
-    // ***************
-    // Use the silencer plugin to suppress warnings
-    // You may turn it on for `views` too to suppress warnings from unused imports in compiled twirl templates, but this will hide other warnings.
-    scalacOptions += "-P:silencer:pathFilters=views;routes",
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-    )
-    // ***************
+    Test / unmanagedSourceDirectories += baseDirectory(_ / "test-common").value
   )
   .settings(scoverageSettings)
-  .configs(IntegrationTest)
-  .settings(integrationTestSettings(): _*)
-  .settings(inConfig(IntegrationTest)(BloopDefaults.configSettings))
-  .settings(IntegrationTest / unmanagedResourceDirectories  += (IntegrationTest / baseDirectory).value / "it" / "resources")
-  .settings(IntegrationTest / unmanagedSourceDirectories += (IntegrationTest / baseDirectory).value / "test-common")
   .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
   .settings(scalacOptions ++= Seq("-deprecation", "-feature"))
-  .settings(scalafixConfigSettings(IntegrationTest): _*)
+  .settings(scalacOptions += "-Wconf:src=routes/.*:s")
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
@@ -78,3 +28,9 @@ lazy val scoverageSettings = {
     Test / parallelExecution  := false
   )
 }
+
+lazy val it = (project in file("it"))
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test")
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(libraryDependencies ++= AppDependencies.it)

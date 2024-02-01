@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,24 @@
 
 package support
 
+import com.codahale.metrics.MetricRegistry
+import org.scalatest.Suite
+
 import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
+import scala.jdk.CollectionConverters._
 
-trait TestApplication {
-  _: BaseISpec =>
+trait MetricsTestSupport {
+  self: Suite =>
 
-  override implicit lazy val app: Application = appBuilder.build()
+  def app: Application
 
-  protected override def appBuilder: GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .configure(
-        "microservice.services.auth.port" -> wireMockPort,
-        "metrics.enabled"                 -> true,
-        "auditing.enabled"                -> true,
-        "auditing.consumer.baseUri.host"  -> wireMockHost,
-        "auditing.consumer.baseUri.port"  -> wireMockPort
-      )
+  def givenCleanMetricRegistry(): Unit = {
+    val registry = app.injector.instanceOf[MetricRegistry]
+    for (
+      metric <- registry.getMetrics.keySet().iterator().asScala
+    ) {
+      registry.remove(metric)
+    }
+  }
 
 }
