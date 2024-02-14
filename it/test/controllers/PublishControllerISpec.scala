@@ -16,17 +16,11 @@
 
 package controllers
 
-import java.io.{FileOutputStream, InputStream}
-import java.util.UUID
-import scala.concurrent.Future
 import io.circe.yaml.Printer
 import io.circe.{Json => CirceJson}
 import org.apache.commons.io.IOUtils
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import org.scalatest.BeforeAndAfterEach
-import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
-import utils.MultipartFormDataWriteable
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.{HeaderNames, Writeable}
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -36,10 +30,17 @@ import play.api.libs.ws.WSClient
 import play.api.mvc._
 import play.api.test.Helpers.{BAD_REQUEST, _}
 import play.api.test.{FakeRequest, Helpers}
+import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
+import utils.MultipartFormDataWriteable
+
+import java.io.{FileOutputStream, InputStream}
+import java.time.Instant
+import java.util.UUID
+import scala.concurrent.Future
 
 class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach with IntegrationCatalogueConnectorStub {
 
@@ -96,8 +97,8 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
 
     implicit val writer: Writeable[MultipartFormData[TemporaryFile]] = MultipartFormDataWriteable.writeable
 
-    val dateValue: DateTime    = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
-    val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+    val dateValue: Instant    = Instant.parse("2020-11-04T20:27:05Z")
+    val reviewedDate: Instant = Instant.parse("2020-11-04T20:27:05Z")
 
     val publisherReference = "XXX-YYY-ZZZMonthly-pull"
 
