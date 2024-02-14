@@ -19,7 +19,6 @@ package controllers
 import io.circe.yaml.Printer
 import io.circe.{Json => CirceJson}
 import org.apache.commons.io.IOUtils
-import org.joda.time.DateTime
 import org.scalatest.BeforeAndAfterEach
 import play.api.http.HeaderNames.CONTENT_TYPE
 import play.api.http.{HeaderNames, Writeable}
