@@ -16,12 +16,6 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
-
-import java.util.UUID
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
 import org.mockito.scalatest.MockitoSugar
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
@@ -31,6 +25,10 @@ import uk.gov.hmrc.integrationcatalogue.models._
 import uk.gov.hmrc.integrationcatalogue.models.common._
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
+import java.time.Instant
+import java.util.UUID
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 
 class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneAppPerSuite with MockitoSugar {
@@ -48,8 +46,8 @@ class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneA
     val expectedFileTransferPublishResult: PublishResult =
       PublishResult(isSuccess = true, Some(PublishDetails(isUpdate = true, IntegrationId(UUID.randomUUID()), "BVD-DPS-PCPMonthly-pull", PlatformType.CORE_IF)))
 
-    val dateValue: DateTime    = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
-    val reviewedDate: DateTime = DateTime.parse("24/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+    val dateValue: Instant    = Instant.parse("2020-11-04T20:27:05Z")
+    val reviewedDate: Instant = Instant.parse("2020-11-04T20:27:05Z")
 
     val fileTransferPublishRequest: FileTransferPublishRequest = FileTransferPublishRequest(
       fileTransferSpecificationVersion = "1.0",

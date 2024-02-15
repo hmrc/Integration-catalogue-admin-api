@@ -16,16 +16,12 @@
 
 package connectors
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
-
-import java.util.UUID
 import org.scalatest.BeforeAndAfterEach
-import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.test.Helpers._
+import support.{IntegrationCatalogueConnectorStub, ServerBaseISpec}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
 import uk.gov.hmrc.integrationcatalogue.models._
@@ -34,6 +30,9 @@ import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
 import uk.gov.hmrc.integrationcatalogue.models.common._
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
+
+import java.time.Instant
+import java.util.UUID
 
 class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailTestData with BeforeAndAfterEach with IntegrationCatalogueConnectorStub {
 
@@ -64,7 +63,7 @@ class IntegrationCatalogueConnectorISpec extends ServerBaseISpec with ApiDetailT
       PublishResult(isSuccess, publishDetails, publishErrors)
     }
 
-    val dateValue: DateTime = DateTime.parse("04/11/2020 20:27:05", DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss"))
+    val dateValue: Instant = Instant.parse("2020-11-04T20:27:05Z")
 
     val fileTransferPublishRequestObj: FileTransferPublishRequest = FileTransferPublishRequest(
       fileTransferSpecificationVersion = "1.0",

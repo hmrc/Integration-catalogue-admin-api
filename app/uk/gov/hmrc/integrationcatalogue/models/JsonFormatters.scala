@@ -17,10 +17,26 @@
 package uk.gov.hmrc.integrationcatalogue.models
 
 import play.api.libs.json._
-
 import uk.gov.hmrc.integrationcatalogue.models.common._
+import uk.gov.hmrc.integrationcatalogueadmin.utils.DateTimeFormatters
 
-object JsonFormatters extends JodaReads with JodaWrites {
+import java.time.Instant
+
+object JsonFormatters extends DateTimeFormatters {
+
+  implicit val instantReads: Reads[Instant] = new Reads[Instant] {
+    override def reads(json: JsValue): JsResult[Instant] =
+      json match {
+        case JsString(s) => parseDate(s) match {
+          case Some(i: Instant) => JsSuccess(i)
+          case _ => JsError(Seq(JsPath() -> Seq(JsonValidationError(s"Could not interpret date[/time] as one of the supported ISO formats: $json"))))
+        }
+        case _ => JsError(Seq(JsPath() -> Seq(JsonValidationError(s"Could not interpret date[/time] as one of the supported ISO formats: $json"))))
+      }
+
+    private def parseDate(input: String): Option[Instant] =
+      scala.util.control.Exception.nonFatalCatch[Instant].opt(Instant.from(dateAndOptionalTimeFormatter.parse(input)))
+  }
 
   implicit val formatContactInformation: Format[ContactInformation] = Json.format[ContactInformation]
 

@@ -1,6 +1,3 @@
-import play.core.PlayVersion.current
-import play.sbt.PlayImport._
-import sbt.Keys.libraryDependencies
 import sbt._
 
 object AppDependencies {
@@ -17,7 +14,6 @@ object AppDependencies {
     "com.fasterxml.jackson.core"       % "jackson-databind"           % jacksonVersion,
     "com.fasterxml.jackson.module"     %% "jackson-module-scala"      % jacksonVersion,
     "com.fasterxml.jackson.dataformat" % "jackson-dataformat-yaml"    % jacksonVersion,
-    "com.typesafe.play"               %% "play-json-joda"             % "2.10.4",
     "org.typelevel"                   %% "cats-core"                  % "2.10.0",
     "io.circe"                        %% "circe-yaml"                 % "1.15.0"
   )
