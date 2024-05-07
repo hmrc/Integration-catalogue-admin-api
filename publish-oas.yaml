@@ -336,6 +336,7 @@ components:
         - CDS_CLASSIC
         - CMA
         - CORE_IF
+        - HIP
       example: DES
     ContactInformation:
       type: object
