@@ -3,8 +3,8 @@ import sbt._
 object AppDependencies {
 
   lazy val enumeratumVersion = "1.8.0"
-  lazy val bootstrapVersion = "8.4.0"
-  lazy val jacksonVersion = "2.16.1"
+  lazy val bootstrapVersion = "8.6.0"
+  lazy val jacksonVersion = "2.17.1"
 
   val compile = Seq(
     "uk.gov.hmrc"                     %% "bootstrap-backend-play-30" % bootstrapVersion,
@@ -22,7 +22,7 @@ object AppDependencies {
     "uk.gov.hmrc"            %% "bootstrap-test-play-30"   % bootstrapVersion % Test,
     "org.pegdown"             % "pegdown"                  % "1.6.0"  % Test,
     "org.jsoup"               % "jsoup"                    % "1.17.2" % Test,
-    "org.mockito"            %% "mockito-scala-scalatest"  % "1.17.30" % Test
+    "org.mockito"            %% "mockito-scala-scalatest"  % "1.17.31" % Test
   )
 
   val it = Seq.empty
