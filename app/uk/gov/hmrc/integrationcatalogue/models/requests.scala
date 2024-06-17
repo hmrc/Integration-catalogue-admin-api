@@ -22,7 +22,26 @@ import java.time.Instant
 
 case class IntegrationResponse(count: Int, results: List[IntegrationDetail])
 
-case class ApiPublishRequest(publisherReference: Option[String], platformType: PlatformType, specificationType: SpecificationType, contents: String)
+case class ApiPublishRequest(
+  publisherReference: Option[String],
+  platformType: PlatformType,
+  specificationType: SpecificationType,
+  contents: String,
+  autopublish: Boolean
+)
+
+object ApiPublishRequest {
+
+  def apply(
+    publisherReference: Option[String],
+    platformType: PlatformType,
+    specificationType: SpecificationType,
+    contents: String
+  ): ApiPublishRequest = {
+    ApiPublishRequest(publisherReference, platformType, specificationType, contents, autopublish = false)
+  }
+
+}
 
 // Integration Catalogule File Transfer Sepcification
 // Json look like this :point_down:
