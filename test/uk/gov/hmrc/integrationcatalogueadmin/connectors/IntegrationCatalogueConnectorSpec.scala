@@ -16,25 +16,29 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.connectors
 
-import org.mockito.IdiomaticMockito.StubbingOps
-
-import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
-import org.mockito.captor.{ArgCaptor, Captor}
-import org.mockito.scalatest.MockitoSugar
-import org.mockito.stubbing.ScalaOngoingStubbing
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, OptionValues}
-import play.api.libs.json.Writes
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.libs.json.Json
 import play.api.test.Helpers
-import play.api.test.Helpers._
-import uk.gov.hmrc.http.{BadGatewayException, HttpClient, _}
-import uk.gov.hmrc.integrationcatalogue.models._
-import uk.gov.hmrc.integrationcatalogue.models.common._
+import play.api.test.Helpers.*
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
+import uk.gov.hmrc.http.{BadGatewayException, *}
+import uk.gov.hmrc.integrationcatalogue.models.*
+import uk.gov.hmrc.integrationcatalogue.models.common.*
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters.*
 import uk.gov.hmrc.integrationcatalogueadmin.AwaitTestSupport
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
+
+import java.net.{URL, URLEncoder}
+import java.nio.charset.StandardCharsets
+import java.util.UUID
+import scala.concurrent.{ExecutionContext, Future}
 
 class IntegrationCatalogueConnectorSpec extends AnyWordSpec
     with Matchers
@@ -44,21 +48,25 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
     with AwaitTestSupport
     with ApiDetailTestData {
 
-  private val mockHttpClient                = mock[HttpClient]
+  private val mockHttpClient                = mock[HttpClientV2]
   private val mockAppConfig                 = mock[AppConfig]
+  private val requestBuilder                = mock[RequestBuilder]
   private implicit val ec: ExecutionContext = Helpers.stubControllerComponents().executionContext
   private implicit val hc: HeaderCarrier    = HeaderCarrier(authorization = Some(Authorization("test-inbound-token")))
+  private val fakeDomain                    = "http://foo.bar"
   private val internalAuthToken             = "test-internal-auth-token"
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockHttpClient)
     reset(mockAppConfig)
-    mockAppConfig.internalAuthToken returns internalAuthToken
+    reset(requestBuilder)
+    when(mockAppConfig.integrationCatalogueUrl).thenReturn(fakeDomain)
+    when(mockAppConfig.internalAuthToken).thenReturn(internalAuthToken)
   }
 
   trait SetUp {
-    val headerCarrierCaptor: Captor[HeaderCarrier] = ArgCaptor[HeaderCarrier]
+    val headerCarrierCaptor: ArgumentCaptor[HeaderCarrier] = ArgumentCaptor.forClass(classOf[HeaderCarrier])
 
     val connector                                         = new IntegrationCatalogueConnector(
       mockHttpClient,
@@ -66,70 +74,88 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
     )
     val integrationId: IntegrationId                      = IntegrationId(UUID.fromString("2840ce2d-03fa-46bb-84d9-0299402b7b32"))
     val searchTerm                                        = "API-1001"
-    val outboundUrl                                       = "/integration-catalogue/apis/publish"
-    val findWithFilterUrl                                 = "/integration-catalogue/integrations"
-    val reportUrl                                         = "/integration-catalogue/report"
-    def deleteIntegrationsUrl(id: IntegrationId)          = s"/integration-catalogue/integrations/${id.value}"
-    def deleteIntegrationsByPlatformUrl(platform: String) = s"/integration-catalogue/integrations?platformFilter=$platform"
+    val outboundUrl                                       = s"${fakeDomain}/integration-catalogue/apis/publish"
+    val findWithFilterUrl                                 = s"${fakeDomain}/integration-catalogue/integrations"
+    val reportUrl                                         = s"${fakeDomain}/integration-catalogue/report"
+    def deleteIntegrationsUrl(id: IntegrationId)          = s"${fakeDomain}/integration-catalogue/integrations/${id.value}"
+    def deleteIntegrationsByPlatformUrl(platform: String) = s"${fakeDomain}/integration-catalogue/integrations?platformFilter=$platform"
 
-    def httpCallToPublishWillSucceedWithResponse(response: PublishResult): ScalaOngoingStubbing[Future[PublishResult]] =
-      when(mockHttpClient.PUT[ApiPublishRequest, PublishResult](eqTo(outboundUrl), any[ApiPublishRequest], any[Seq[(String, String)]])(
-        any[Writes[ApiPublishRequest]],
-        any[HttpReads[PublishResult]],
-        any[HeaderCarrier],
-        any[ExecutionContext]
-      ))
-        .thenReturn(Future.successful(response))
+    def httpCallToPublishWillSucceedWithResponse(response: PublishResult): Unit =
+      when(mockHttpClient.put(eqTo(URL(outboundUrl)))(any[HeaderCarrier]))
+        .thenReturn(requestBuilder)
 
-    def httpCallToPublishWillFailWithException(exception: Throwable): ScalaOngoingStubbing[Future[PublishResult]] =
-      when(mockHttpClient.PUT[ApiPublishRequest, PublishResult](eqTo(outboundUrl), any[ApiPublishRequest], any[Seq[(String, String)]])(
-        any[Writes[ApiPublishRequest]],
-        any[HttpReads[PublishResult]],
-        any[HeaderCarrier],
-        any[ExecutionContext]
-      ))
-        .thenReturn(Future.failed(exception))
+      when(requestBuilder.setHeader(any())).thenReturn(requestBuilder)
+      when(requestBuilder.withBody(any())(using any(), any(), any())).thenReturn(requestBuilder)
+      when(requestBuilder.transform(any())).thenReturn(requestBuilder)
+      when(requestBuilder.execute(using any(), any())).thenReturn(Future.successful(response))
 
-    def httpCallToFindWithFilterWillSucceedWithResponse(response: IntegrationResponse): ScalaOngoingStubbing[Future[IntegrationResponse]] =
+    def httpCallToPublishWillFailWithException(exception: Throwable): Unit =
+      when(mockHttpClient.put(eqTo(URL(outboundUrl)))(any[HeaderCarrier]))
+        .thenReturn(requestBuilder)
+
+      when(requestBuilder.setHeader(any())).thenReturn(requestBuilder)
+      when(requestBuilder.withBody(any())(using any(), any(), any())).thenReturn(requestBuilder)
+      when(requestBuilder.transform(any())).thenReturn(requestBuilder)
+      when(requestBuilder.execute(using any(), any())).thenReturn(Future.failed(exception))
+
+    def httpCallToFindWithFilterWillSucceedWithResponse(response: IntegrationResponse): Unit =
       httpCallToGETEndpointWillSucceed(response, findWithFilterUrl, Seq(("searchTerm", searchTerm)))
 
-    def httpCallToFindWithFilterWillFailWithException(exception: Throwable): ScalaOngoingStubbing[Future[IntegrationResponse]] =
+    def httpCallToFindWithFilterWillFailWithException(exception: Throwable): Unit =
       httpCallToGETEndpointWillFail(exception, findWithFilterUrl, Seq(("searchTerm", searchTerm)))
 
-    def httpCallToDeleteApiWillSucceed(response: HttpResponse, id: IntegrationId): ScalaOngoingStubbing[Future[HttpResponse]] =
-      when(mockHttpClient.DELETE[HttpResponse](eqTo(deleteIntegrationsUrl(id)), *)(*, *, *)).thenReturn(Future.successful(response))
+    def httpCallToDeleteApiWillSucceed(response: HttpResponse, id: IntegrationId): Unit =
+      when(mockHttpClient.delete(eqTo(URL(deleteIntegrationsUrl(id))))(any[HeaderCarrier]))
+        .thenReturn(requestBuilder)
 
-    def httpCallToDeleteApiWillFail[A](exception: Throwable, urlParam: A, urlResolveFunction: A => String): ScalaOngoingStubbing[Future[HttpResponse]] =
-      when(mockHttpClient.DELETE[HttpResponse](eqTo(urlResolveFunction(urlParam)), *)(*, *, *)).thenReturn(Future.failed(exception))
+      when(requestBuilder.setHeader(any())).thenReturn(requestBuilder)
+      when(requestBuilder.transform(any())).thenReturn(requestBuilder)
+      when(requestBuilder.execute(using any(), any())).thenReturn(Future.successful(response))
 
-    def httpCallToDeleteByPlatformWillSucceed(response: DeleteIntegrationsResponse, platform: String): ScalaOngoingStubbing[Future[DeleteIntegrationsResponse]] =
-      when(mockHttpClient.DELETE[DeleteIntegrationsResponse](eqTo(deleteIntegrationsByPlatformUrl(platform)), *)(*, *, *))
-        .thenReturn(Future.successful(response))
+    def httpCallToDeleteApiWillFail[A](exception: Throwable, urlParam: A, urlResolveFunction: A => String): Unit =
+      when(mockHttpClient.delete(eqTo(URL(urlResolveFunction(urlParam))))(any[HeaderCarrier]))
+        .thenReturn(requestBuilder)
 
-    def httpCallToCatalogueReportWillSucceed(): ScalaOngoingStubbing[Future[List[IntegrationPlatformReport]]] = {
+      when(requestBuilder.setHeader(any())).thenReturn(requestBuilder)
+      when(requestBuilder.transform(any())).thenReturn(requestBuilder)
+      when(requestBuilder.execute(using any(), any())).thenReturn(Future.failed(exception))
+
+    def httpCallToDeleteByPlatformWillSucceed(response: DeleteIntegrationsResponse, platform: String): Unit =
+      when(mockHttpClient.delete(eqTo(URL(deleteIntegrationsByPlatformUrl(platform))))(any[HeaderCarrier]))
+        .thenReturn(requestBuilder)
+
+      when(requestBuilder.setHeader(any())).thenReturn(requestBuilder)
+      when(requestBuilder.transform(any())).thenReturn(requestBuilder)
+      when(requestBuilder.execute(using any(), any())).thenReturn(Future.successful(response))
+
+    def httpCallToCatalogueReportWillSucceed(): Unit = {
       httpCallToGETEndpointWillSucceed(List.empty[IntegrationPlatformReport], reportUrl, Seq.empty)
     }
 
-    def httpCallToCatalogueReportWillFail(exception: Throwable): ScalaOngoingStubbing[Future[List[IntegrationPlatformReport]]] = {
+    def httpCallToCatalogueReportWillFail(exception: Throwable): Unit = {
       httpCallToGETEndpointWillFail(exception, reportUrl, Seq.empty)
     }
 
-    def httpCallToGETEndpointWillSucceed[A](returnValue: A, urlString: String, queryParams: Seq[(String, String)]): ScalaOngoingStubbing[Future[A]] = {
-      when(mockHttpClient.GET[A](
-        eqTo(urlString),
-        eqTo(queryParams),
-        eqTo(Seq((AUTHORIZATION, internalAuthToken)))
-      )(any[HttpReads[A]], any[HeaderCarrier], any[ExecutionContext]))
-        .thenReturn(Future.successful(returnValue))
-    }
+    private def queryString(queryParams: Seq[(String, String)]) =
+      queryParams.headOption.map(_ =>
+        queryParams.map { case (name, value) => s"$name=${URLEncoder.encode(value, StandardCharsets.UTF_8.name)}" }.mkString("?", "&", "")
+      ).getOrElse("")
 
-    def httpCallToGETEndpointWillFail[A](exception: Throwable, url: String, queryParams: Seq[(String, String)]): ScalaOngoingStubbing[Future[A]] =
-      when(mockHttpClient.GET[A](
-        eqTo(url),
-        eqTo(queryParams),
-        eqTo(Seq((AUTHORIZATION, internalAuthToken)))
-      )(any[HttpReads[A]], any[HeaderCarrier], any[ExecutionContext]))
-        .thenReturn(Future.failed(exception))
+    def httpCallToGETEndpointWillSucceed[A](returnValue: A, urlString: String, queryParams: Seq[(String, String)]): Unit =
+      when(mockHttpClient.get(eqTo(URL(s"$urlString${queryString(queryParams)}")))(any[HeaderCarrier]))
+        .thenReturn(requestBuilder)
+
+      when(requestBuilder.setHeader(any())).thenReturn(requestBuilder)
+      when(requestBuilder.transform(any())).thenReturn(requestBuilder)
+      when(requestBuilder.execute(using any(), any())).thenReturn(Future.successful(returnValue))
+
+    def httpCallToGETEndpointWillFail[A](exception: Throwable, url: String, queryParams: Seq[(String, String)]): Unit =
+      when(mockHttpClient.get(eqTo(URL(s"$url${queryString(queryParams)}")))(any[HeaderCarrier]))
+        .thenReturn(requestBuilder)
+
+      when(requestBuilder.setHeader(any())).thenReturn(requestBuilder)
+      when(requestBuilder.transform(any())).thenReturn(requestBuilder)
+      when(requestBuilder.execute(using any(), any())).thenReturn(Future.failed(exception))
   }
 
   "IntegrationCatalogueConnector send" should {
@@ -152,12 +178,8 @@ class IntegrationCatalogueConnectorSpec extends AnyWordSpec
         case Right(publishResult: PublishResult) => publishResult.isSuccess shouldBe true
       }
 
-      verify(mockHttpClient).PUT(eqTo(outboundUrl), eqTo(request), any[Seq[(String, String)]])(
-        any[Writes[ApiPublishRequest]],
-        any[HttpReads[PublishResult]],
-        headerCarrierCaptor.capture,
-        any[ExecutionContext]
-      )
+      verify(mockHttpClient).put(eqTo(URL(outboundUrl)))(any[HeaderCarrier])
+      verify(requestBuilder).withBody(eqTo(Json.toJson(request)))(using any, any, any)
 
     }
 

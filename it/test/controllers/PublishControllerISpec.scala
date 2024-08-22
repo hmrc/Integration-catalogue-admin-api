@@ -132,13 +132,13 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
     val multipartBody: MultipartFormData[TemporaryFile] = MultipartFormData[TemporaryFile](dataParts = Map.empty, files = Seq(filePart), badParts = Nil)
 
     val validApiPublishRequest: FakeRequest[MultipartFormData[TemporaryFile]] =
-      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-api/services/apis/publish", Headers(basePublishHeaders: _*), multipartBody)
+      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-api/services/apis/publish", Headers(basePublishHeaders*), multipartBody)
 
     val validFileTransferJsonPublishRequest: FakeRequest[JsValue] =
       FakeRequest(
         Helpers.PUT,
         "/integration-catalogue-admin-api/services/filetransfers/publish",
-        Headers(basePublishHeaders: _*),
+        Headers(basePublishHeaders*),
         Json.toJson(fileTransferPublishRequestObj)
       )
 
@@ -168,14 +168,14 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
           "fileTransferPattern":"Corporate to corporate"
         }
       """
-      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-api/services/filetransfers/publish", Headers(basePublishHeaders: _*), Json.parse(json))
+      FakeRequest(Helpers.PUT, "/integration-catalogue-admin-api/services/filetransfers/publish", Headers(basePublishHeaders*), Json.parse(json))
     }
 
     val validFileTransferYamlPublishRequest: FakeRequest[JsValue] =
       FakeRequest(
         Helpers.PUT,
         "/integration-catalogue-admin-api/services/filetransfers/publish/yaml",
-        Headers(basePublishHeaders ++ yamlContentTypeHeader ++ jsonAcceptHeader: _*),
+        Headers(basePublishHeaders ++ yamlContentTypeHeader ++ jsonAcceptHeader*),
         Json.toJson(fileTransferPublishRequestObj)
       )
 
@@ -225,7 +225,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
         primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader*)).get
         status(response) mustBe CREATED
         // check body
       }
@@ -235,7 +235,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
         primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)).get
         status(response) mustBe CREATED
         // check body
       }
@@ -245,7 +245,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
         primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader: _*)).get
+        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"platform type header is missing or invalid"}]}"""
 
@@ -257,7 +257,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
         val response: Future[Result] =
-          route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "SOMEINVALIDPLATFORM"): _*)).get
+          route(app, validApiPublishRequest.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "SOMEINVALIDPLATFORM")*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"platform type header is missing or invalid"}]}"""
 
@@ -268,7 +268,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
         primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"Some Error Message"}]}"""
 
@@ -279,7 +279,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = true)
         primePutWithBody("/integration-catalogue/apis/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, validApiPublishRequest.withHeaders(masterKeyHeader ++ coreIfPlatformTypeHeader*)).get
         status(response) mustBe OK
 
       }
@@ -368,7 +368,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
         primePutWithBody("/integration-catalogue/filetransfers/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader*)).get
         status(response) mustBe CREATED
         // check body
       }
@@ -380,7 +380,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val response: Future[Result] = route(
           app,
           validFileTransferJsonPublishRequestWithAlternativeDate
-            .withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader: _*)
+            .withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader*)
         )
           .get
 
@@ -393,7 +393,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
         primePutWithBody("/integration-catalogue/filetransfers/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"Some Error Message"}]}"""
 
@@ -404,7 +404,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = true)
         primePutWithBody("/integration-catalogue/filetransfers/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader*)).get
         status(response) mustBe OK
 
       }
@@ -417,14 +417,14 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       }
 
       "respond with 401 and error message Authorization header is missing" in new Setup {
-        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader*)).get
         status(response) mustBe UNAUTHORIZED
         contentAsString(response) mustBe """{"errors":[{"message":"Authorisation failed"}]}"""
 
       }
 
       "respond with 400 and error message platform type header is missing" in new Setup {
-        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfAuthHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfAuthHeader*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"platform type header is missing or invalid"}]}"""
 
@@ -441,7 +441,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 and error message when platform type in header is different to request payload" in new Setup {
 
         val response: Future[Result] =
-          route(app, validFileTransferJsonPublishRequest.withHeaders(apiPlatformAuthHeader ++ apiPlatformPlatformTypeHeader: _*)).get
+          route(app, validFileTransferJsonPublishRequest.withHeaders(apiPlatformAuthHeader ++ apiPlatformPlatformTypeHeader*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"Invalid request body - platform type mismatch"}]}"""
 
@@ -455,7 +455,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = true, isUpdate = false)
         primePutWithBody("/integration-catalogue/filetransfers/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validFileTransferYamlPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferYamlPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader*)).get
         status(response) mustBe CREATED
         // check body
       }
@@ -465,7 +465,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
         val backendResponse: PublishResult = createBackendPublishResponse(isSuccess = false, isUpdate = false)
         primePutWithBody("/integration-catalogue/filetransfers/publish", OK, Json.toJson(backendResponse).toString)
 
-        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferJsonPublishRequest.withHeaders(coreIfPlatformTypeHeader ++ masterKeyHeader*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"Some Error Message"}]}"""
 
@@ -487,14 +487,14 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       }
 
       "respond with 401 and error message Authorization header is missing" in new Setup {
-        val response: Future[Result] = route(app, validFileTransferYamlPublishRequest.withHeaders(coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferYamlPublishRequest.withHeaders(coreIfPlatformTypeHeader*)).get
         status(response) mustBe UNAUTHORIZED
         contentAsString(response) mustBe """{"errors":[{"message":"Authorisation failed"}]}"""
 
       }
 
       "respond with 400 and error message platform type header is missing" in new Setup {
-        val response: Future[Result] = route(app, validFileTransferYamlPublishRequest.withHeaders(coreIfAuthHeader: _*)).get
+        val response: Future[Result] = route(app, validFileTransferYamlPublishRequest.withHeaders(coreIfAuthHeader*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"platform type header is missing or invalid"}]}"""
 
@@ -511,7 +511,7 @@ class PublishControllerISpec extends ServerBaseISpec with BeforeAndAfterEach wit
       "respond with 400 and error message when platform type in header is different to request payload" in new Setup {
 
         val response: Future[Result] =
-          route(app, validFileTransferYamlPublishRequest.withHeaders(apiPlatformAuthHeader ++ apiPlatformPlatformTypeHeader: _*)).get
+          route(app, validFileTransferYamlPublishRequest.withHeaders(apiPlatformAuthHeader ++ apiPlatformPlatformTypeHeader*)).get
         status(response) mustBe BAD_REQUEST
         contentAsString(response) mustBe """{"errors":[{"message":"Invalid request body - platform type mismatch"}]}"""
 

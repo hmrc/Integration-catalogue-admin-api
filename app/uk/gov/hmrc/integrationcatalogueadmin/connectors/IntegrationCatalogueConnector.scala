@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.connectors
 
+import java.net.{URL, URLEncoder}
+import java.nio.charset.StandardCharsets
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -23,37 +25,45 @@ import scala.util.control.NonFatal
 import play.api.Logging
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.http.Status._
+import play.api.libs.json.Json
+import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
 
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
-import uk.gov.hmrc.integrationcatalogue.models._
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters.*
+import uk.gov.hmrc.integrationcatalogue.models.*
 import uk.gov.hmrc.integrationcatalogue.models.common.{IntegrationId, PlatformType}
 
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
 
 @Singleton
-class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppConfig)(implicit ec: ExecutionContext) extends Logging {
+class IntegrationCatalogueConnector @Inject() (http: HttpClientV2, appConfig: AppConfig)(implicit ec: ExecutionContext) extends Logging {
 
   private lazy val externalServiceUri = s"${appConfig.integrationCatalogueUrl}/integration-catalogue"
+  private val urlEncoder = URLEncoder.encode(_: String, StandardCharsets.UTF_8.name)
 
   def publishApis(publishRequest: ApiPublishRequest)(implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]] = {
     handleResult(
-      http.PUT[ApiPublishRequest, PublishResult](
-        url = s"$externalServiceUri/apis/publish",
-        body = publishRequest,
-        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )(implicitly, implicitly, treatHeaderCarrier(hc), implicitly)
+      http.put(
+        URL(s"$externalServiceUri/apis/publish")
+      )(treatHeaderCarrier(hc))
+      .withBody(Json.toJson(publishRequest))
+      .setHeader(
+        (AUTHORIZATION, appConfig.internalAuthToken)
+      ).execute[PublishResult]
     )
   }
 
   def publishFileTransfer(publishRequest: FileTransferPublishRequest)(implicit hc: HeaderCarrier): Future[Either[Throwable, PublishResult]] = {
     handleResult(
-      http.PUT[FileTransferPublishRequest, PublishResult](
-        url = s"$externalServiceUri/filetransfers/publish",
-        body = publishRequest,
-        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )(implicitly, implicitly, treatHeaderCarrier(hc), implicitly)
+      http.put(
+        url = URL(s"$externalServiceUri/filetransfers/publish"),
+      )(treatHeaderCarrier(hc))
+      .withBody(Json.toJson(publishRequest))
+      .setHeader(
+        (AUTHORIZATION, appConfig.internalAuthToken)
+      ).execute[PublishResult]
     )
   }
 
@@ -61,28 +71,31 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
     val queryParamsValues = buildQueryParams(integrationFilter)
 
     handleResult(
-      http.GET[IntegrationResponse](
-        url = s"$externalServiceUri/integrations",
-        queryParams = queryParamsValues,
-        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )(implicitly, treatHeaderCarrier(hc), implicitly)
+      http.get(
+        url = URL(s"$externalServiceUri/integrations$queryParamsValues"),
+      )(treatHeaderCarrier(hc))
+      .setHeader(
+        (AUTHORIZATION, appConfig.internalAuthToken)
+      ).execute[IntegrationResponse]
     )
   }
 
   def findByIntegrationId(id: IntegrationId)(implicit hc: HeaderCarrier): Future[Either[Throwable, IntegrationDetail]] = {
     handleResult(
-      http.GET[IntegrationDetail](
-        url = s"$externalServiceUri/integrations/${id.value.toString}",
-        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )(implicitly, treatHeaderCarrier(hc), implicitly)
+      http.get(
+        url = URL(s"$externalServiceUri/integrations/${id.value.toString}"),
+      )(treatHeaderCarrier(hc)).setHeader(
+        (AUTHORIZATION, appConfig.internalAuthToken)
+      ).execute[IntegrationDetail]
     )
   }
 
   def deleteByIntegrationId(integrationId: IntegrationId)(implicit hc: HeaderCarrier): Future[Boolean] = {
-    http.DELETE[HttpResponse](
-      url = s"$externalServiceUri/integrations/${integrationId.value}",
-      headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-    )(implicitly, treatHeaderCarrier(hc), implicitly)
+    http.delete(
+      url = URL(s"$externalServiceUri/integrations/${integrationId.value}"),
+    )(treatHeaderCarrier(hc)).setHeader(
+      (AUTHORIZATION, appConfig.internalAuthToken)
+    ).execute[HttpResponse]
       .map(_.status == NO_CONTENT)
       .recover {
         case NonFatal(e) =>
@@ -92,10 +105,10 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
   }
 
   def deleteByPlatform(platform: PlatformType)(implicit hc: HeaderCarrier): Future[DeleteApiResult] = {
-    http.DELETE[DeleteIntegrationsResponse](
-      url = s"$externalServiceUri/integrations?platformFilter=${platform.toString}",
-      headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-    )(implicitly, treatHeaderCarrier(hc), implicitly)
+    http.delete(
+      url = URL(s"$externalServiceUri/integrations?platformFilter=${platform.toString}"),
+    )(treatHeaderCarrier(hc)).setHeader((AUTHORIZATION, appConfig.internalAuthToken))
+      .execute[DeleteIntegrationsResponse]
       .map(x => DeleteIntegrationsSuccess(x))
       .recover {
         case NonFatal(e) =>
@@ -106,19 +119,20 @@ class IntegrationCatalogueConnector @Inject() (http: HttpClient, appConfig: AppC
 
   def catalogueReport()(implicit hc: HeaderCarrier): Future[Either[Throwable, List[IntegrationPlatformReport]]] = {
     handleResult(
-      http.GET[List[IntegrationPlatformReport]](
-        url = s"$externalServiceUri/report",
-        headers = Seq((AUTHORIZATION, appConfig.internalAuthToken))
-      )(implicitly, treatHeaderCarrier(hc), implicitly)
+      http.get(
+        URL(s"$externalServiceUri/report")
+      )(treatHeaderCarrier(hc)).setHeader(
+        (AUTHORIZATION, appConfig.internalAuthToken)
+      ).execute[List[IntegrationPlatformReport]]
     )
   }
 
-  private def buildQueryParams(integrationFilter: IntegrationFilter): Seq[(String, String)] = {
-    val searchTerms      = integrationFilter.searchText.map(x => ("searchTerm", x))
-    val platformsFilters = integrationFilter.platforms.map((x: PlatformType) => ("platformFilter", x.toString))
-    val backendFilters   = integrationFilter.backends.map(x => ("backendsFilter", x))
-    searchTerms ++ platformsFilters ++ backendFilters
-
+  private def buildQueryParams(integrationFilter: IntegrationFilter): String = {
+    val searchTerms       = integrationFilter.searchText.map(x => ("searchTerm", x))
+    val platformsFilters  = integrationFilter.platforms.map((x: PlatformType) => ("platformFilter", x.toString))
+    val backendFilters    = integrationFilter.backends.map(x => ("backendsFilter", x))
+    val queryParamsValues = searchTerms ++ platformsFilters ++ backendFilters
+    queryParamsValues.map { case (name, value) => s"$name=${urlEncoder(value)}" }.mkString("?", "&", "")
   }
 
   private def handleResult[A](result: Future[A]): Future[Either[Throwable, A]] = {
