@@ -83,7 +83,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
     def validDeleteIntegrationRequest(integrationId: String): FakeRequest[AnyContentAsEmpty.type] = {
       FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$integrationId")
-        .withHeaders(masterKeyHeader: _*)
+        .withHeaders(masterKeyHeader*)
     }
 
     def validDeleteIntegrationRequestWithNoHeaders(integrationId: String): FakeRequest[AnyContentAsEmpty.type] = {
@@ -92,7 +92,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
 
     def validDeleteByPlatformRequest(queryParam: String): FakeRequest[AnyContentAsEmpty.type] = {
       FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$queryParam")
-        .withHeaders(masterKeyHeader: _*)
+        .withHeaders(masterKeyHeader*)
     }
 
     def invalidPathRequest(): FakeRequest[AnyContentAsEmpty.type] = {
@@ -243,7 +243,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         primeDeleteByIdWithoutBody(exampleApiDetail.id.value.toString, NO_CONTENT)
 
         val response: Future[Result] =
-          route(app, validDeleteIntegrationRequest(exampleApiDetail.id.value.toString).withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
+          route(app, validDeleteIntegrationRequest(exampleApiDetail.id.value.toString).withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)).get
         status(response) mustBe NO_CONTENT
       }
 
@@ -272,7 +272,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
-        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfPlatformTypeHeader*)).get
         status(response) mustBe UNAUTHORIZED
 
         contentAsString(response) mustBe """{"errors":[{"message":"Authorisation failed"}]}"""
@@ -284,7 +284,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
-        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader: _*)).get
+        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader*)).get
         status(response) mustBe BAD_REQUEST
 
         contentAsString(response) mustBe """{"errors":[{"message":"platform type header is missing or invalid"}]}"""
@@ -297,7 +297,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
           FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
         val response: Future[Result] =
-          route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "INVALID_PLATFORM"): _*)).get
+          route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ List(HeaderKeys.platformKey -> "INVALID_PLATFORM")*)).get
         status(response) mustBe BAD_REQUEST
 
         contentAsString(response) mustBe """{"errors":[{"message":"platform type header is missing or invalid"}]}"""
@@ -309,7 +309,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/$exampleIntegrationId")
 
-        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)).get
         status(response) mustBe NOT_FOUND
 
         contentAsString(response) mustBe """{"errors":[{"message":"Integration with ID: 2840ce2d-03fa-46bb-84d9-0299402b7b32 not found"}]}"""
@@ -322,7 +322,7 @@ class IntegrationControllerISpec extends ServerBaseISpec
         val requestWithNoAuthHeader: FakeRequest[AnyContentAsEmpty.type] =
           FakeRequest(Helpers.DELETE, s"/integration-catalogue-admin-api/services/integrations/${integrationWithApiPlatform.id.value.toString}")
 
-        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)).get
+        val response: Future[Result] = route(app, requestWithNoAuthHeader.withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)).get
         status(response) mustBe UNAUTHORIZED
 
         contentAsString(response) mustBe """{"errors":[{"message":"Authorisation failed - CORE_IF is not authorised to delete an integration on API_PLATFORM"}]}"""

@@ -3,7 +3,7 @@ import uk.gov.hmrc.DefaultBuildSettings
 val appName = "integration-catalogue-admin-api"
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "3.4.2"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -21,7 +21,7 @@ lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
-    ScoverageKeys.coverageExcludedPackages := ";.*\\.domain\\.models\\..*;uk\\.gov\\.hmrc\\.BuildInfo;.*\\.Routes;.*\\.RoutesPrefix;;Module;GraphiteStartUp;.*\\.Reverse[^.]*",
+    ScoverageKeys.coverageExcludedPackages := ",.*\\.domain\\.models\\..*,uk\\.gov\\.hmrc\\.BuildInfo,.*\\.utils\\..*,.*\\.config\\..*,.*\\.models\\..*,.*\\.Routes,.*\\.RoutesPrefix,,Module,GraphiteStartUp,.*\\.Reverse[^.]*",
     ScoverageKeys.coverageMinimumStmtTotal := 96,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,

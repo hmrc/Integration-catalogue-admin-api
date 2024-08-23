@@ -16,35 +16,34 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
-import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
 import org.apache.pekko.stream.Materializer
-import org.mockito.scalatest.MockitoSugar
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{verifyNoInteractions, when}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.http.HeaderNames
 import play.api.libs.Files.{SingletonTemporaryFileCreator, TemporaryFile}
 import play.api.libs.json.{JsObject, Json}
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.mvc.{MultipartFormData, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, StubBodyParserFactory}
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.integrationcatalogue.models.*
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters.*
+import uk.gov.hmrc.integrationcatalogue.models.common.*
+import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
+import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.*
+import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
+import uk.gov.hmrc.integrationcatalogueadmin.services.PublishService
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.tools.Stubs.stubMessagesControllerComponents
 
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
-import uk.gov.hmrc.integrationcatalogue.models._
-import uk.gov.hmrc.integrationcatalogue.models.common._
-
-import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
-import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders._
-import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
-import uk.gov.hmrc.integrationcatalogueadmin.services.PublishService
+import java.util.UUID
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPerSuite with MockitoSugar with StubBodyParserFactory {
 
@@ -91,7 +90,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
     )
 
     def callPublishWithFile(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
-      expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
+      expectedConnectorResponse.map(response => when(mockPublishService.publishApi(any, any, any, any)(any)).thenReturn(Future.successful(Right(response))))
       val tempFile = SingletonTemporaryFileCreator.create("text", "txt")
       tempFile.deleteOnExit()
 
@@ -101,7 +100,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     def callPublishWithDataPart(expectedConnectorResponse: Option[PublishResult], headers: Seq[(String, String)], dataPart: Seq[String]): Future[Result] = {
       if (dataPart.nonEmpty) {
-        expectedConnectorResponse.map(response => when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Right(response))))
+        expectedConnectorResponse.map(response => when(mockPublishService.publishApi(any, any, any, any)(any)).thenReturn(Future.successful(Right(response))))
       }
 
       val dataWithDataParts = new MultipartFormData[TemporaryFile](Map("selectedFile" -> dataPart), List.empty, List())
@@ -110,21 +109,21 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
     private def callPublishCommon(publishBody: MultipartFormData[TemporaryFile], headers: Seq[(String, String)]) = {
       val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
-        .withHeaders(headers: _*)
+        .withHeaders(headers*)
         .withBody(publishBody)
 
       controller.publishApi()(publishRequest)
     }
 
     def callPublishWithFileReturnError(headers: Seq[(String, String)], filePartKey: String, fileName: String): Future[Result] = {
-      when(mockPublishService.publishApi(*, *, *, *)(*)).thenReturn(Future.successful(Left(new RuntimeException("some error"))))
+      when(mockPublishService.publishApi(any, any, any, any)(any)).thenReturn(Future.successful(Left(new RuntimeException("some error"))))
 
       val tempFile = SingletonTemporaryFileCreator.create("text", "txt")
       tempFile.deleteOnExit()
 
       val data           = new MultipartFormData[TemporaryFile](Map(), List(FilePart(filePartKey, fileName, Some("text/plain"), tempFile)), List())
       val publishRequest = FakeRequest.apply("PUT", "integration-catalogue-admin-api/publish/api")
-        .withHeaders(headers: _*)
+        .withHeaders(headers*)
         .withBody(data)
 
       controller.publishApi()(publishRequest)
@@ -145,7 +144,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
         "text.txt"
       )
 
-      result shouldBeResult CREATED
+      result.shouldBeResult(CREATED)
       contentAsString(result) shouldBe raw"""{"id":"$id","publisherReference":"123456","platformType":"CORE_IF"}"""
     }
 
@@ -158,7 +157,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
         Seq("Data bytes")
       )
 
-      result shouldBeResult CREATED
+      result.shouldBeResult(CREATED)
       contentAsString(result) shouldBe raw"""{"id":"$id","publisherReference":"123456","platformType":"CORE_IF"}"""
     }
 
@@ -172,7 +171,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
         "text.txt"
       )
 
-      result shouldBeResult OK
+      result.shouldBeResult(OK)
       contentAsString(result) shouldBe raw"""{"id":"$id","publisherReference":"123456","platformType":"CORE_IF"}"""
     }
 
@@ -185,7 +184,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
         Seq("Data bytes")
       )
 
-      result shouldBeResult OK
+      result.shouldBeResult(OK)
       contentAsString(result) shouldBe raw"""{"id":"$id","publisherReference":"123456","platformType":"CORE_IF"}"""
     }
 
@@ -198,7 +197,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
         Seq.empty
       )
 
-      result shouldBeResult BAD_REQUEST
+      result.shouldBeResult(BAD_REQUEST)
       contentAsString(result) shouldBe """{"errors":[{"message":"selectedFile is missing from requestBody"}]}"""
     }
 
@@ -206,7 +205,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
       val result: Future[Result] = callPublishWithFile(Some(PublishResult(isSuccess = true, None, List.empty)), validHeaders, "selectedFile", "text.txt")
 
-      result shouldBeResult BAD_REQUEST
+      result.shouldBeResult(BAD_REQUEST)
       contentAsString(result) shouldBe """{"errors":[{"message":"Unexpected response from /integration-catalogue"}]}"""
     }
 
@@ -214,7 +213,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
 
       val result: Future[Result] = callPublishWithFileReturnError(validHeaders, "selectedFile", "text.txt")
 
-      result shouldBeResult BAD_REQUEST
+      result.shouldBeResult(BAD_REQUEST)
       contentAsString(result) shouldBe """{"errors":[{"message":"Unexpected response from /integration-catalogue: some error"}]}"""
     }
 
@@ -229,7 +228,7 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
           "text.txt"
         )
 
-      result shouldBeResult BAD_REQUEST
+      result.shouldBeResult(BAD_REQUEST)
       contentAsString(result) shouldBe """{"errors":[{"message":"some message"}]}"""
     }
 
@@ -238,9 +237,9 @@ class PublishControllerSpec extends AnyWordSpec with Matchers with GuiceOneAppPe
       val result: Future[Result] = callPublishWithFile(None, validHeaders, "CANT FIND ME", "text3.txt")
 
       contentAsString(result) shouldBe """{"errors":[{"message":"selectedFile is missing from requestBody"}]}"""
-      result shouldBeResult BAD_REQUEST
+      result.shouldBeResult(BAD_REQUEST)
 
-      verifyZeroInteractions(mockPublishService)
+      verifyNoInteractions(mockPublishService)
     }
 
     "return 400 when plaform not set in header" in new Setup {

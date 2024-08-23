@@ -21,7 +21,7 @@ import play.api.{Configuration, Environment}
 
 class AppModule extends Module {
 
-  override def bindings(environment: Environment, configuration: Configuration): collection.Seq[Binding[_]] = {
+  override def bindings(environment: Environment, configuration: Configuration): collection.Seq[Binding[?]] = {
     if (configuration.get[Boolean]("create-internal-auth-token-on-start")) {
       Seq(bind[InternalAuthTokenInitialiser].to(classOf[InternalAuthTokenInitialiserImpl]).eagerly())
     }

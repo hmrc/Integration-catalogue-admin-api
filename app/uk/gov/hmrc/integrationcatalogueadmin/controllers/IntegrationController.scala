@@ -101,7 +101,7 @@ class IntegrationController @Inject() (
 
       override def executionContext: ExecutionContext = ec
 
-      implicit def hc(implicit request: Request[_]): HeaderCarrier = {
+      implicit def hc(implicit request: Request[?]): HeaderCarrier = {
         HeaderCarrierConverter.fromRequestAndSession(request, request.session)
       }
 

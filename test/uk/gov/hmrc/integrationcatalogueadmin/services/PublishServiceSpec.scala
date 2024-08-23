@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.services
 
-import org.mockito.scalatest.MockitoSugar
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.{verify, when}
 import org.scalatest.matchers.should
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.integrationcatalogue.models._
-import uk.gov.hmrc.integrationcatalogue.models.common._
+import uk.gov.hmrc.integrationcatalogue.models.*
+import uk.gov.hmrc.integrationcatalogue.models.common.*
 import uk.gov.hmrc.integrationcatalogueadmin.connectors.IntegrationCatalogueConnector
 
 import java.time.Instant
 import java.util.UUID
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 
@@ -67,7 +69,7 @@ class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneA
 
   "publishApi" should {
     "return value from connector" in new SetUp {
-      when(mockIntegrationCatalogueConnector.publishApis(eqTo(apiPublishRequest))(*)).thenReturn(Future.successful(Right(expectedApiPublishResult)))
+      when(mockIntegrationCatalogueConnector.publishApis(eqTo(apiPublishRequest))(any)).thenReturn(Future.successful(Right(expectedApiPublishResult)))
 
       val result: Either[Throwable, PublishResult] =
         Await.result(objInTest.publishApi(Some("publisherRef"), PlatformType.CORE_IF, SpecificationType.OAS_V3, "contents"), 500 millis)
@@ -83,7 +85,7 @@ class PublishServiceSpec extends AnyWordSpec with should.Matchers with GuiceOneA
 
   "publishFileTransfer" should {
     "return value from connector" in new SetUp {
-      when(mockIntegrationCatalogueConnector.publishFileTransfer(eqTo(fileTransferPublishRequest))(*))
+      when(mockIntegrationCatalogueConnector.publishFileTransfer(eqTo(fileTransferPublishRequest))(any))
         .thenReturn(Future.successful(Right(expectedFileTransferPublishResult)))
 
       val result: Either[Throwable, PublishResult] =

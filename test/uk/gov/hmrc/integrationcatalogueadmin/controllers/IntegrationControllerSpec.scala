@@ -16,34 +16,33 @@
 
 package uk.gov.hmrc.integrationcatalogueadmin.controllers
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
 import org.apache.pekko.stream.Materializer
-import org.mockito.scalatest.MockitoSugar
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, when}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
 import play.api.http.HeaderNames
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContentAsEmpty, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.test.{FakeRequest, StubBodyParserFactory}
 import uk.gov.hmrc.http.NotFoundException
-
-import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters._
+import uk.gov.hmrc.integrationcatalogue.models.JsonFormatters.*
+import uk.gov.hmrc.integrationcatalogue.models.common.*
 import uk.gov.hmrc.integrationcatalogue.models.common.IntegrationType.{API, FILE_TRANSFER}
 import uk.gov.hmrc.integrationcatalogue.models.common.PlatformType.CORE_IF
-import uk.gov.hmrc.integrationcatalogue.models.common._
 import uk.gov.hmrc.integrationcatalogue.models.{DeleteIntegrationsFailure, DeleteIntegrationsResponse, DeleteIntegrationsSuccess, IntegrationPlatformReport}
-
 import uk.gov.hmrc.integrationcatalogueadmin.config.AppConfig
-import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders._
+import uk.gov.hmrc.integrationcatalogueadmin.controllers.actionbuilders.*
 import uk.gov.hmrc.integrationcatalogueadmin.data.ApiDetailTestData
 import uk.gov.hmrc.integrationcatalogueadmin.models.HeaderKeys
 import uk.gov.hmrc.integrationcatalogueadmin.services.IntegrationService
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class IntegrationControllerSpec
     extends AnyWordSpec
@@ -91,13 +90,13 @@ class IntegrationControllerSpec
   "DELETE /services/integrations/{id}" should {
 
     "respond with 401 when platform header does not have any auth setup in app config" in new Setup {
-      when(mockIntegrationService.findByIntegrationId(*[IntegrationId])(*)).thenReturn(Future.successful(Right(exampleApiDetail)))
+      when(mockIntegrationService.findByIntegrationId(any[IntegrationId])(any)).thenReturn(Future.successful(Right(exampleApiDetail)))
 
       when(mockAppConfig.authPlatformMap).thenReturn(Map.empty)
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations/${exampleApiDetail.id.value.toString}")
-          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)
 
       val result: Future[Result] = controller.deleteByIntegrationId(exampleApiDetail.id)(deleteRequest)
       status(result) shouldBe UNAUTHORIZED
@@ -111,11 +110,11 @@ class IntegrationControllerSpec
 
       when(mockAppConfig.authorizationKey).thenReturn("test-auth-key")
 
-      when(mockIntegrationService.deleteByPlatform(*)(*)).thenReturn(Future.successful(DeleteIntegrationsSuccess(DeleteIntegrationsResponse(1))))
+      when(mockIntegrationService.deleteByPlatform(any)(any)).thenReturn(Future.successful(DeleteIntegrationsSuccess(DeleteIntegrationsResponse(1))))
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
-          .withHeaders(masterKeyHeader: _*)
+          .withHeaders(masterKeyHeader*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
       status(result) shouldBe OK
@@ -127,11 +126,11 @@ class IntegrationControllerSpec
 
       when(mockAppConfig.authPlatformMap).thenReturn(Map(PlatformType.CORE_IF -> "someKey3"))
 
-      when(mockIntegrationService.deleteByPlatform(*)(*)).thenReturn(Future.successful(DeleteIntegrationsSuccess(DeleteIntegrationsResponse(1))))
+      when(mockIntegrationService.deleteByPlatform(any)(any)).thenReturn(Future.successful(DeleteIntegrationsSuccess(DeleteIntegrationsResponse(1))))
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
-          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
       status(result) shouldBe OK
@@ -143,11 +142,11 @@ class IntegrationControllerSpec
 
       when(mockAppConfig.authPlatformMap).thenReturn(Map(PlatformType.CORE_IF -> "someKey3"))
 
-      when(mockIntegrationService.deleteByPlatform(*)(*)).thenReturn(Future.successful(DeleteIntegrationsFailure("Internal Server Error")))
+      when(mockIntegrationService.deleteByPlatform(any)(any)).thenReturn(Future.successful(DeleteIntegrationsFailure("Internal Server Error")))
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.CORE_IF.toString}")
-          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.CORE_IF))(deleteRequest)
       status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -161,7 +160,7 @@ class IntegrationControllerSpec
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}")
-          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.API_PLATFORM))(deleteRequest)
       status(result) shouldBe UNAUTHORIZED
@@ -175,7 +174,7 @@ class IntegrationControllerSpec
 
       val deleteRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("DELETE", s"integration-catalogue-admin-api/services/integrations")
-          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)
 
       val result: Future[Result] = controller.deleteByPlatform(List.empty)(deleteRequest)
       status(result) shouldBe BAD_REQUEST
@@ -193,7 +192,7 @@ class IntegrationControllerSpec
             "DELETE",
             s"integration-catalogue-admin-api/services/integrations?platforms=${PlatformType.API_PLATFORM.toString}&platforms=${PlatformType.CORE_IF.toString}"
           )
-          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader: _*)
+          .withHeaders(coreIfAuthHeader ++ coreIfPlatformTypeHeader*)
 
       val result: Future[Result] = controller.deleteByPlatform(List(PlatformType.API_PLATFORM, PlatformType.CORE_IF))(deleteRequest)
       status(result) shouldBe BAD_REQUEST
@@ -218,7 +217,7 @@ class IntegrationControllerSpec
 
   "GET /report" should {
     "respond with 500 when error received from service " in new Setup {
-      when(mockIntegrationService.catalogueReport()(*)).thenReturn(Future.successful(Left(new NotFoundException("some error"))))
+      when(mockIntegrationService.catalogueReport()(any)).thenReturn(Future.successful(Left(new NotFoundException("some error"))))
 
       val getRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("GET", s"integration-catalogue-admin-api/report")
@@ -229,7 +228,7 @@ class IntegrationControllerSpec
     }
     "respond with results when received from the service " in new Setup {
       val results = List(IntegrationPlatformReport(CORE_IF, API, 2), IntegrationPlatformReport(CORE_IF, FILE_TRANSFER, 5))
-      when(mockIntegrationService.catalogueReport()(*)).thenReturn(Future.successful(Right(results)))
+      when(mockIntegrationService.catalogueReport()(any)).thenReturn(Future.successful(Right(results)))
 
       val getRequest: FakeRequest[AnyContentAsEmpty.type] =
         FakeRequest.apply("GET", s"integration-catalogue-admin-api/report")
